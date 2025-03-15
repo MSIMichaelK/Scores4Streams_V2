@@ -1,0 +1,81 @@
+flowchart TD
+    Start["Start Game"] --> NewInning["New Inning"]
+    NewInning --> Changes{"Lineup Changes?"}
+    Changes -- No --> Pitch{{"Pitch Thrown"}}
+    Pitch --> Outcome{"Outcome of Pitch"}
+    Pitch -- Optional: Record Pitch Type --> PT{"Identify Pitch Type"}
+    PT -- Fastball --> PTF["PTF"]
+    PT -- Curveball --> PTC["PTC"]
+    PT -- Slider --> PTS["PTS"]
+    PT -- Changeup --> PTCU["PTCU"]
+    PT -- Other --> PTO["PTO"]
+    PTF --> PitchLocation
+    PTC --> PitchLocation
+    PTS --> PitchLocation
+    PTCU --> PitchLocation
+    PTO --> PitchLocation 
+    PitchLocation --> Outcome
+    Outcome -- Ball --> BallCount["Increment Ball Count"]
+    Outcome -- Strike --> StrikeCount["Increment Strike Count"]
+    Outcome -- Foul --> Foul["Foul Hit"]
+    Outcome -- In Play --> InPlay["Ball In Play"]
+    Outcome -- Hit by Pitch --> Walk["Walk Batter"]
+    Outcome -- Catcher Interference --> Walk["Walk Batter"]
+    Outcome -- Illegal Pitch --> BallCount
+    BallCount -- 4 Balls --> Walk
+    StrikeCount -- 3 Strikes --> StrikeOut["Strike Out Batter"]
+    Foul --> RecordFoul["Record Foul Location"]
+    RecordFoul --> FoulOutcome{"Decide Foul Outcome"}
+    FoulOutcome -- "Caught" --> FoulOut["Batter Out"]
+    FoulOutcome -- "Not Caught" --> CheckFoulCount
+    InPlay --> HitType{"Determine Hit Type"}
+    HitType -- Fly Ball --> FlyBall["Fly Ball"]
+    HitType -- Line Drive --> LineDrive["Line Drive"]
+    HitType -- Ground Ball --> GroundBall["Ground Ball"]
+    HitType -- Bunt --> Bunt["Bunt"]
+    HitType -- Pop Fly --> PopFly["Pop Fly"]
+   
+    FlyBall --> HitLocation{"Hit Location"}
+    LineDrive --> HitLocation
+    GroundBall --> HitLocation
+    Bunt --> HitLocation
+    PopFly --> HitLocation
+    HitLocation -- Caught --> Caught["Ball Caught"]
+    HitLocation -- Muffed Catch --> Error["Error"]
+    HitLocation -- Fielding Error --> Error
+    HitLocation -- Fielded --> Fielded 
+    
+    Caught -- "Base Runner Steals?" --> CaughtTag{"Runner Tags Up"}
+    CaughtTag -- "Out at Next Base?" --> CaughtOut["Runner Out"]
+      
+    Error --> IdentifyError{"Identify Error Committer"}
+    
+    Error1B --> E1BConsequences["Handle Error Consequences"]
+    Error2B --> E2BConsequences["Handle Error Consequences"]
+    ErrorSS --> ESSConsequences["Handle Error Consequences"]
+    Error3B --> E3BConsequences["Handle Error Consequences"]
+    E1BConsequences -- "Runner Advances" --> UpdatePlay["Update Play"]
+    E2BConsequences -- "Runner Advances" --> UpdatePlay
+    ESSConsequences -- "Runner Advances" --> UpdatePlay
+    E3BConsequences -- "Runner Advances" --> UpdatePlay
+ 
+    Walk --> NextBatter["Next Batter"]
+    StrikeOut --> NextBatter
+   
+    FoulOut --> RunnerTags{"Runner Tags Up?"}
+    RunnerTags -- "Yes" --> TagUpAdvancement["Handle Tag Up Advancements"]
+    RunnerTags -- "No" --> CheckOuts
+    TagUpAdvancement --> CheckOuts
+    CheckOuts -- 3 Outs --> ChangeSides["Change Sides"]
+    ChangeSides -- New Inning --> NewInning
+    NextBatter --> Pitch
+    CheckFoulCount -- 2 Strikes --> StrikeCount
+    CheckFoulCount -- <2 Strikes --> Pitch
+    CheckOuts -- <3 Outs --> NextBatter
+    BaseRunnerAdv --> AdvancedRunners[Handle Advanced Runners]
+    AdvancedRunners --> NextBatter
+
+Changes -- Yes Home Team --> HomeChanges
+Changes -- Yes Visitor Team--> VisitorChanges
+HomeChanges --> Changes
+VisitorChanges --> Changes
