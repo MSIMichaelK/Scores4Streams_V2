@@ -1,11 +1,37 @@
+ 
+## User
+- **user_id**: string
+- **email**: string
+- **name**: string
+- **profile_picture_url**: string (Firebase Storage URL)
+- **walkout_audio_url**: string (optional, Firebase Storage URL)
+- **memberships**: list of `Membership`
+- **notification_preferences**: list of `NotificationPreference`
+- **version**: int
+
+## Membership
+- **membership_id**: string
+- **user_id**: string
+- **tenant_id**: string
+- **tenant_type**: enum ("club", "association", "team", "travel_league", "tournament")
+- **roles**: list of enum ("scorer", "viewer", "admin", "statistician", "super_user", "player", "family_member", "fan")
+- **version**: int
+
+## NotificationPreference
+- **notification_id**: string
+- **membership_id**: string
+- **notifications_enabled**: boolean
+- **notification_types**: list of enum ("game_start", "game_end", "score_update", "player_event", "custom")
+- **version**: int
 
 ## Player
 - **player_id**: string
 - **name**: string
 - **dob**: date
-- **profile_picture**: string
 - **teams**: list of `PlayerTeam`
 - **version**: int
+- **profile_picture_url**: string (Firebase storage URL)
+- **walkout_audio_url**: string (optional, Firebase Storage URL)
 
 ## PlayerTeam
 - **player_team_id**: string
@@ -27,7 +53,7 @@
 - **team_type**: string (e.g., mixed, male, female)
 - **team_category**: string (e.g., T-Ball, U12, U14, U16, U19, Women's A grade, Women's B grade, Men's Open)
 - **home_field**: string
-- **logo**: string
+- **logo_url**: string (Firebase storage URL)
 - **players**: list of `PlayerTeam`
 - **officials**: list of `TeamOfficial`
 - **statistics**: list of `TeamStatistics`
@@ -76,6 +102,11 @@
 ## State
 - **state_id**: string
 - **name**: string
+- **version**: int
+
+## TenantReference
+- **tenant_id**: string
+- **tenant_type**: enum ("club", "association", "team", "travel_league")
 - **version**: int
 
 ## Game
@@ -288,3 +319,7 @@
 - **description**: string
 - **timestamp**: timestamp
 - **version**: int
+
+
+
+

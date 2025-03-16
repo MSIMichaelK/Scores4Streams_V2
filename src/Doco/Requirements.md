@@ -169,6 +169,21 @@ Limited interaction with the application, possibly for promotional or trial purp
 Restricted access to certain UI components like the public Scoreboard Overlay UI.
 No access to administrative or sensitive game data.
 
+### Player
+#### Responsibilities:
+- View personal statistics across multiple teams, seasons, tournaments.
+- Manage personal profile details including profile image and walk-out audio snippet.
+
+#### Permissions:
+- Read-only access to own data across all affiliated teams.
+
+### Family Member/Fan
+#### Responsibilities:
+- Follow specific player(s) to view player statistics and gameplay updates.
+
+#### Permissions:
+- Read-only access to followed player's data.
+- Ability to customize notifications explicitly for game-related player events (game start/end, scoring events, player-specific events).
 
 ## Core Features:
 ### Scoring Interface:
@@ -270,9 +285,9 @@ Define how the interface will handle incorrect inputs or conflicts.
 - Real-Time Sync: Describe how scoreboard updates will be synchronized across devices in real-time.
 - Customization: Explain the options available for customizing the scoreboard display (fonts, colors, layouts).
 
-### Multi-Tenancy Support:
-- Data Segregation: Elaborate on how the system will isolate and manage data for different tenants.
-- Access Control: Define the access control model and how data can be selectively shared or protected.
+### Multi-Tenancy & RBAC Model:
+- Users explicitly can have memberships to multiple tenants across different types (Teams, Clubs, Associations, Travel Leagues, Tournaments).
+- Membership explicitly defines the user's role and permissions within each specific tenant.
 
 ### Statistical Data Management:
 - Data Structures: Outline the structure of statistical data and how it is captured and updated.
@@ -282,9 +297,40 @@ Define how the interface will handle incorrect inputs or conflicts.
 - API Partners: List potential scoring and statistics platforms for integration.
 - Data Exchange Formats: Specify the formats and protocols for exchanging data with external APIs.
 
+### iScore Integration (Read-only):
+- Integrate explicitly with iScore REST API for fetching live game scoring data.
+- Clearly reference the [iScore REST API documentation](https://www.postman.com/aviation-technologist-30718165/iscore-api/documentation/5as36pg/iscore).
+
 ### Multi-Platform Support:
 - Responsive Design: Confirm that the initial web application is fully responsive and will function on various device sizes and platforms.
 - Future Developments: Set the stage for future native app developments for iOS and Android platforms.
+
+### Media Asset Management:
+- Support explicit uploading, storage, and retrieval of media assets (logos for Teams, Clubs, Associations, Tournaments; profile images and audio snippets for Players).
+- Clearly defined media file specifications:
+  - **Images**: PNG/SVG logos (~500x500 px), Player profiles JPG/PNG (~400x400 px), with size limits (~300KB images, ~500KB audio).
+  - **Audio snippets (player walk-out)**: Short audio clips (10-20 sec), MP3/AAC formats stored in Firebase Storage.
+
+### Traditional Scorebook View:
+- Provide a traditional scorebook-style UI clearly showing play-by-play events, allowing scorers and officials to verify scoring details quickly.
+
+### Reporting & Data Export:
+- Initially support CSV and Excel format exports for statistics clearly.
+- Future requirement explicitly defined for PDF exports in traditional scorebook format.
+
+### Privacy & Consent:
+- The application explicitly requires user consent for handling personal data including images and audio clips.
+- Clearly defined notification preferences with explicit opt-in/out controls for users.
+- Initially adhere clearly to relevant privacy principles and data handling guidelines relevant to Australia, with global considerations in future updates.
+
+
+### Performance:
+- Clearly state real-time synchronization requirement: game data updates within ~1 second.
+- Initial support explicitly for 10 concurrent games, with scaling through Firebase's infrastructure clearly avoiding significant code changes.
+
+### Backup & Disaster Recovery:
+- Clearly outlined initial use of Firebase automatic backups and Firestore regular exports.
+- Basic documented recovery procedure explicitly for rapid restoration in case of data loss or corruption.
 
 ## Gameplay Features:
 
