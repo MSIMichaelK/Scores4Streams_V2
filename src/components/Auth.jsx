@@ -1,37 +1,45 @@
 import { useState, useEffect } from "react";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useFirebase } from "../contexts/FirebaseContext";
-import { doc, setDoc, getFirestore } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 const Auth = () => {
-  const { auth, db } = useFirebase(); // Get Firebase instances
+  const { auth, db } = useFirebase();
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [teamId, setTeamId] = useState(""); // User selects/join a team
-  const [role, setRole] = useState("scorer"); // Default role
+  const [teamId, setTeamId] = useState("");
+  const [role, setRole] = useState("scorer");
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        const userRef = doc(db, "users", currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          setUser({ uid: currentUser.uid, ...userSnap.data() });
+        } else {
+          setUser(currentUser);
+        }
+      } else {
+        setUser(null);
+      }
     });
-    return () => unsubscribe();
-  }, [auth]);
 
-  // Sign Up & Store User Role in Firestore
+    return () => unsubscribe();
+  }, [auth, db]);
+
   const handleSignUp = async () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const userId = userCredential.user.uid;
 
-      console.log("User created:", userCredential.user);
-
-      // Store user and team membership in Firestore
       await setDoc(doc(db, "users", userId), {
         email,
         memberships: {
-          [teamId]: { role }, // Assign role for this team
-        }
+          [teamId]: { role },
+        },
+        activeTenant: teamId,
       });
 
       console.log("User signed up and assigned to team:", teamId);
@@ -40,7 +48,6 @@ const Auth = () => {
     }
   };
 
-  // Sign In
   const handleSignIn = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
@@ -50,17 +57,37 @@ const Auth = () => {
     }
   };
 
-const handleGoogleSignIn = async () => {
-  const provider = new GoogleAuthProvider();
-  try {
-    await signInWithPopup(auth, provider);
-    console.log("User signed in with Google");
-  } catch (error) {
-    console.error("Error signing in with Google:", error.message);
-  }
-};
+  const handleGoogleSignIn = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
 
-  // Sign Out
+      if (!userSnap.exists()) {
+        // New user, prompt for team and role
+        // For simplicity, assigning default teamId and role
+        const defaultTeamId = "defaultTeam";
+        const defaultRole = "viewer";
+
+        await setDoc(userRef, {
+          email: user.email,
+          memberships: {
+            [defaultTeamId]: { role: defaultRole },
+          },
+          activeTenant: defaultTeamId,
+        });
+
+        console.log("New Google user assigned to team:", defaultTeamId);
+      } else {
+        console.log("Existing Google user signed in:", user.email);
+      }
+    } catch (error) {
+      console.error("Error signing in with Google:", error.message);
+    }
+  };
+
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -75,24 +102,20 @@ const handleGoogleSignIn = async () => {
       {user ? (
         <>
           <h2>Welcome, {user.email}</h2>
+          <p>Active Team: {user.activeTenant || "None"}</p>
           <button onClick={handleSignOut}>Sign Out</button>
         </>
       ) : (
         <>
-          <h2>Sign Up</h2>
+          <h2>Sign Up / Sign In</h2>
           <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
           <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-
-          {/* Team Selection */}
           <input type="text" placeholder="Enter Team ID" value={teamId} onChange={(e) => setTeamId(e.target.value)} />
-
-          {/* Role Selection */}
           <select value={role} onChange={(e) => setRole(e.target.value)}>
             <option value="scorer">Scorer</option>
             <option value="admin">Admin</option>
             <option value="viewer">Viewer</option>
           </select>
-
           <button onClick={handleSignUp}>Sign Up</button>
           <button onClick={handleSignIn}>Sign In</button>
           <button onClick={handleGoogleSignIn}>Sign In with Google</button>
