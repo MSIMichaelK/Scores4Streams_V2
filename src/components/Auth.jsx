@@ -1,3 +1,4 @@
+import { callSetCustomClaims } from "../utils/authUtils";
 import { useState, useEffect } from "react";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useFirebase } from "../contexts/FirebaseContext";
@@ -52,6 +53,7 @@ const Auth = () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       console.log("User signed in:", email);
+      await callSetCustomClaims(); // Assign custom claims
     } catch (error) {
       console.error("Error signing in:", error.message);
     }
@@ -61,6 +63,7 @@ const Auth = () => {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
+
       const user = result.user;
       const userRef = doc(db, "users", user.uid);
       const userSnap = await getDoc(userRef);
@@ -83,6 +86,7 @@ const Auth = () => {
       } else {
         console.log("Existing Google user signed in:", user.email);
       }
+      await callSetCustomClaims(); // Assign custom claims
     } catch (error) {
       console.error("Error signing in with Google:", error.message);
     }
