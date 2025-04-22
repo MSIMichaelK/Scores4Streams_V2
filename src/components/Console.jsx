@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { getAuth, signOut } from "firebase/auth";
 import { useAuth } from "../contexts/AuthContext";
 import { callSetCustomClaims } from "../utils/authUtils";
 
 const Console = () => {
   const { user, tenantId, loading } = useAuth();
+  const navigate = useNavigate();
   const [memberships, setMemberships] = useState({});
   const [activeTenant, setActiveTenant] = useState(tenantId);
   const [updating, setUpdating] = useState(false);
@@ -61,7 +63,18 @@ const Console = () => {
     setUpdating(false);
   };
 
+  const handleSignOut = () => {
+    const auth = getAuth();
+    signOut(auth).then(() => {
+      console.log("🔓 User signed out");
+    });
+  };
+
   if (loading) return <p>Loading profile...</p>;
+  if (!user && !loading) {
+    navigate("/login");
+    return null;
+  }
   //console.log("🔥 memberships (FULL):", JSON.stringify(memberships, null, 2));
   //console.log("🔥 keys(memberships):", Object.keys(memberships));
   //console.log("🔥 activeTenant:", activeTenant);
@@ -92,6 +105,7 @@ const Console = () => {
           </ul>
         </>
       )}
+      <button onClick={handleSignOut}>Sign Out</button>
     </div>
   );
 };

@@ -3,14 +3,16 @@ import { useState, useEffect } from "react";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useFirebase } from "../contexts/FirebaseContext";
 import { doc, setDoc, getDoc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 
-const Auth = () => {
+const AuthForm = () => {
   const { auth, db } = useFirebase();
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [teamId, setTeamId] = useState("");
   const [role, setRole] = useState("scorer");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -54,6 +56,7 @@ const Auth = () => {
       await signInWithEmailAndPassword(auth, email, password);
       console.log("User signed in:", email);
       await callSetCustomClaims(); // Assign custom claims
+      navigate("/");
     } catch (error) {
       console.error("Error signing in:", error.message);
     }
@@ -87,6 +90,7 @@ const Auth = () => {
         console.log("Existing Google user signed in:", user.email);
       }
       await callSetCustomClaims(); // Assign custom claims
+      navigate("/");
     } catch (error) {
       console.error("Error signing in with Google:", error.message);
     }
@@ -129,4 +133,4 @@ const Auth = () => {
   );
 };
 
-export default Auth;
+export default AuthForm;
