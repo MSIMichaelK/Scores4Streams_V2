@@ -5,9 +5,12 @@ import './App.css';
 
 import { useAuth } from "./contexts/AuthContext"; // 👈 NEW
 import Auth from "./components/Auth";
+import Console from "./components/Console";
 
 function App() {
   const { user, role, tenantId, loading } = useAuth(); // 👈 NEW
+  console.log("🧪 App.jsx — loading:", loading);
+  console.log("🧪 App.jsx — user:", user);
 
   return (
     <div>
@@ -17,11 +20,7 @@ function App() {
       {loading ? (
         <p>Loading user info...</p>
       ) : user ? (
-        <div>
-          <p><strong>Email:</strong> {user.email}</p>
-          <p><strong>Role:</strong> {role}</p>
-          <p><strong>Team:</strong> {tenantId}</p>
-        </div>
+        <Console />
       ) : (
         <p>Please sign in.</p>
       )}

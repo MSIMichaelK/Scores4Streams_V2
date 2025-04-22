@@ -26,10 +26,11 @@ export const setCustomClaims = functions.https.onRequest((req, res) => {
 
       const userData = userDoc.data();
       const activeTenant = userData.activeTenant;
-      const role = userData.memberships?.[activeTenant]?.role;
+      const roles = userData.memberships?.[activeTenant]?.roles || [];
+      const role = roles[0]; // Choose the first role as the primary role
 
-      if (!activeTenant || !role) {
-        return res.status(400).send("Invalid tenant or role");
+      if (!activeTenant || roles.length === 0) {
+        return res.status(400).send("Invalid tenant or no roles assigned");
       }
 
       await admin.auth().setCustomUserClaims(uid, {
@@ -42,6 +43,7 @@ export const setCustomClaims = functions.https.onRequest((req, res) => {
           message: "Custom claims set successfully",
           tenantId: activeTenant,
           role,
+          roles
         }
       });
     } catch (err) {
