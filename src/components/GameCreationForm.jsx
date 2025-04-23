@@ -19,8 +19,10 @@ const GameCreationForm = () => {
     if (!user || !tenantId) return;
 
     const gameData = {
-      homeTeam,
-      awayTeam,
+      homeTeamId: "team123",
+      homeTeamName: homeTeam,
+      awayTeamId: "team456",
+      awayTeamName: awayTeam,
       status: "scheduled",
       createdBy: user.uid,
       tenantId,
