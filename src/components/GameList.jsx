@@ -5,7 +5,7 @@ import { useAuth } from "../contexts/AuthContext";
 
 const GameList = () => {
   const [games, setGames] = useState([]);
-  const { user, tenantId } = useAuth();
+  const { user, tenantId, roles } = useAuth();
   const navigate = useNavigate();
   const db = getFirestore();
 
@@ -34,7 +34,9 @@ const GameList = () => {
           {games.map(game => (
             <li key={game.id}>
               {game.homeTeamName} vs {game.awayTeamName} — {new Date(game.scheduledStart.seconds * 1000).toLocaleString()}
-              <button onClick={() => navigate(`/manual/${game.id}`)}>Score Game</button>
+              {roles?.some(r => r === "admin" || r === "scorer") && (
+                <button onClick={() => navigate(`/manual/${game.id}`)}>Score Game</button>
+              )}
             </li>
           ))}
         </ul>
