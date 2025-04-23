@@ -4,6 +4,7 @@ import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import { useAuth } from "../contexts/AuthContext";
 import { callSetCustomClaims } from "../utils/authUtils";
+import GameCreationForm from "./GameCreationForm";
 
 const Console = () => {
   const { user, tenantId, loading } = useAuth();
@@ -106,6 +107,8 @@ const Console = () => {
         </>
       )}
       <button onClick={handleSignOut}>Sign Out</button>
+      <hr />
+      <GameCreationForm />
     </div>
   );
 };
