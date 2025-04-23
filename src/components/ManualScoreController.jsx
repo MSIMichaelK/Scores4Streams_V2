@@ -1,10 +1,8 @@
-
-
 import { useState, useEffect } from "react";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { useAuth } from "../contexts/AuthContext";
 
-const ManualScoreController = () => {
+const ManualScoreController = ({ gameId }) => {
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
   const [balls, setBalls] = useState(0);
@@ -24,10 +22,10 @@ const ManualScoreController = () => {
 
   useEffect(() => {
     const saveToFirestore = async () => {
-      if (!user || !tenantId) return;
+      if (!user || !tenantId || !gameId) return;
 
       const db = getFirestore();
-      const gameRef = doc(db, "games", "testGame123");
+      const gameRef = doc(db, "games", gameId);
 
       await setDoc(
         gameRef,

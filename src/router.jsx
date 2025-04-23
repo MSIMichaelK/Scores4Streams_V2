@@ -9,7 +9,7 @@ const router = createBrowserRouter([
     element: <Console />
   },
   {
-    path: "/manual",
+    path: "/manual/:gameId",
     element: <ManualScoringPage />
   },
   {

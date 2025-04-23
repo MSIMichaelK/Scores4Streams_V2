@@ -40,7 +40,7 @@ const AuthForm = () => {
       await setDoc(doc(db, "users", userId), {
         email,
         memberships: {
-          [teamId]: { role },
+          [teamId]: { roles: [role] },
         },
         activeTenant: teamId,
       });
@@ -80,7 +80,7 @@ const AuthForm = () => {
         await setDoc(userRef, {
           email: user.email,
           memberships: {
-            [defaultTeamId]: { role: defaultRole },
+            [defaultTeamId]: { roles: [defaultRole] },
           },
           activeTenant: defaultTeamId,
         });

@@ -1,3 +1,4 @@
+import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 import { createContext, useContext, useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged, getIdTokenResult } from "firebase/auth";
 
@@ -13,6 +14,24 @@ export const AuthProvider = ({ children }) => {
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        // Create default Firestore user profile if it doesn't exist
+        const db = getFirestore();
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+          const defaultTeamId = "defaultTeam";
+          await setDoc(userRef, {
+            email: user.email,
+            activeTenant: defaultTeamId,
+            memberships: {
+              [defaultTeamId]: {
+                roles: ["viewer"]
+              }
+            }
+          });
+        }
+
         const tokenResult = await getIdTokenResult(user);
         setUser(user);
         setClaims({
