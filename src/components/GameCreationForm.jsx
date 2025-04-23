@@ -1,5 +1,3 @@
-
-
 import { useState } from "react";
 import { collection, addDoc, Timestamp, getFirestore } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
@@ -9,9 +7,18 @@ const GameCreationForm = () => {
   const [homeTeam, setHomeTeam] = useState("");
   const [awayTeam, setAwayTeam] = useState("");
   const [startTime, setStartTime] = useState("");
-  const { user, tenantId } = useAuth();
+  const { user, tenantId, role, roles } = useAuth();
   const navigate = useNavigate();
   const db = getFirestore();
+
+  console.log("🔍 Role access check:", { user, tenantId, roles });
+  console.log("🧩 user:", user);
+  console.log("🧩 tenantId:", tenantId);
+  console.log("🧩 roles:", roles);
+
+  if (!user || !tenantId || !roles?.some(r => r === "admin" || r === "scorer")) {
+    return null;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();

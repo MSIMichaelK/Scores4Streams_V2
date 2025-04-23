@@ -40,7 +40,9 @@ const AuthForm = () => {
       await setDoc(doc(db, "users", userId), {
         email,
         memberships: {
-          [teamId]: { roles: [role] },
+          [teamId]: {
+            roles: Array.isArray(role) ? role : [role],
+          },
         },
         activeTenant: teamId,
       });

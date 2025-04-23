@@ -6,7 +6,7 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [claims, setClaims] = useState({ role: null, tenantId: null });
+  const [claims, setClaims] = useState({ role: null, tenantId: null, roles: [] });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,14 +33,33 @@ export const AuthProvider = ({ children }) => {
         }
 
         const tokenResult = await getIdTokenResult(user);
+        // Force refresh to ensure updated custom claims
+        const refreshedTokenResult = await user.getIdTokenResult(true);
+
         setUser(user);
+        let activeTenant = refreshedTokenResult.claims.tenantId;
+        let roles = refreshedTokenResult.claims.roles;
+        let role = refreshedTokenResult.claims.role;
+
+        if (!activeTenant || !roles) {
+          const db = getFirestore();
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            activeTenant = data.activeTenant;
+            roles = data.memberships?.[activeTenant]?.roles || [];
+            role = roles[0] || null;
+          }
+        }
+
         setClaims({
-          role: tokenResult.claims.role || null,
-          tenantId: tokenResult.claims.tenantId || null,
+          tenantId: activeTenant || null,
+          roles: roles || [],
+          role: role || null
         });
       } else {
         setUser(null);
-        setClaims({ role: null, tenantId: null });
+        setClaims({ role: null, tenantId: null, roles: [] });
       }
       setLoading(false);
     });
@@ -49,7 +68,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, role: claims.role, tenantId: claims.tenantId, loading }}>
+    <AuthContext.Provider value={{ user, role: claims.role, roles: claims.roles, tenantId: claims.tenantId, loading }}>
       {children}
     </AuthContext.Provider>
   );
