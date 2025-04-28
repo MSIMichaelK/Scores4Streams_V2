@@ -16,6 +16,34 @@ const ManualScoreController = ({ gameId }) => {
   const [inning, setInning] = useState(1);
   const [isTop, setIsTop] = useState(true);
 
+  const [undoStack, setUndoStack] = useState([]);
+  const [redoStack, setRedoStack] = useState([]);
+
+  const [changeHighlight, setChangeHighlight] = useState("");
+
+  const flashHighlight = (message) => {
+    setChangeHighlight(message);
+    setTimeout(() => setChangeHighlight(""), 1500);
+  };
+
+  const saveSnapshot = () => {
+    const snapshot = {
+      homeScore,
+      awayScore,
+      balls,
+      strikes,
+      outs,
+      runners,
+      inning,
+      isTop,
+    };
+    setUndoStack(prev => {
+      const newStack = [snapshot, ...prev].slice(0, 3);
+      return newStack;
+    });
+    setRedoStack([]); // Clear redo stack on new action
+  };
+
   const addRun = () => {
     if (isTop) {
       setAwayScore(prev => prev + 1);
@@ -25,6 +53,7 @@ const ManualScoreController = ({ gameId }) => {
   };
 
   const toggleRunner = (base) => {
+    saveSnapshot();
     setRunners((prev) => ({ ...prev, [base]: !prev[base] }));
   };
 
@@ -58,21 +87,75 @@ const ManualScoreController = ({ gameId }) => {
     saveToFirestore();
   }, [homeScore, awayScore, balls, strikes, outs, runners, inning, isTop]);
 
+  const handleUndo = () => {
+    if (undoStack.length === 0) return;
+    const previous = undoStack[0];
+    setUndoStack(prev => prev.slice(1));
+    setRedoStack(prev => [{ homeScore, awayScore, balls, strikes, outs, runners, inning, isTop }, ...prev].slice(0, 3));
+
+    setHomeScore(previous.homeScore);
+    setAwayScore(previous.awayScore);
+    setBalls(previous.balls);
+    setStrikes(previous.strikes);
+    setOuts(previous.outs);
+    setRunners(previous.runners);
+    setInning(previous.inning);
+    setIsTop(previous.isTop);
+  };
+
+  const handleRedo = () => {
+    if (redoStack.length === 0) return;
+    const next = redoStack[0];
+    setRedoStack(prev => prev.slice(1));
+    setUndoStack(prev => [{ homeScore, awayScore, balls, strikes, outs, runners, inning, isTop }, ...prev].slice(0, 3));
+
+    setHomeScore(next.homeScore);
+    setAwayScore(next.awayScore);
+    setBalls(next.balls);
+    setStrikes(next.strikes);
+    setOuts(next.outs);
+    setRunners(next.runners);
+    setInning(next.inning);
+    setIsTop(next.isTop);
+  };
+
   return (
     <div>
       <h2>Manual Score Controller</h2>
+      {changeHighlight && (
+        <div style={{ backgroundColor: "yellow", padding: "8px", marginBottom: "10px" }}>
+          {changeHighlight}
+        </div>
+      )}
+
+      <div>
+        <button onClick={handleUndo} disabled={undoStack.length === 0}>Undo</button>
+        <button onClick={handleRedo} disabled={redoStack.length === 0}>Redo</button>
+      </div>
 
       <div>
         <h3>Score</h3>
         <div>
           <p>Home: {homeScore}</p>
-          <button onClick={() => setHomeScore(homeScore + 1)}>+</button>
-          <button onClick={() => setHomeScore(Math.max(0, homeScore - 1))}>-</button>
+          <button onClick={() => {
+            saveSnapshot();
+            setHomeScore(homeScore + 1);
+          }}>+</button>
+          <button onClick={() => {
+            saveSnapshot();
+            setHomeScore(Math.max(0, homeScore - 1));
+          }}>-</button>
         </div>
         <div>
           <p>Away: {awayScore}</p>
-          <button onClick={() => setAwayScore(awayScore + 1)}>+</button>
-          <button onClick={() => setAwayScore(Math.max(0, awayScore - 1))}>-</button>
+          <button onClick={() => {
+            saveSnapshot();
+            setAwayScore(awayScore + 1);
+          }}>+</button>
+          <button onClick={() => {
+            saveSnapshot();
+            setAwayScore(Math.max(0, awayScore - 1));
+          }}>-</button>
         </div>
       </div>
 
@@ -81,9 +164,11 @@ const ManualScoreController = ({ gameId }) => {
         <h3>Balls / Strikes / Outs</h3>
         <p>Balls: {balls}</p>
         <button onClick={() => {
+          saveSnapshot();
           const newBalls = balls + 1;
           if (newBalls >= 4) {
             // Walk - move runners
+            flashHighlight("Walk - Runners Advanced");
             const updatedRunners = { ...runners };
             if (runners.third) {
               addRun();
@@ -100,9 +185,11 @@ const ManualScoreController = ({ gameId }) => {
         }}>Next</button>
         <p>Strikes: {strikes}</p>
         <button onClick={() => {
+          saveSnapshot();
           const newStrikes = strikes + 1;
           if (newStrikes >= 3) {
             // Strikeout - add out
+            flashHighlight("Strikeout");
             const newOuts = outs + 1;
             if (newOuts >= 3) {
               setOuts(0);
@@ -122,10 +209,23 @@ const ManualScoreController = ({ gameId }) => {
             setStrikes(newStrikes);
           }
         }}>Next</button>
+        <div>
+          <button onClick={() => {
+            saveSnapshot();
+            setBalls(0);
+          }}>Reset Balls</button>
+
+          <button onClick={() => {
+            saveSnapshot();
+            setStrikes(0);
+          }}>Reset Strikes</button>
+        </div>
         <p>Outs: {outs}</p>
         <button onClick={() => {
+          saveSnapshot();
           const newOuts = outs + 1;
           if (newOuts >= 3) {
+            flashHighlight("Inning Changed - Runners Cleared");
             setOuts(0);
             if (isTop) {
               setIsTop(false);
@@ -143,6 +243,8 @@ const ManualScoreController = ({ gameId }) => {
       <div>
         <h3>Hit Type Actions</h3>
         <button onClick={() => {
+          flashHighlight("Hit Recorded");
+          saveSnapshot();
           // Single
           const updatedRunners = { ...runners };
           if (runners.third) addRun();
@@ -155,6 +257,8 @@ const ManualScoreController = ({ gameId }) => {
         }}>Single</button>
 
         <button onClick={() => {
+          flashHighlight("Hit Recorded");
+          saveSnapshot();
           // Double
           const updatedRunners = { ...runners };
           if (runners.third) addRun();
@@ -168,6 +272,8 @@ const ManualScoreController = ({ gameId }) => {
         }}>Double</button>
 
         <button onClick={() => {
+          flashHighlight("Hit Recorded");
+          saveSnapshot();
           // Triple
           const updatedRunners = { ...runners };
           if (runners.third) addRun();
@@ -182,6 +288,8 @@ const ManualScoreController = ({ gameId }) => {
         }}>Triple</button>
 
         <button onClick={() => {
+          flashHighlight("Hit Recorded");
+          saveSnapshot();
           // Home Run
           let runsScored = 1;
           if (runners.first) runsScored++;
