@@ -1,0 +1,154 @@
+/* General Container */
+.overlay-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background-color: #222;
+  color: white;
+  overflow: hidden;
+  font-family: "Arial", sans-serif;
+}
+
+/* Loading State */
+.loading {
+  color: white;
+  font-size: 2rem;
+  text-align: center;
+  margin-top: 20%;
+}
+
+/* League Header */
+.league-header {
+  position: absolute;
+  top: 10px;
+  width: 100%;
+  text-align: center;
+}
+
+.league-logo {
+  height: 50px;
+}
+
+.league-name {
+  font-size: 2rem;
+  margin-top: 5px;
+}
+
+/* Teams Section */
+.teams-section {
+  position: absolute;
+  top: 100px;
+  left: 10%;
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.team {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.team-logo {
+  height: 40px;
+}
+
+.team-name {
+  font-size: 1.8rem;
+}
+
+.team-score {
+  font-size: 3rem;
+  margin-left: auto;
+}
+
+/* Bases and Counts Section */
+.diamond-and-counts {
+  position: absolute;
+  top: 140px;
+  right: 10%;
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Bases */
+.bases {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 20px;
+}
+
+.base {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 2px solid white;
+  transform: rotate(45deg);
+  background-color: transparent;
+}
+
+.base.occupied {
+  background-color: white;
+}
+
+.base.second {
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.base.first {
+  top: 50%;
+  right: 0;
+  transform: translate(50%, -50%) rotate(45deg);
+}
+
+.base.third {
+  top: 50%;
+  left: 0;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.base.home {
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 50%) rotate(45deg);
+}
+
+/* Inning Indicator */
+.inning-indicator {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+/* Counts Section */
+.counts {
+  text-align: center;
+  font-size: 1.2rem;
+}
+
+/* Game Time */
+.game-time {
+  position: absolute;
+  bottom: 80px;
+  width: 100%;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+/* Sponsor Banner */
+.sponsor-banner {
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
+  font-size: 1.8rem;
+  background-color: #bb44cc;
+  padding: 10px 0;
+  border-radius: 10px;
+}
