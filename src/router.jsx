@@ -24,7 +24,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/overlayfigma/:gameId",
-    element: <OverlayFromFigma />
+    element: <OverlayFromFigma showGrid={false} />
   },
   {
     path: "/login",
