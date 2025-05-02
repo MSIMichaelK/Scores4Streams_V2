@@ -19,6 +19,15 @@ const OverlayFromFigma = ({ showGrid = true }) => {
     return unsub;
   }, [db, gameId]);
 
+  // Whenever gameData changes, re-run the SVG text updates
+  useEffect(() => {
+    if (!gameData) return;
+    const svgEl = document.querySelector('.overlay-svg svg');
+    if (svgEl) {
+      updateSVGNodes(svgEl);
+    }
+  }, [gameData]);
+
   if (!gameData) {
     return <div className="overlay-wrapper">Loading…</div>;
   }
@@ -65,7 +74,7 @@ const OverlayFromFigma = ({ showGrid = true }) => {
     const presentIds = Array.from(svg.querySelectorAll("[id]")).map(el => el.id);
     console.log("OverlayFromFigma SVG IDs found:", presentIds);
     Object.entries(overlayData).forEach(([id, value]) => {
-      const node = svg.getElementById(id);
+      const node = svg.querySelector(`[id="${id}"]`);
       if (node) {
         node.textContent = value;
       } else {
@@ -102,27 +111,30 @@ const OverlayFromFigma = ({ showGrid = true }) => {
         </svg>
       )}
       <style>{`
-        .overlay-wrapper {
-          position: relative;
-          width: 100%;
-          height: 100vh;
-        }
-        .overlay-svg svg {
-          width: 100%;
-          height: auto;
-          max-height: 100vh;
-          display: block;
-          margin: 0 auto;
-        }
-        .grid-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          pointer-events: none;
-        }
-      `}</style>
+  .overlay-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+  }
+  .overlay-svg svg {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+  }
+  .grid-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+`}</style>
     </div>
   );
 };
