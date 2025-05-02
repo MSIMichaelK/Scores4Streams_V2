@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { doc, onSnapshot } from "firebase/firestore";
 import { useFirebase } from "../contexts/FirebaseContext";
-import overlaySrc from "../assets/figma_overlay_template 1 (2).svg";
+import overlaySrc from "../assets/figma_overlay_template.svg";
 
 const OverlayFromFigma = ({ showGrid = true }) => {
   const { gameId } = useParams();
