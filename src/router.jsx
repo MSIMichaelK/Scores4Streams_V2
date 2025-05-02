@@ -4,7 +4,7 @@ import ManualScoringPage from "./pages/ManualScoringPage";
 import LoginPage from "./pages/LoginPage";
 import OverlayPage from "./pages/OverlayPage";
 import OverlaySVGPage from "./pages/OverlaySVGPage";
-
+import OverlayFromFigma from "./pages/OverlayFromFigma";  
 const router = createBrowserRouter([
   {
     path: "/",
@@ -21,6 +21,10 @@ const router = createBrowserRouter([
   {
     path: "/overlaysvg/:gameId",
     element: <OverlaySVGPage />
+  },
+  {
+    path: "/overlayfigma/:gameId",
+    element: <OverlayFromFigma />
   },
   {
     path: "/login",

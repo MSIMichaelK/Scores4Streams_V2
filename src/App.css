@@ -1,17 +1,3 @@
-// src/App.jsx
-import { FirebaseProvider } from './contexts/FirebaseContext';
-
-function App() {
-  return (
-    <FirebaseProvider>
-      <div>
-        <h1>Softball Scoring App</h1>
-      </div>
-    </FirebaseProvider>
-  );
-}
-
-export default App;
 #root {
   max-width: 1280px;
   margin: 0 auto;
