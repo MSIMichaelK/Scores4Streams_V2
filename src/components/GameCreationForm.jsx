@@ -33,7 +33,18 @@ const GameCreationForm = () => {
       status: "scheduled",
       createdBy: user.uid,
       tenantId,
-      scheduledStart: Timestamp.fromDate(new Date(startTime))
+      scheduledStart: Timestamp.fromDate(new Date(startTime)),
+      homeScore: 0,
+      awayScore: 0,
+      inning: 1,
+      balls: 0,
+      strikes: 0,
+      outs: 0,
+      leagueName: "",
+      gameClock: "",
+      pitchCount: 0,
+      pitcherName: "",
+      batterName: "",
     };
 
     try {

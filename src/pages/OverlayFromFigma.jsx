@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { doc, onSnapshot } from "firebase/firestore";
 import { useFirebase } from "../contexts/FirebaseContext";
@@ -9,7 +9,6 @@ const OverlayFromFigma = ({ showGrid = true }) => {
   const { gameId } = useParams();
   const { db } = useFirebase();
   const [gameData, setGameData] = useState(null);
-  const svgRef = useRef(null);
 
   // Subscribe to your game doc
   useEffect(() => {
@@ -79,8 +78,13 @@ const OverlayFromFigma = ({ showGrid = true }) => {
     <div className="overlay-wrapper">
       <InlineSVG
         src={overlaySrc}
-        innerRef={svgRef}
-        onLoad={() => updateSVGNodes(svgRef.current)}
+        afterInjection={(error, svg) => {
+          if (error) {
+            console.error("OverlayFromFigma SVG injection error:", error);
+            return;
+          }
+          updateSVGNodes(svg);
+        }}
         onError={err => console.error("OverlayFromFigma SVG load error:", err)}
         wrapperClassName="overlay-svg"
       />
@@ -103,11 +107,12 @@ const OverlayFromFigma = ({ showGrid = true }) => {
           width: 100%;
           height: 100vh;
         }
-        .overlay-svg,
         .overlay-svg svg {
           width: 100%;
-          height: 100%;
+          height: auto;
+          max-height: 100vh;
           display: block;
+          margin: 0 auto;
         }
         .grid-overlay {
           position: absolute;
