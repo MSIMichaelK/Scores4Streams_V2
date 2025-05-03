@@ -7,6 +7,10 @@ const GameCreationForm = () => {
   const [homeTeam, setHomeTeam] = useState("");
   const [awayTeam, setAwayTeam] = useState("");
   const [startTime, setStartTime] = useState("");
+  const [leagueName, setLeagueName] = useState("");
+  const [homeTeamLogo, setHomeTeamLogo] = useState(null);
+  const [awayTeamLogo, setAwayTeamLogo] = useState(null);
+  const [leagueLogo, setLeagueLogo] = useState(null);
   const { user, tenantId, role, roles } = useAuth();
   const navigate = useNavigate();
   const db = getFirestore();
@@ -40,11 +44,14 @@ const GameCreationForm = () => {
       balls: 0,
       strikes: 0,
       outs: 0,
-      leagueName: "",
+      leagueName,
       gameClock: "",
       pitchCount: 0,
       pitcherName: "",
       batterName: "",
+      homeTeamLogoUrl: "", // placeholder, to be updated after upload
+      awayTeamLogoUrl: "", // placeholder
+      leagueLogoUrl: "",   // placeholder
     };
 
     try {
@@ -70,6 +77,22 @@ const GameCreationForm = () => {
       <label>
         Start Time:
         <input type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} required />
+      </label>
+      <label>
+        League Name:
+        <input value={leagueName} onChange={(e) => setLeagueName(e.target.value)} required />
+      </label>
+      <label>
+        Home Team Logo:
+        <input type="file" accept="image/*" onChange={(e) => setHomeTeamLogo(e.target.files[0])} />
+      </label>
+      <label>
+        Away Team Logo:
+        <input type="file" accept="image/*" onChange={(e) => setAwayTeamLogo(e.target.files[0])} />
+      </label>
+      <label>
+        League Logo:
+        <input type="file" accept="image/*" onChange={(e) => setLeagueLogo(e.target.files[0])} />
       </label>
       <button type="submit">Create Game</button>
     </form>

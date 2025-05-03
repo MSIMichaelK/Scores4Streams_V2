@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { doc, onSnapshot } from "firebase/firestore";
 import { useFirebase } from "../contexts/FirebaseContext";
 import overlaySrc from "../assets/figma_overlay_template.svg";
+import { updateSVGNodes } from "../utils/updateSVGNodes";
 
 const OverlayFromFigma = ({ showGrid = true }) => {
   const { gameId } = useParams();
@@ -44,14 +45,14 @@ const OverlayFromFigma = ({ showGrid = true }) => {
       .catch(err => console.error("OverlayFromFigma: Failed to load SVG:", err));
   }, []);
 
-  // Whenever gameData changes, re-run the SVG text updates
+  // Whenever gameData or showGrid changes, re-run the SVG text updates
   useEffect(() => {
     if (!gameData) return;
     const svgEl = svgContainerRef.current?.querySelector("svg");
     if (svgEl) {
-      updateSVGNodes(svgEl);
+      updateSVGNodes(svgEl, gameData, showGrid);
     }
-  }, [gameData]);
+  }, [gameData, showGrid]);
 
   if (!gameData) {
     return <div className="overlay-wrapper">Loading…</div>;
@@ -89,100 +90,7 @@ const OverlayFromFigma = ({ showGrid = true }) => {
     "Batter": batterName,
   };
 
-  // When SVG is injected, replace each text node
-  const updateSVGNodes = (svg) => {
-    if (!svg) {
-      console.error("OverlayFromFigma: SVG ref is null");
-      return;
-    }
-    // Hide static SVG grid lines if showGrid is false
-    if (!showGrid) {
-      const gridLines = svg.querySelectorAll('[id^="Vector"], [id*="Grid"], [id^="Line"]');
-      gridLines.forEach(el => {
-        el.setAttribute("display", "none");
-        console.log(`OverlayFromFigma: Hiding SVG grid element ${el.id}`);
-      });
-    }
-    console.log("OverlayFromFigma overlayData keys:", Object.keys(overlayData));
-    const presentIds = Array.from(svg.querySelectorAll("[id]")).map(el => el.id);
-    console.log("OverlayFromFigma SVG IDs found:", presentIds);
-    console.log("OverlayFromFigma: Running updateSVGNodes with overlayData:", overlayData);
-    Object.entries(overlayData).forEach(([id, value]) => {
-      const node = svg.querySelector(`[id="${id}"]`);
-      if (node) {
-        const tspans = node.querySelectorAll("tspan");
-        if (tspans.length) {
-          tspans.forEach((t, i) => {
-            if (i === 0) {
-              t.textContent = value;
-            } else {
-              t.textContent = "";
-            }
-          });
-        } else {
-          node.textContent = value;
-        }
-        console.log(`OverlayFromFigma: Updated SVG node #${id} to "${value}"`);
-      } else {
-        console.warn(`OverlayFromFigma: no element with id="${id}" in SVG`);
-      }
-    });
-
-    // Update fill logic for bases, balls, strikes, and outs
-    const highlightCircles = (prefix, count) => {
-      const colorMap = {
-        Ball: "#2CF90C",     // Green
-        Strike: "#FE090D",   // Red
-      };
-      const defaultColor = "#2B2B2B";
-      for (let i = 1; i <= 3; i++) {
-        const circle = svg.querySelector(`[id="${prefix}${i}"]`);
-        if (circle) {
-          const fillColor = i <= count ? (colorMap[prefix] || "#ffffff") : defaultColor;
-          circle.setAttribute("fill", fillColor);
-          console.log(`OverlayFromFigma: Set ${prefix}${i} fill to ${fillColor}`);
-        }
-      }
-    };
-
-    const highlightOuts = (count) => {
-      for (let i = 1; i <= 2; i++) {
-        const outCircle = svg.querySelector(`[id="Out${i}"]`);
-        if (outCircle) {
-          const fillColor = i <= count ? "#FFFF06" : "#2B2B2B";
-          outCircle.setAttribute("fill", fillColor);
-          console.log(`OverlayFromFigma: Set Out${i} fill to ${fillColor}`);
-        }
-      }
-    };
-
-    // Highlight base paths
-    const highlightBase = (id, active) => {
-      const base = svg.querySelector(`[id="${id}"]`);
-      if (base) {
-        const baseColor = active ? "#FFFF06" : "#2B2B2B";
-        base.setAttribute("fill", baseColor);
-        console.log(`OverlayFromFigma: Set base ${id} fill to ${baseColor}`);
-      }
-    };
-
-    highlightCircles("Ball", gameData.balls || 0);
-    highlightCircles("Strike", gameData.strikes || 0);
-    highlightOuts(gameData.outs || 0);
-    highlightBase("1st Base_2", gameData.runners?.first);
-    highlightBase("2nd Base_2", gameData.runners?.second);
-    highlightBase("3rd Base_2", gameData.runners?.third);
-
-    // Inning arrow logic
-    const topArrow = svg.querySelector(`[id="Top"]`);
-    const bottomArrow = svg.querySelector(`[id="Bottom"]`);
-    if (topArrow && bottomArrow) {
-      const isTop = gameData.isTop;
-      topArrow.setAttribute("fill", isTop ? "#FFFF06" : "#2B2B2B");
-      bottomArrow.setAttribute("fill", isTop ? "#2B2B2B" : "#FFFF06");
-      console.log(`OverlayFromFigma: Set inning arrows: top=${isTop}`);
-    }
-  };
+  // now using imported function from utils
 
   return (
     <div className="overlay-wrapper">
