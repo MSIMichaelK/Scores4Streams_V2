@@ -1,0 +1,10 @@
+[
+  {
+    "origin": ["https://scores4streams-v2.web.app"],
+    "method": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": [
+      "*"
+    ]
+  }
+]

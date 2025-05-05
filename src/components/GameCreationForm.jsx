@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { collection, addDoc, Timestamp, getFirestore } from "firebase/firestore";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -29,6 +30,54 @@ const GameCreationForm = () => {
     console.log("📝 Submitting new game:", { homeTeam, awayTeam, startTime });
     if (!user || !tenantId) return;
 
+    const gameId = crypto.randomUUID(); // Generate temporary ID for naming paths
+
+    const uploadLogo = async (file, teamType) => {
+      if (!file) return "";
+
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          try {
+            const base64Logo = reader.result.split(",")[1];
+            const idToken = await user.getIdToken();
+
+            const response = await fetch("https://us-central1-scores4streams-v2.cloudfunctions.net/uploadGameLogo", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${idToken}`,
+              },
+              body: JSON.stringify({ base64Logo, gameId, teamType }),
+            });
+
+            if (!response.ok) {
+              console.error(`❌ Upload failed: ${response.statusText}`);
+              return resolve("");
+            }
+
+            const data = await response.json();
+            resolve(data.url || "");
+          } catch (err) {
+            console.error(`❌ Upload error for ${teamType}:`, err);
+            reject("");
+          }
+        };
+        reader.onerror = (err) => {
+          console.error("❌ FileReader error:", err);
+          reject("");
+        };
+        reader.readAsDataURL(file);
+      });
+    };
+
+    // const homeTeamLogoUrl = await uploadLogo(homeTeamLogo, "home");
+    // const awayTeamLogoUrl = await uploadLogo(awayTeamLogo, "away");
+    // const leagueLogoUrl = await uploadLogo(leagueLogo, "league");
+    const homeTeamLogoUrl = "";
+    const awayTeamLogoUrl = "";
+    const leagueLogoUrl = "";
+
     const gameData = {
       homeTeamId: "team123",
       homeTeamName: homeTeam,
@@ -49,13 +98,13 @@ const GameCreationForm = () => {
       pitchCount: 0,
       pitcherName: "",
       batterName: "",
-      homeTeamLogoUrl: "", // placeholder, to be updated after upload
-      awayTeamLogoUrl: "", // placeholder
-      leagueLogoUrl: "",   // placeholder
+      homeTeamLogoUrl,
+      awayTeamLogoUrl,
+      leagueLogoUrl,
     };
 
     try {
-      const docRef = await addDoc(collection(db, "games"), gameData);
+      const docRef = await addDoc(collection(db, "games"), { ...gameData, id: gameId });
       console.log("✅ Game created with ID:", docRef.id);
       navigate(`/manual/${docRef.id}`);
     } catch (error) {
@@ -82,6 +131,7 @@ const GameCreationForm = () => {
         League Name:
         <input value={leagueName} onChange={(e) => setLeagueName(e.target.value)} required />
       </label>
+      {/*
       <label>
         Home Team Logo:
         <input type="file" accept="image/*" onChange={(e) => setHomeTeamLogo(e.target.files[0])} />
@@ -94,6 +144,7 @@ const GameCreationForm = () => {
         League Logo:
         <input type="file" accept="image/*" onChange={(e) => setLeagueLogo(e.target.files[0])} />
       </label>
+      */}
       <button type="submit">Create Game</button>
     </form>
   );
