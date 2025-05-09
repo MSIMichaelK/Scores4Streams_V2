@@ -67,8 +67,9 @@ export const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
+  const claimsReady = !!user && !!claims.tenantId && claims.roles.length > 0;
   return (
-    <AuthContext.Provider value={{ user, role: claims.role, roles: claims.roles, tenantId: claims.tenantId, loading }}>
+    <AuthContext.Provider value={{ user, role: claims.role, roles: claims.roles, tenantId: claims.tenantId, loading, claimsReady }}>
       {children}
     </AuthContext.Provider>
   );

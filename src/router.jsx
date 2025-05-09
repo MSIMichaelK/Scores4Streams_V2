@@ -4,31 +4,45 @@ import ManualScoringPage from "./pages/ManualScoringPage";
 import LoginPage from "./pages/LoginPage";
 import OverlayPage from "./pages/OverlayPage";
 import OverlaySVGPage from "./pages/OverlaySVGPage";
-import OverlayFromFigma from "./pages/OverlayFromFigma";  
+import OverlayFromFigma from "./pages/OverlayFromFigma";
+
+const ErrorFallback = () => <div style={{ padding: "2rem" }}><h1>404 Not Found</h1><p>This page doesn’t exist.</p></div>;
+
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Console />
+    element: <Console />,
+    errorElement: <ErrorFallback />
+  },
+  {
+    path: "/console",
+    element: <Console />,
+    errorElement: <ErrorFallback />
   },
   {
     path: "/manual/:gameId",
-    element: <ManualScoringPage />
+    element: <ManualScoringPage />,
+    errorElement: <ErrorFallback />
   },
   {
     path: "/overlay/:gameId",
-    element: <OverlayPage />
+    element: <OverlayPage />,
+    errorElement: <ErrorFallback />
   },
   {
     path: "/overlaysvg/:gameId",
-    element: <OverlaySVGPage />
+    element: <OverlaySVGPage />,
+    errorElement: <ErrorFallback />
   },
   {
     path: "/overlayfigma/:gameId",
-    element: <OverlayFromFigma showGrid={false} />
+    element: <OverlayFromFigma showGrid={false} />,
+    errorElement: <ErrorFallback />
   },
   {
     path: "/login",
-    element: <LoginPage />
+    element: <LoginPage />,
+    errorElement: <ErrorFallback />
   }
 ]);
 

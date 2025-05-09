@@ -1,33 +1,21 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthForm from "../components/AuthForm";
 import { useAuth } from "../contexts/AuthContext";
 import { getAuth } from "firebase/auth";
 
 const LoginPage = () => {
-  const { user, activeTeam, logout } = useAuth();
+  const { user, activeTeam, logout, claimsReady } = useAuth();
   const navigate = useNavigate();
-  const [checkingClaims, setCheckingClaims] = useState(true);
-
-  if (checkingClaims) {
-    return <div>Loading...</div>;
-  }
 
   useEffect(() => {
-    const checkClaimsAndRedirect = async () => {
-      if (user) {
-        const auth = getAuth();
-        await auth.currentUser.getIdToken(true); // force refresh
-        if (activeTeam && activeTeam !== "defaultteam") {
-          navigate("/console");
-        }
-      }
-      setCheckingClaims(false);
-    };
-    checkClaimsAndRedirect();
-  }, [user, activeTeam, navigate]);
+    if (claimsReady && activeTeam !== "defaultteam") {
+      console.log("✅ Redirecting to /console");
+      navigate("/console");
+    }
+  }, [claimsReady, activeTeam, navigate]);
 
-  if (!checkingClaims && user) {
+  if (claimsReady && user) {
     return (
       <div>
         <h2>Welcome to Scores4Streams</h2>

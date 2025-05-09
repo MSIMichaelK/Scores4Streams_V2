@@ -65,11 +65,11 @@ const Console = () => {
     setUpdating(false);
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     const auth = getAuth();
-    signOut(auth).then(() => {
-      console.log("🔓 User signed out");
-    });
+    await signOut(auth);
+    console.log("🔓 User signed out");
+    navigate("/login");
   };
 
   if (loading) return <p>Loading profile...</p>;
