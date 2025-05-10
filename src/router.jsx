@@ -5,6 +5,7 @@ import LoginPage from "./pages/LoginPage";
 import OverlayPage from "./pages/OverlayPage";
 import OverlaySVGPage from "./pages/OverlaySVGPage";
 import OverlayFromFigma from "./pages/OverlayFromFigma";
+import AdminHierarchy from "./pages/AdminHierarchy";
 
 const ErrorFallback = () => <div style={{ padding: "2rem" }}><h1>404 Not Found</h1><p>This page doesn’t exist.</p></div>;
 
@@ -17,6 +18,11 @@ const router = createBrowserRouter([
   {
     path: "/console",
     element: <Console />,
+    errorElement: <ErrorFallback />
+  },
+  {
+    path: "/admin-hierarchy",
+    element: <AdminHierarchy />,
     errorElement: <ErrorFallback />
   },
   {
