@@ -71,10 +71,18 @@ const CreateGameWizard = () => {
         finalOpponentId = newOpponentRef.id;
       }
 
+      // Resolve team names for home and away
+      const yourTeam = teams.find((team) => team.id === yourTeamId);
+      const opponentTeam = teams.find((team) => team.id === finalOpponentId);
+      const homeTeamName = isHomeTeam ? yourTeam?.name : opponentTeam?.name;
+      const awayTeamName = isHomeTeam ? opponentTeam?.name : yourTeam?.name;
+
       const gameRef = doc(collection(db, "games"));
       await setDoc(gameRef, {
         home_team_id: isHomeTeam ? yourTeamId : finalOpponentId,
         away_team_id: isHomeTeam ? finalOpponentId : yourTeamId,
+        homeTeamName,
+        awayTeamName,
         created_by: uid,
         created_at: new Date().toISOString(),
         status: "scheduled",
