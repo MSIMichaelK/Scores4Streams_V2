@@ -6,6 +6,7 @@ import OverlayPage from "./pages/OverlayPage";
 import OverlaySVGPage from "./pages/OverlaySVGPage";
 import OverlayFromFigma from "./pages/OverlayFromFigma";
 import AdminHierarchy from "./pages/AdminHierarchy";
+import CreateGameWizard from "./pages/CreateGameWizard";
 
 const ErrorFallback = () => <div style={{ padding: "2rem" }}><h1>404 Not Found</h1><p>This page doesn’t exist.</p></div>;
 
@@ -31,6 +32,11 @@ const router = createBrowserRouter([
     errorElement: <ErrorFallback />
   },
   {
+    path: "/controller/:gameId",
+    element: <ManualScoringPage />,
+    errorElement: <ErrorFallback />
+  },
+  {
     path: "/overlay/:gameId",
     element: <OverlayPage />,
     errorElement: <ErrorFallback />
@@ -43,6 +49,11 @@ const router = createBrowserRouter([
   {
     path: "/overlayfigma/:gameId",
     element: <OverlayFromFigma showGrid={false} />,
+    errorElement: <ErrorFallback />
+  },
+  {
+    path: "/create-game",
+    element: <CreateGameWizard />,
     errorElement: <ErrorFallback />
   },
   {

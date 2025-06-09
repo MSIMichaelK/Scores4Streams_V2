@@ -1,0 +1,47 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Allow authenticated users to read/write their own user profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Allow authenticated users to access their own team membership sub-docs
+    match /users/{userId}/memberships/{teamId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Allow unauthenticated read access to specific fields in games for overlays
+    match /games/{gameId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Allow authenticated users to read + list hierarchy data
+    match /states/{stateId} {
+      allow read, list: if request.auth != null;
+    }
+    match /regions/{regionId} {
+      allow read, list: if request.auth != null;
+    }
+    match /state_associations/{stateAssociationId} {
+      allow read, list: if request.auth != null;
+    }
+    match /associations/{associationId} {
+      allow read, list: if request.auth != null;
+    }
+    match /clubs/{clubId} {
+      allow read, list: if request.auth != null;
+    }
+    match /teams/{teamId} {
+      allow read, list: if request.auth != null;
+    }
+
+    // Deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
