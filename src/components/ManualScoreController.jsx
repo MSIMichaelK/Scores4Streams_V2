@@ -205,7 +205,25 @@ const ManualScoreController = ({ gameId }) => {
     saveSnapshot();
     const newBalls = balls + 1;
     if (newBalls >= 4) {
-      const runsScored = runners.third ? 1 : 0;
+      // Force-advance: only runners in continuous chain from 1st (same as HBP, AB-004)
+      const was = { ...runners };
+      let runsScored = 0;
+      if (was.first) {
+        if (was.second) {
+          if (was.third) {
+            addRun();
+            runsScored++;
+          }
+        }
+      }
+      const updated = { ...runners };
+      if (was.first) {
+        if (was.second) {
+          updated.third = true;
+        }
+        updated.second = true;
+      }
+      updated.first = true;
       recordEvent(
         {
           type: "walk",
@@ -217,11 +235,6 @@ const ManualScoreController = ({ gameId }) => {
         getGameState()
       );
       flashHighlight("Walk");
-      const updated = { ...runners };
-      if (runners.third) addRun();
-      updated.third = runners.second;
-      updated.second = runners.first;
-      updated.first = true;
       setRunners(updated);
       setBalls(0);
       setStrikes(0);

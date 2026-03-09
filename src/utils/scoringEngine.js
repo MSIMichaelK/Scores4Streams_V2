@@ -80,11 +80,19 @@ export function applyAction(state, action) {
     case "ball": {
       const newBalls = state.balls + 1;
       if (newBalls >= 4) {
-        // Walk
-        const runsScored = state.runners.third ? 1 : 0;
-        if (state.runners.third) addRun(state);
-        state.runners.third = state.runners.second;
-        state.runners.second = state.runners.first;
+        // Walk — force-advance runners in continuous chain from 1st (same as HBP, AB-004)
+        const was = { ...state.runners };
+        let runsScored = 0;
+        if (was.first) {
+          if (was.second) {
+            if (was.third) {
+              addRun(state);
+              runsScored++;
+            }
+            state.runners.third = true;
+          }
+          state.runners.second = true;
+        }
         state.runners.first = true;
         recordEvent(state, {
           type: "walk",
