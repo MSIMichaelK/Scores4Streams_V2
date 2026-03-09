@@ -12,40 +12,25 @@ const OverlayFromFigma = ({ showGrid = true }) => {
   const [svgContent, setSvgContent] = useState(null);
   const svgContainerRef = React.useRef();
 
-  // Subscribe to your game doc
   useEffect(() => {
-    if (!gameId) {
-      console.warn("OverlayFromFigma: No gameId found in route params.");
-      return;
-    }
-    if (!db) {
-      console.error("OverlayFromFigma: Firebase DB not initialized.");
-      return;
-    }
-    console.log("OverlayFromFigma: Subscribing to gameId", gameId);
+    if (!gameId || !db) return;
 
     const unsub = onSnapshot(doc(db, "games", gameId), (snap) => {
       if (snap.exists()) {
-        const data = snap.data();
-        console.log("OverlayFromFigma: Got game update", data);
-        setGameData(data);
-      } else {
-        console.warn("OverlayFromFigma: No such document for gameId", gameId);
+        setGameData(snap.data());
       }
     });
 
     return unsub;
   }, [db, gameId]);
 
-  // Load SVG content on mount
   useEffect(() => {
     fetch(overlaySrc)
       .then(res => res.text())
       .then(setSvgContent)
-      .catch(err => console.error("OverlayFromFigma: Failed to load SVG:", err));
+      .catch(err => console.error("Failed to load SVG overlay template:", err));
   }, []);
 
-  // Whenever gameData or showGrid changes, re-run the SVG text updates
   useEffect(() => {
     if (!gameData) return;
     const svgEl = svgContainerRef.current?.querySelector("svg");
@@ -55,42 +40,8 @@ const OverlayFromFigma = ({ showGrid = true }) => {
   }, [gameData, showGrid]);
 
   if (!gameData) {
-    return <div className="overlay-wrapper">Loading…</div>;
+    return <div className="overlay-wrapper">Loading...</div>;
   }
-
-  const {
-    homeTeamName,
-    awayTeamName,
-    homeScore,
-    awayScore,
-    inning,
-    outs,
-    balls,
-    strikes,
-    leagueName,
-    gameClock,
-    pitchCount,
-    pitcherName,
-    batterName,
-  } = gameData;
-
-  // Map your SVG <text id="…"> → live values
-  const overlayData = {
-    "Away Team Name_2": awayTeamName || "Missing",
-    "Home Team Name": homeTeamName || "Missing",
-    "League Name": leagueName,
-    "Away Team Score_2": String(awayScore),
-    "Home Team Score": String(homeScore),
-    "Inning": String(inning),
-    "Outs": `${outs} Out`,
-    "Balls and Strikes": `${balls}-${strikes}`,
-    "Game Clock": gameClock,
-    "Pitch Count": `${pitchCount}`,
-    "Pitcher": pitcherName,
-    "Batter": batterName,
-  };
-
-  // now using imported function from utils
 
   return (
     <div className="overlay-wrapper">
