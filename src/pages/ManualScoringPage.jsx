@@ -1,13 +1,18 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ManualScoreController from "../components/ManualScoreController";
 
 const ManualScoringPage = () => {
   const { gameId } = useParams();
-  console.log("📺 gameId from route:", gameId);
+  const navigate = useNavigate();
 
   return (
     <div>
-      <h2>Manual Scoring Page</h2>
+      <div className="page-header">
+        <button className="back-btn" onClick={() => navigate("/console")}>
+          &larr; Back
+        </button>
+        <h2>Live Scoring</h2>
+      </div>
       <ManualScoreController gameId={gameId} />
     </div>
   );

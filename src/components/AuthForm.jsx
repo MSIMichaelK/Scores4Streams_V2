@@ -1,6 +1,6 @@
 import { callSetCustomClaims } from "../utils/authUtils";
 import { useState, useEffect } from "react";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useFirebase } from "../contexts/FirebaseContext";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +12,7 @@ const AuthForm = () => {
   const [password, setPassword] = useState("");
   const [teamId, setTeamId] = useState("");
   const [role, setRole] = useState("scorer");
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,109 +29,100 @@ const AuthForm = () => {
         setUser(null);
       }
     });
-
     return () => unsubscribe();
   }, [auth, db]);
 
   const handleSignUp = async () => {
+    setError(null);
+    if (!teamId.trim()) {
+      setError("Team ID is required for sign up");
+      return;
+    }
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const userId = userCredential.user.uid;
-
       await setDoc(doc(db, "users", userId), {
         email,
         memberships: {
-          [teamId]: {
-            roles: Array.isArray(role) ? role : [role],
-          },
+          [teamId]: { roles: Array.isArray(role) ? role : [role] },
         },
         activeTenant: teamId,
       });
-
-      console.log("User signed up and assigned to team:", teamId);
-    } catch (error) {
-      console.error("Error signing up:", error.message);
+    } catch (err) {
+      setError(err.message);
     }
   };
 
   const handleSignIn = async () => {
+    setError(null);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      console.log("User signed in:", email);
-      await callSetCustomClaims(); // Assign custom claims
+      await callSetCustomClaims();
       navigate("/");
-    } catch (error) {
-      console.error("Error signing in:", error.message);
+    } catch (err) {
+      setError(err.message);
     }
   };
 
   const handleGoogleSignIn = async () => {
+    setError(null);
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-
       const user = result.user;
       const userRef = doc(db, "users", user.uid);
       const userSnap = await getDoc(userRef);
 
       if (!userSnap.exists()) {
-        // New user, prompt for team and role
-        // For simplicity, assigning default teamId and role
-        const defaultTeamId = "defaultTeam";
-        const defaultRole = "viewer";
-
         await setDoc(userRef, {
           email: user.email,
-          memberships: {
-            [defaultTeamId]: { roles: [defaultRole] },
-          },
-          activeTenant: defaultTeamId,
+          memberships: { defaultTeam: { roles: ["viewer"] } },
+          activeTenant: "defaultTeam",
         });
-
-        console.log("New Google user assigned to team:", defaultTeamId);
-      } else {
-        console.log("Existing Google user signed in:", user.email);
       }
-      await callSetCustomClaims(); // Assign custom claims
+
+      await callSetCustomClaims();
       navigate("/");
-    } catch (error) {
-      console.error("Error signing in with Google:", error.message);
+    } catch (err) {
+      setError(err.message);
     }
   };
 
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      console.log("User signed out");
-    } catch (error) {
-      console.error("Error signing out:", error.message);
+    } catch (err) {
+      setError(err.message);
     }
   };
 
+  if (user) {
+    return (
+      <div className="auth-form">
+        <p style={{ marginBottom: 12 }}>Signed in as <strong>{user.email}</strong></p>
+        <button className="btn-danger" onClick={handleSignOut} style={{ width: "100%" }}>
+          Sign Out
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      {user ? (
-        <>
-          <h2>Welcome, {user.email}</h2>
-          <p>Active Team: {user.activeTenant || "None"}</p>
-          <button onClick={handleSignOut}>Sign Out</button>
-        </>
-      ) : (
-        <>
-          <h2>Sign Up / Sign In</h2>
-          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <input type="text" placeholder="Enter Team ID" value={teamId} onChange={(e) => setTeamId(e.target.value)} />
-          <select value={role} onChange={(e) => setRole(e.target.value)}>
-            <option value="scorer">Scorer</option>
-            <option value="admin">Admin</option>
-            <option value="viewer">Viewer</option>
-          </select>
-          <button onClick={handleSignUp}>Sign Up</button>
-          <button onClick={handleSignIn}>Sign In</button>
-          <button onClick={handleGoogleSignIn}>Sign In with Google</button>
-        </>
-      )}
+    <div className="auth-form">
+      {error && <div className="error-message">{error}</div>}
+      <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+      <input type="text" placeholder="Team ID (for sign up)" value={teamId} onChange={(e) => setTeamId(e.target.value)} />
+      <select value={role} onChange={(e) => setRole(e.target.value)}>
+        <option value="scorer">Scorer</option>
+        <option value="admin">Admin</option>
+        <option value="viewer">Viewer</option>
+      </select>
+      <div className="auth-buttons">
+        <button className="btn-primary" onClick={handleSignIn}>Sign In</button>
+        <button className="btn-secondary" onClick={handleSignUp}>Sign Up</button>
+        <button className="btn-google" onClick={handleGoogleSignIn}>Sign In with Google</button>
+      </div>
     </div>
   );
 };

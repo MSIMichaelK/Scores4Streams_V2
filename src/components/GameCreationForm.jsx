@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { collection, addDoc, Timestamp, getFirestore } from "firebase/firestore";
-import { getFunctions, httpsCallable } from "firebase/functions";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -9,17 +8,12 @@ const GameCreationForm = () => {
   const [awayTeam, setAwayTeam] = useState("");
   const [startTime, setStartTime] = useState("");
   const [leagueName, setLeagueName] = useState("");
-  const [homeTeamLogo, setHomeTeamLogo] = useState(null);
-  const [awayTeamLogo, setAwayTeamLogo] = useState(null);
-  const [leagueLogo, setLeagueLogo] = useState(null);
-  const { user, tenantId, role, roles } = useAuth();
+  const [scoringMode, setScoringMode] = useState("simple");
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const { user, tenantId, roles } = useAuth();
   const navigate = useNavigate();
   const db = getFirestore();
-
-  console.log("🔍 Role access check:", { user, tenantId, roles });
-  console.log("🧩 user:", user);
-  console.log("🧩 tenantId:", tenantId);
-  console.log("🧩 roles:", roles);
 
   if (!user || !tenantId || !roles?.some(r => r === "admin" || r === "scorer")) {
     return null;
@@ -27,62 +21,26 @@ const GameCreationForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("📝 Submitting new game:", { homeTeam, awayTeam, startTime });
-    if (!user || !tenantId) return;
+    setError(null);
 
-    const gameId = crypto.randomUUID(); // Generate temporary ID for naming paths
+    if (!homeTeam.trim() || !awayTeam.trim()) {
+      setError("Both team names are required");
+      return;
+    }
+    if (!startTime) {
+      setError("Start time is required");
+      return;
+    }
+    if (!leagueName.trim()) {
+      setError("League name is required");
+      return;
+    }
 
-    const uploadLogo = async (file, teamType) => {
-      if (!file) return "";
-
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-          try {
-            const base64Logo = reader.result.split(",")[1];
-            const idToken = await user.getIdToken();
-
-            const response = await fetch("https://us-central1-scores4streams-v2.cloudfunctions.net/uploadGameLogo", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${idToken}`,
-              },
-              body: JSON.stringify({ base64Logo, gameId, teamType }),
-            });
-
-            if (!response.ok) {
-              console.error(`❌ Upload failed: ${response.statusText}`);
-              return resolve("");
-            }
-
-            const data = await response.json();
-            resolve(data.url || "");
-          } catch (err) {
-            console.error(`❌ Upload error for ${teamType}:`, err);
-            reject("");
-          }
-        };
-        reader.onerror = (err) => {
-          console.error("❌ FileReader error:", err);
-          reject("");
-        };
-        reader.readAsDataURL(file);
-      });
-    };
-
-    // const homeTeamLogoUrl = await uploadLogo(homeTeamLogo, "home");
-    // const awayTeamLogoUrl = await uploadLogo(awayTeamLogo, "away");
-    // const leagueLogoUrl = await uploadLogo(leagueLogo, "league");
-    const homeTeamLogoUrl = "";
-    const awayTeamLogoUrl = "";
-    const leagueLogoUrl = "";
+    setSubmitting(true);
 
     const gameData = {
-      homeTeamId: "team123",
-      homeTeamName: homeTeam,
-      awayTeamId: "team456",
-      awayTeamName: awayTeam,
+      homeTeamName: homeTeam.trim(),
+      awayTeamName: awayTeam.trim(),
       status: "scheduled",
       createdBy: user.uid,
       tenantId,
@@ -90,62 +48,94 @@ const GameCreationForm = () => {
       homeScore: 0,
       awayScore: 0,
       inning: 1,
+      isTop: true,
       balls: 0,
       strikes: 0,
       outs: 0,
-      leagueName,
+      runners: { first: false, second: false, third: false },
+      leagueName: leagueName.trim(),
       gameClock: "",
       pitchCount: 0,
       pitcherName: "",
       batterName: "",
-      homeTeamLogoUrl,
-      awayTeamLogoUrl,
-      leagueLogoUrl,
+      homeTeamLogoUrl: "",
+      awayTeamLogoUrl: "",
+      leagueLogoUrl: "",
+      scoringMode,
     };
 
     try {
-      const docRef = await addDoc(collection(db, "games"), { ...gameData, id: gameId });
-      console.log("✅ Game created with ID:", docRef.id);
+      const docRef = await addDoc(collection(db, "games"), gameData);
       navigate(`/manual/${docRef.id}`);
-    } catch (error) {
-      console.error("❌ Error creating game:", error);
+    } catch (err) {
+      setError("Failed to create game. Please try again.");
+      setSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h3>Create a New Game</h3>
+    <form onSubmit={handleSubmit} className="create-game-form">
+      <h3>New Game</h3>
+      {error && <div className="error-message">{error}</div>}
       <label>
-        Home Team:
-        <input value={homeTeam} onChange={(e) => setHomeTeam(e.target.value)} required />
+        Home Team
+        <input
+          value={homeTeam}
+          onChange={(e) => setHomeTeam(e.target.value)}
+          placeholder="e.g. Thunder"
+        />
       </label>
       <label>
-        Away Team:
-        <input value={awayTeam} onChange={(e) => setAwayTeam(e.target.value)} required />
+        Away Team
+        <input
+          value={awayTeam}
+          onChange={(e) => setAwayTeam(e.target.value)}
+          placeholder="e.g. Lightning"
+        />
       </label>
       <label>
-        Start Time:
-        <input type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} required />
+        Start Time
+        <input
+          type="datetime-local"
+          value={startTime}
+          onChange={(e) => setStartTime(e.target.value)}
+        />
       </label>
       <label>
-        League Name:
-        <input value={leagueName} onChange={(e) => setLeagueName(e.target.value)} required />
+        League
+        <input
+          value={leagueName}
+          onChange={(e) => setLeagueName(e.target.value)}
+          placeholder="e.g. Metro Softball"
+        />
       </label>
-      {/*
-      <label>
-        Home Team Logo:
-        <input type="file" accept="image/*" onChange={(e) => setHomeTeamLogo(e.target.files[0])} />
-      </label>
-      <label>
-        Away Team Logo:
-        <input type="file" accept="image/*" onChange={(e) => setAwayTeamLogo(e.target.files[0])} />
-      </label>
-      <label>
-        League Logo:
-        <input type="file" accept="image/*" onChange={(e) => setLeagueLogo(e.target.files[0])} />
-      </label>
-      */}
-      <button type="submit">Create Game</button>
+      <div className="scoring-mode-selector">
+        <span className="scoring-mode-label">Scoring Mode</span>
+        <div className="scoring-mode-options">
+          <button
+            type="button"
+            className={`scoring-mode-btn ${scoringMode === "simple" ? "active" : ""}`}
+            onClick={() => setScoringMode("simple")}
+          >
+            Simple
+          </button>
+          <button
+            type="button"
+            className={`scoring-mode-btn ${scoringMode === "advanced" ? "active" : ""}`}
+            onClick={() => setScoringMode("advanced")}
+          >
+            Advanced
+          </button>
+        </div>
+        <span className="scoring-mode-hint">
+          {scoringMode === "simple"
+            ? "Basic scoring — drives the overlay scoreboard"
+            : "Detailed plays — for stats and scorebook"}
+        </span>
+      </div>
+      <button type="submit" disabled={submitting}>
+        {submitting ? "Creating..." : "Create Game"}
+      </button>
     </form>
   );
 };

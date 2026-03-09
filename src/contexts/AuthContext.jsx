@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
             activeTenant: defaultTeamId,
             memberships: {
               [defaultTeamId]: {
-                roles: ["viewer"]
+                roles: ["scorer"]
               }
             }
           });

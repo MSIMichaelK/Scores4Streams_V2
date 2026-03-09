@@ -1,50 +1,58 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getAuth, signOut } from "firebase/auth";
 import AuthForm from "../components/AuthForm";
 import { useAuth } from "../contexts/AuthContext";
-import { getAuth } from "firebase/auth";
 
 const LoginPage = () => {
-  const { user, activeTeam, logout, claimsReady } = useAuth();
+  const { user, tenantId, claimsReady } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (claimsReady && activeTeam !== "defaultteam") {
-      console.log("✅ Redirecting to /console");
+    if (claimsReady && tenantId && tenantId !== "defaultTeam") {
       navigate("/console");
     }
-  }, [claimsReady, activeTeam, navigate]);
+  }, [claimsReady, tenantId, navigate]);
+
+  const handleSignOut = async () => {
+    const auth = getAuth();
+    await signOut(auth);
+    navigate("/login");
+  };
 
   if (claimsReady && user) {
     return (
-      <div>
-        <h2>Welcome to Scores4Streams</h2>
-        {activeTeam === "defaultteam" ? (
-          <>
-            <p>Your account is active but not associated with a valid team.</p>
-            <p>Please contact an admin or sign out and try again.</p>
-          </>
+      <div className="auth-page">
+        <h2>Scores4Streams</h2>
+        {tenantId === "defaultTeam" ? (
+          <div className="auth-form">
+            <p style={{ marginBottom: 12, color: "var(--text-secondary)" }}>
+              Your account is not associated with a team yet. Contact an admin to get added.
+            </p>
+            <button className="btn-danger" onClick={handleSignOut} style={{ width: "100%" }}>
+              Sign Out
+            </button>
+          </div>
         ) : (
-          <>
-            <p>You are logged in with team: {activeTeam}</p>
-            <button onClick={() => navigate("/console")}>Go to Console</button>
-          </>
+          <div className="auth-form">
+            <p style={{ marginBottom: 12 }}>Signed in with team: <strong>{tenantId}</strong></p>
+            <div className="auth-buttons">
+              <button className="btn-primary" onClick={() => navigate("/console")}>
+                Go to Dashboard
+              </button>
+              <button className="btn-danger" onClick={handleSignOut}>
+                Sign Out
+              </button>
+            </div>
+          </div>
         )}
-        <button
-          onClick={async () => {
-            await logout();
-            navigate("/login");
-          }}
-        >
-          Sign Out
-        </button>
       </div>
     );
   }
 
   return (
-    <div>
-      <h2>Login to Scores4Streams</h2>
+    <div className="auth-page">
+      <h2>Scores4Streams</h2>
       <AuthForm />
     </div>
   );
