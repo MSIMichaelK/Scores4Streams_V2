@@ -812,6 +812,214 @@ label input, label select {
   border-bottom: 1px solid var(--border-color);
 }
 
+/* === New Play Button Colors (Phase 2) === */
+.action-btn.sb { background: #2980b9; color: white; }
+.action-btn.wp { background: #8e44ad; color: white; }
+.action-btn.sacbunt { background: #27ae60; color: white; }
+.action-btn.ibb { background: #16a085; color: white; }
+.action-btn.d3k { background: #c0392b; color: white; }
+.action-btn.obs { background: #d35400; color: white; }
+.action-btn.int { background: #7f8c8d; color: white; }
+.action-btn.bunt { background: #2ecc71; color: white; }
+
+/* === Picker Modal (Fielder + Runner) === */
+.picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.picker-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  width: 90%;
+  max-width: 340px;
+}
+
+.picker-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.picker-chain {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  margin-bottom: 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--btn-radius);
+  min-height: 44px;
+}
+
+.picker-chain-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent-blue);
+  letter-spacing: 2px;
+}
+
+.picker-backspace {
+  background: var(--accent-red);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* 3x3 fielder grid */
+.fielder-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.fielder-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 8px;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.fielder-btn:active,
+.fielder-btn.selected {
+  border-color: var(--accent-blue);
+  background: rgba(52, 152, 219, 0.15);
+}
+
+.fielder-num {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.fielder-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* Runner picker grid */
+.runner-grid {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.runner-btn {
+  padding: 16px 24px;
+  font-size: 18px;
+  font-weight: 700;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.runner-btn:active,
+.runner-btn.selected {
+  border-color: var(--accent-blue);
+  background: rgba(52, 152, 219, 0.15);
+}
+
+.picker-empty {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 20px;
+  font-size: 14px;
+}
+
+/* Picker action buttons */
+.picker-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.picker-btn {
+  flex: 1;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--btn-radius);
+  cursor: pointer;
+}
+
+.picker-cancel {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.picker-confirm {
+  background: var(--accent-blue);
+  color: white;
+}
+
+.picker-confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.picker-skip {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+/* === Expand/Collapse Controls === */
+.expand-toggle {
+  width: 100%;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--btn-radius);
+  text-align: center;
+  cursor: pointer;
+}
+
+.expand-toggle:active {
+  background: var(--bg-secondary);
+}
+
+.expandable-section {
+  border-left: 3px solid var(--accent-blue);
+  padding-left: 12px;
+  margin-left: 4px;
+}
+
+.action-btn.expanded {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: -2px;
+}
+
 /* === Responsive === */
 @media (min-width: 481px) {
   #root {
