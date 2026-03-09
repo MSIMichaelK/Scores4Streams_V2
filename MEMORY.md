@@ -13,7 +13,7 @@
 - **Node.js:** v25.6.1 at `/opt/homebrew/bin/node`
 - **PATH prefix:** `export PATH="/opt/homebrew/bin:/usr/bin:$PATH"` (required before npm commands)
 - **Dev server:** Vite on port 5173 (`npm run dev`)
-- **Tests:** Jest (`npm test`) — 4 suites, 32 tests
+- **Tests:** Jest (`npm test`) — 5 suites, 42 tests
 
 ## Routes
 
@@ -90,7 +90,7 @@
 
 ## Known Bugs
 
-- **Walk force-advance bug (pre-existing):** Walk handler in `handleBall` uses simplified runner logic that incorrectly clears non-forced runners (e.g., runner on 2nd with empty 1st gets removed). Not yet fixed — none of the test data triggers it. The HBP handler has the correct force-chain logic.
+- ~~Walk force-advance bug~~ **FIXED** — Walk handler now uses the same force-chain logic as HBP. Regression tests in `walkForceAdvance.test.js`.
 - **Logo uploads disabled:** Cloud Function for logo processing is incomplete.
 
 ## Known Limitations

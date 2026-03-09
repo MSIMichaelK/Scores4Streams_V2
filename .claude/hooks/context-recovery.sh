@@ -27,7 +27,7 @@ cat <<'BANNER'
 ║  PAST FAILURES (why this exists):                            ║
 ║  - isPitch was false for outs/hits → 30% pitch undercount   ║
 ║  - HBP force-advance cleared non-forced runners              ║
-║  - Walk handler STILL has same bug (AB-004) — don't trust it║
+║  - Walk handler was FIXED (AB-004) — uses force-chain now   ║
 ║  - Scoring mode split was re-planned by a session that       ║
 ║    didn't know it was already done                           ║
 ╠══════════════════════════════════════════════════════════════╣

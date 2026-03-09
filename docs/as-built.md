@@ -66,7 +66,7 @@ if (was.first) {
 state.runners.first = true;
 ```
 
-**Known bug:** The walk handler in `handleBall` (ManualScoreController) still uses the OLD simplified logic. It has the same bug but none of our test data triggers it. Fix it when we next touch `handleBall`.
+**Fixed:** The walk handler in `handleBall` was updated with the same force-chain logic. Regression tests added in `walkForceAdvance.test.js` covering all 8 base-state combinations.
 
 **Why it matters:** Force-advance logic is subtle. A walk/HBP with bases loaded scores a run, but a walk/HBP with runners on 1st and 3rd only (no 2nd) should NOT move the runner from 3rd. The chain only pushes runners who are forced.
 
