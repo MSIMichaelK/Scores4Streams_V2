@@ -1,15 +1,58 @@
 import { useReducer, useRef, useState, useCallback } from "react";
 import { createGameState, applyAction } from "../utils/scoringEngine";
+import { getCurrentBatter, updateRunnerIdentity } from "../utils/rosterHelpers";
 
 /**
  * Reducer powered by the scoring engine.
  * All game logic lives in applyAction — this just wraps it in React state.
+ * Special action types for roster management bypass the engine.
  */
 function gameReducer(state, action) {
   if (action.type === "__RESTORE__") return action.payload;
   if (action.type === "__INIT__") return action.payload;
+
+  // Set lineup (metadata, not a game action)
+  if (action.type === "__SET_LINEUP__") {
+    const newState = structuredClone(state);
+    if (action.team === "home") {
+      newState.homeRoster = action.roster;
+      if (action.pitcherId) newState.currentHomePitcher = action.pitcherId;
+    } else {
+      newState.awayRoster = action.roster;
+      if (action.pitcherId) newState.currentAwayPitcher = action.pitcherId;
+    }
+    return newState;
+  }
+
+  // Manual batter selection (pinch hitter)
+  if (action.type === "__SET_BATTER_INDEX__") {
+    const newState = structuredClone(state);
+    if (action.team === "home") {
+      newState.homeBatterIndex = action.index;
+    } else {
+      newState.awayBatterIndex = action.index;
+    }
+    return newState;
+  }
+
+  // Normal game action — run through engine + update runner identity
   const newState = structuredClone(state);
+  const runnersBefore = { ...newState.runners };
+  const identityBefore = { ...newState.runnerIdentity };
+  const batterBefore = getCurrentBatter(newState);
+
   applyAction(newState, action);
+
+  // Update runner identity by diffing before/after
+  if (newState.homeRoster || newState.awayRoster) {
+    newState.runnerIdentity = updateRunnerIdentity(
+      identityBefore,
+      runnersBefore,
+      newState.runners,
+      batterBefore?.id || null
+    );
+  }
+
   return newState;
 }
 
@@ -84,10 +127,32 @@ export default function useGameState(homeTeam = "Home", awayTeam = "Away") {
     restored.inning = firestoreData.inning ?? 1;
     restored.isTop = firestoreData.isTop ?? true;
     restored.pitchCount = firestoreData.pitchCount ?? 0;
+    // Phase 3: Roster fields
+    restored.homeRoster = firestoreData.homeRoster ?? null;
+    restored.awayRoster = firestoreData.awayRoster ?? null;
+    restored.homeBatterIndex = firestoreData.homeBatterIndex ?? 0;
+    restored.awayBatterIndex = firestoreData.awayBatterIndex ?? 0;
+    restored.currentHomePitcher = firestoreData.currentHomePitcher ?? null;
+    restored.currentAwayPitcher = firestoreData.currentAwayPitcher ?? null;
+    restored.runnerIdentity = firestoreData.runnerIdentity ?? { first: null, second: null, third: null };
     dispatch({ type: "__INIT__", payload: restored });
     setUndoStack([]);
     setRedoStack([]);
   }, [homeTeam, awayTeam]);
+
+  /** Set a team's lineup (roster + starting pitcher). */
+  const setLineup = useCallback((team, roster, pitcherId = null) => {
+    setUndoStack((prev) => [stateRef.current, ...prev].slice(0, 20));
+    setRedoStack([]);
+    dispatch({ type: "__SET_LINEUP__", team, roster, pitcherId });
+  }, []);
+
+  /** Manually set the current batter index (for pinch hitters). */
+  const setBatterIndex = useCallback((team, index) => {
+    setUndoStack((prev) => [stateRef.current, ...prev].slice(0, 20));
+    setRedoStack([]);
+    dispatch({ type: "__SET_BATTER_INDEX__", team, index });
+  }, []);
 
   return {
     state,
@@ -97,5 +162,7 @@ export default function useGameState(homeTeam = "Home", awayTeam = "Away") {
     canUndo: undoStack.length > 0,
     canRedo: redoStack.length > 0,
     initFromFirestore,
+    setLineup,
+    setBatterIndex,
   };
 }
