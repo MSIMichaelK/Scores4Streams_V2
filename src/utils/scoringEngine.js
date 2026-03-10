@@ -7,6 +7,19 @@
  *   applyAction(state, { type: "ground_out", positions: [6, 3] })   // object
  */
 
+import { getBattingLineup } from "./rosterHelpers.js";
+
+// ─── Plate Appearance Event Types (for batter auto-advance) ──────
+
+const PA_EVENT_TYPES = new Set([
+  "walk", "strikeout", "out", "ground_out", "fly_out", "line_drive_out",
+  "popup_out", "foul_fly_out", "infield_fly", "strikeout_swinging",
+  "strikeout_looking", "double_play", "triple_play", "interference",
+  "hit", "error", "hbp", "fc", "sac_fly", "sacrifice_bunt",
+  "bunt_hit", "slap_hit", "dropped_third_strike", "intentional_walk",
+  "obstruction",
+]);
+
 // ─── State Factory ────────────────────────────────────────────────
 
 export function createGameState(homeTeam = "Home", awayTeam = "Away") {
@@ -23,6 +36,14 @@ export function createGameState(homeTeam = "Home", awayTeam = "Away") {
     awayTeamName: awayTeam,
     pitchCount: 0,
     events: [],
+    // Phase 3: Roster fields (null = no roster, backward compat)
+    homeRoster: null,
+    awayRoster: null,
+    homeBatterIndex: 0,
+    awayBatterIndex: 0,
+    currentHomePitcher: null,
+    currentAwayPitcher: null,
+    runnerIdentity: { first: null, second: null, third: null },
   };
 }
 
@@ -41,6 +62,7 @@ function changeSides(state) {
   state.balls = 0;
   state.strikes = 0;
   state.runners = { first: false, second: false, third: false };
+  state.runnerIdentity = { first: null, second: null, third: null };
   if (state.isTop) {
     state.isTop = false;
   } else {
@@ -147,6 +169,10 @@ function positionName(num) {
 export function applyAction(state, action) {
   // Normalize: string → { type: string }
   const act = typeof action === "string" ? { type: action } : action;
+
+  // Capture pre-action state for batter auto-advance (isTop may flip on changeSides)
+  const isTopBefore = state.isTop;
+  const eventsLenBefore = state.events.length;
 
   switch (act.type) {
     // ─── Count Actions ───────────────────────────────────
@@ -906,8 +932,39 @@ export function applyAction(state, action) {
       break;
     }
 
+    // ─── Pitcher Change ─────────────────────────────────
+
+    case "pitcher_change": {
+      if (act.team === "home") {
+        state.currentHomePitcher = act.pitcherId;
+      } else {
+        state.currentAwayPitcher = act.pitcherId;
+      }
+      recordEvent(state, {
+        type: "pitcher_change",
+        isPitch: false,
+        description: act.playerName
+          ? `Pitching change: ${act.playerName}`
+          : "Pitching change",
+      });
+      break;
+    }
+
     default:
       throw new Error(`Unknown action: ${act.type}`);
+  }
+
+  // ─── Auto-advance batter after plate appearances ────────────
+  // Only when rosters are loaded. Uses isTopBefore to handle changeSides.
+  const newEvents = state.events.slice(eventsLenBefore);
+  const hasPAEvent = newEvents.some((e) => PA_EVENT_TYPES.has(e.type));
+  if (hasPAEvent) {
+    const roster = isTopBefore ? state.awayRoster : state.homeRoster;
+    const lineup = getBattingLineup(roster);
+    if (lineup.length > 0) {
+      const indexKey = isTopBefore ? "awayBatterIndex" : "homeBatterIndex";
+      state[indexKey] = (state[indexKey] + 1) % lineup.length;
+    }
   }
 
   return state;
