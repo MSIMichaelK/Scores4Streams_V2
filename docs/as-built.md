@@ -162,3 +162,44 @@ The mode is set at game creation but can be switched mid-game (no data loss — 
 **Decision:** Soft-delete: undone events get `undone: true` flag. The event remains in Firestore and in the local events array. Pitch count adjusts (decrements on undo, increments on redo).
 
 **Why it matters:** The full event trail is preserved for debugging and future audit features. EventLog shows undone events with strikethrough styling. If you build stats computation, filter out `undone: true` events.
+
+---
+
+## AB-012: Game-Level Rosters — No PII, No Shared DB
+
+**Date:** 2026-03-10 | **Affects:** scoringEngine.js, rosterHelpers.js, useGameState.js, ManualScoreController.jsx, LineupEditor.jsx
+
+**Finding:** Players need to be tracked per game for batter/pitcher identification, batting order auto-advance, and future statistics. Options considered:
+1. Shared player database with cross-game identity → complex, PII concerns, multi-tenancy issues
+2. Game-level rosters with minimal data → simple, no PII, fully backward compatible
+
+**Decision:** Game-level rosters only. Each game stores its own `homeRoster` and `awayRoster` arrays directly on the game state. Player shape is minimal: `{ id, name, number, battingOrder, position }`. No email, phone, or cross-game identity yet.
+
+**Key choices:**
+- **Roster lives on game state** (not a separate Firestore collection) — keeps the dual-write pattern simple
+- **Null defaults** — `homeRoster: null, awayRoster: null` means all existing games work unchanged
+- **UUID per player per game** — `crypto.randomUUID()` generates IDs at lineup entry time. Not stable across games.
+- **DP/FLEX/DR positions included** — 10-player lineup supported from day 1. DP bats but doesn't field, FLEX fields but doesn't bat (battingOrder=0), DR runs from the bench (substitute)
+- **PII deferred** — email/phone/DOB will come with a shared player database in a future phase. For now, name + jersey number is sufficient for in-game identification.
+
+**Why it matters:** Don't add PII fields to the game-level roster — that data should live in a shared player database with proper access controls. The game roster is intentionally lean so it can be embedded in the game document without privacy concerns.
+
+---
+
+## AB-013: Runner Identity Tracked in Parallel Map, Not in Engine Booleans
+
+**Date:** 2026-03-10 | **Affects:** scoringEngine.js, rosterHelpers.js, useGameState.js
+
+**Finding:** The scoring engine tracks base runners as booleans: `runners: { first: true, second: false, third: true }`. With rosters, we need to know WHICH player is on each base. Options:
+1. Change booleans to player IDs (`runners: { first: "player-uuid", second: null, third: "player-uuid" }`) → breaks 44 boolean checks and 106+ tests
+2. Add a parallel identity map alongside the booleans → zero test breakage
+
+**Decision:** Parallel `runnerIdentity` map: `{ first: "player-uuid", second: null, third: "player-uuid" }`. The engine continues to use `runners` booleans for all game logic. The `useGameState` reducer maintains `runnerIdentity` by diffing `runners` before and after each `applyAction` call, using `updateRunnerIdentity()` from `rosterHelpers.js`.
+
+**Identity tracking heuristic** (in `updateRunnerIdentity`):
+- Works from furthest base (3rd) backward to 1st
+- For each newly occupied base, checks `prevBases` (multiple sources — e.g., 3rd checks both 2nd and 1st to handle doubles where 1st→3rd)
+- If no previous runner found, assigns the current batter's ID (they just reached base)
+- On `changeSides`, all identities clear to null
+
+**Why it matters:** Never change `runners` from booleans to objects — the engine has dozens of `if (state.runners.first)` checks that depend on boolean truthiness. The parallel map pattern keeps the engine pure and testable while giving the UI layer player identity for display.

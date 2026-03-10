@@ -1,6 +1,6 @@
 # ARCHITECTURE.md — System Map
 
-> Version: 0.7.0 | Last updated: 2026-03-10
+> Version: 0.8.0 | Last updated: 2026-03-10
 
 ## Overview
 
@@ -74,7 +74,8 @@ Scores4Streams_V2/
 │   │   ├── Console.jsx          # Dashboard page wrapper
 │   │   ├── GameCreationForm.jsx # New game form (incl. scoring mode selector)
 │   │   ├── GameList.jsx         # Game list with mode badges
-│   │   ├── ManualScoreController.jsx  # Main scoring UI (generic handleAction dispatch)
+│   │   ├── ManualScoreController.jsx  # Main scoring UI (matchup display, lineup flow)
+│   │   ├── LineupEditor.jsx           # Mobile-first lineup entry (9/10 slots, DP/FLEX/DR)
 │   │   ├── FielderPickerModal.jsx     # 3x3 position grid for fielder chains
 │   │   ├── RunnerPickerModal.jsx      # Base runner selection (single/multi)
 │   │   └── EventLog.jsx         # Collapsible play-by-play feed
@@ -89,7 +90,8 @@ Scores4Streams_V2/
 │   │   ├── ManualScoringPage.jsx # Scoring route wrapper (extracts gameId)
 │   │   └── OverlayFromFigma.jsx # SVG overlay page (public, onSnapshot listener)
 │   ├── utils/
-│   │   ├── scoringEngine.js     # Pure scoring engine — 35 action types, polymorphic dispatch
+│   │   ├── scoringEngine.js     # Pure scoring engine — 36 action types, polymorphic dispatch
+│   │   ├── rosterHelpers.js     # Roster helpers: lineup, batter/pitcher, runner identity
 │   │   └── updateSVGNodes.js    # SVG DOM manipulation for overlay
 │   ├── __tests__/
 │   │   ├── gameReplay.test.js           # Sunshine vs Knox (5-inning game)
@@ -98,6 +100,7 @@ Scores4Streams_V2/
 │   │   ├── expandedOuts.test.js         # Expanded out types, DP, TP (22 tests)
 │   │   ├── baseRunning.test.js          # SB, CS, PK, WP, PB, IP (22 tests)
 │   │   ├── battingVariants.test.js      # Sac bunt, bunt hit, D3K, IBB, etc (12 tests)
+│   │   ├── roster.test.js              # Roster helpers, batter auto-advance, validation (39 tests)
 │   │   ├── walkForceAdvance.test.js     # AB-004 regression tests (10 tests)
 │   │   ├── OverlayFromFigma.test.jsx    # Overlay unit tests
 │   │   └── OverlayFromFigma.integration.test.jsx
@@ -174,7 +177,7 @@ OBS Browser Source → /overlay/{gameId}
 | **Base running** | — | SB, CS, PK, WP, PB (via "More Plays" toggle) |
 | **Fielder tracking** | — | Position picker (e.g., 6-4-3) |
 | **Manual adjustments** | Runner toggles, Score +/- | Same |
-| **Player tracking** | No (batterId/pitcherId null) | Planned (Phase 3) |
+| **Player tracking** | No (batterId/pitcherId null) | Roster + batter/pitcher on events |
 | **Events recorded** | Yes (coarse) | Yes (granular play types) |
 | **Target user** | Parent, volunteer | Dedicated scorer/statistician |
 | **Firestore doc** | Same `games/{gameId}` | Same |

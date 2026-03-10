@@ -4,9 +4,11 @@ import { useAuth } from "../contexts/AuthContext";
 import useGameEvents from "../hooks/useGameEvents";
 import useGameState from "../hooks/useGameState";
 import { applyAction } from "../utils/scoringEngine";
+import { getCurrentBatter, getCurrentPitcher } from "../utils/rosterHelpers";
 import EventLog from "./EventLog";
 import FielderPickerModal from "./FielderPickerModal";
 import RunnerPickerModal from "./RunnerPickerModal";
+import LineupEditor from "./LineupEditor";
 
 const ManualScoreController = ({ gameId }) => {
   // ─── Game state (scoring engine is single source of truth) ───
@@ -18,6 +20,8 @@ const ManualScoreController = ({ gameId }) => {
     canUndo,
     canRedo,
     initFromFirestore,
+    setLineup,
+    setBatterIndex,
   } = useGameState();
 
   // ─── Metadata (not part of game state) ─────────────────────
@@ -31,6 +35,7 @@ const ManualScoreController = ({ gameId }) => {
   const [runnerPicker, setRunnerPicker] = useState(null); // { actionType, title, multi }
   const [outExpanded, setOutExpanded] = useState(false); // Out sub-menu
   const [morePlays, setMorePlays] = useState(false); // More Plays toggle
+  const [lineupEditor, setLineupEditor] = useState(null); // "home" | "away" | null
 
   // ─── Event persistence (Firestore) ─────────────────────────
   const { user, tenantId } = useAuth();
@@ -73,6 +78,9 @@ const ManualScoreController = ({ gameId }) => {
       if (!user || !tenantId || !gameId) return;
       try {
         const db = getFirestore();
+        // Compute batter/pitcher names for overlay (reads these existing fields)
+        const batter = getCurrentBatter(state);
+        const pitcher = getCurrentPitcher(state);
         await setDoc(
           doc(db, "games", gameId),
           {
@@ -85,6 +93,17 @@ const ManualScoreController = ({ gameId }) => {
             inning: state.inning,
             isTop: state.isTop,
             pitchCount: state.pitchCount,
+            // Roster fields
+            homeRoster: state.homeRoster,
+            awayRoster: state.awayRoster,
+            homeBatterIndex: state.homeBatterIndex,
+            awayBatterIndex: state.awayBatterIndex,
+            currentHomePitcher: state.currentHomePitcher,
+            currentAwayPitcher: state.currentAwayPitcher,
+            runnerIdentity: state.runnerIdentity,
+            // Overlay reads these for display
+            batterName: batter ? `#${batter.number} ${batter.name}` : "",
+            pitcherName: pitcher ? `#${pitcher.number} ${pitcher.name}` : "",
             scorerTeamId: tenantId,
             lastUpdated: new Date().toISOString(),
           },
@@ -108,6 +127,8 @@ const ManualScoreController = ({ gameId }) => {
   }, [
     state.homeScore, state.awayScore, state.balls, state.strikes,
     state.outs, state.runners, state.inning, state.isTop, state.pitchCount,
+    state.homeRoster, state.awayRoster, state.homeBatterIndex, state.awayBatterIndex,
+    state.currentHomePitcher, state.currentAwayPitcher, state.runnerIdentity,
   ]);
 
   // ─── Helpers ───────────────────────────────────────────────
@@ -141,16 +162,19 @@ const ManualScoreController = ({ gameId }) => {
 
   /**
    * Generic action handler: preview → record event → dispatch.
+   * Stamps current batter/pitcher IDs on events when rosters are loaded.
    */
   const handleAction = useCallback((action) => {
     const gameState = getGameState();
+    const batter = getCurrentBatter(state);
+    const pitcher = getCurrentPitcher(state);
     const preview = structuredClone(state);
     const prevLen = preview.events.length;
     applyAction(preview, action);
     const newEvents = preview.events.slice(prevLen);
 
     for (const evt of newEvents) {
-      recordEvent(evt, gameState);
+      recordEvent(evt, gameState, batter?.id || null, pitcher?.id || null);
     }
     dispatch(action);
 
@@ -231,12 +255,82 @@ const ManualScoreController = ({ gameId }) => {
 
   // ─── Render ────────────────────────────────────────────────
 
+  // ─── Lineup editor save handler ──────────────────────────
+  const handleLineupSave = useCallback((roster, pitcherId) => {
+    const team = lineupEditor;
+    setLineup(team, roster, pitcherId);
+    setLineupEditor(null);
+  }, [lineupEditor, setLineup]);
+
   if (loading) {
     return <div className="loading-page">Loading game...</div>;
   }
 
+  // Show lineup editor as full-screen overlay
+  if (lineupEditor) {
+    const teamName = lineupEditor === "home" ? state.homeTeamName : state.awayTeamName;
+    const existingRoster = lineupEditor === "home" ? state.homeRoster : state.awayRoster;
+    return (
+      <LineupEditor
+        teamName={teamName}
+        roster={existingRoster}
+        onSave={handleLineupSave}
+        onCancel={() => setLineupEditor(null)}
+      />
+    );
+  }
+
+  // Pre-game lineup flow (Advanced mode, no rosters yet, no events recorded)
+  const needsLineup = scoringMode === "advanced"
+    && (state.homeRoster === null || state.awayRoster === null)
+    && events.length === 0;
+
+  if (needsLineup) {
+    return (
+      <div className="scorer">
+        <div className="scoring-mode-badge">
+          <span className="mode-tag advanced">Advanced</span>
+        </div>
+        <div className="lineup-setup">
+          <h2>Set Lineups</h2>
+          <p>Enter batting lineups before starting the game.</p>
+          <div className="lineup-setup-buttons">
+            <button
+              className={`lineup-team-btn ${state.awayRoster ? "done" : ""}`}
+              onClick={() => setLineupEditor("away")}
+            >
+              {state.awayRoster ? "\u2713 " : ""}{state.awayTeamName}
+            </button>
+            <button
+              className={`lineup-team-btn ${state.homeRoster ? "done" : ""}`}
+              onClick={() => setLineupEditor("home")}
+            >
+              {state.homeRoster ? "\u2713 " : ""}{state.homeTeamName}
+            </button>
+          </div>
+          {state.homeRoster && state.awayRoster && (
+            <button className="lineup-start-btn" onClick={() => {}}>
+              Start Game
+            </button>
+          )}
+          <button
+            className="lineup-skip-btn"
+            onClick={() => {
+              // Skip lineup entry — proceed without rosters
+              setScoringMode("advanced");
+            }}
+          >
+            Skip Lineups
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const battingTeam = state.isTop ? "away" : "home";
   const hasRunners = state.runners.first || state.runners.second || state.runners.third;
+  const currentBatter = getCurrentBatter(state);
+  const currentPitcher = getCurrentPitcher(state);
 
   return (
     <div className="scorer">
@@ -261,12 +355,40 @@ const ManualScoreController = ({ gameId }) => {
         />
       )}
 
-      {/* Mode badge */}
+      {/* Mode badge + Lineups button */}
       <div className="scoring-mode-badge">
         <span className={`mode-tag ${scoringMode}`}>
           {scoringMode === "simple" ? "Simple" : "Advanced"}
         </span>
+        {scoringMode === "advanced" && (
+          <button
+            className="lineup-edit-btn"
+            onClick={() => setLineupEditor(battingTeam === "away" ? "away" : "home")}
+          >
+            Lineups
+          </button>
+        )}
       </div>
+
+      {/* Current matchup (Advanced mode with rosters) */}
+      {scoringMode === "advanced" && currentBatter && (
+        <div className="matchup-display">
+          <div className="matchup-batter">
+            <span className="matchup-label">AB</span>
+            <span className="matchup-name">
+              #{currentBatter.number} {currentBatter.name}
+            </span>
+          </div>
+          {currentPitcher && (
+            <div className="matchup-pitcher">
+              <span className="matchup-label">P</span>
+              <span className="matchup-name">
+                #{currentPitcher.number} {currentPitcher.name}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Scoreboard */}
       <div className="scoreboard">

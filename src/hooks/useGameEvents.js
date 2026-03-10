@@ -28,8 +28,10 @@ const useGameEvents = (gameId) => {
    * Queue an event for recording. Called by action handlers BEFORE state changes.
    * @param {Object} eventData - { type, subType, isPitch, resultedInOut, runsScored, description }
    * @param {Object} gameState - Current game state at time of action (pre-change)
+   * @param {string|null} batterId - Current batter's player ID (from roster)
+   * @param {string|null} pitcherId - Current pitcher's player ID (from roster)
    */
-  const recordEvent = (eventData, gameState) => {
+  const recordEvent = (eventData, gameState, batterId = null, pitcherId = null) => {
     const event = {
       seq: seqRef.current++,
       timestamp: new Date().toISOString(),
@@ -47,8 +49,8 @@ const useGameEvents = (gameId) => {
       },
       stateAfter: null,
       description: eventData.description || "",
-      batterId: null,
-      pitcherId: null,
+      batterId,
+      pitcherId,
       undone: false,
     };
 
