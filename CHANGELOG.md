@@ -6,6 +6,41 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions follow 
 
 ---
 
+## [0.7.0] — 2026-03-10
+
+### Added
+- **Phase 2 play types:** stolen_base, caught_stealing, pick_off, wild_pitch, passed_ball, illegal_pitch, sacrifice_bunt, bunt_hit, slap_hit, dropped_third_strike, intentional_walk, obstruction, interference
+- `FielderPickerModal` — 3x3 position grid for building fielder chains (e.g., 6-4-3)
+- `RunnerPickerModal` — base selection for SB/CS/PK (single) and WP/PB (multi-select)
+- Expandable Out sub-menu in Advanced mode (GO, FO, LO, PO, FF, IF, K, KC, DP, TP, INT)
+- Collapsible "More Plays" toggle for Batting + Base Running sections
+- `baseRunning.test.js` (22 tests), `battingVariants.test.js` (12 tests)
+
+### Changed
+- ManualScoreController decluttered: default view shows 3 button rows + "More Plays" toggle
+
+---
+
+## [0.6.0] — 2026-03-10
+
+### Added
+- **Polymorphic `applyAction`:** accepts string (`"single"`) or object (`{ type: "ground_out", positions: [6, 3] }`)
+- **Expanded out types:** ground_out, fly_out, line_drive_out, popup_out, foul_fly_out, infield_fly, strikeout_swinging, strikeout_looking, double_play, triple_play
+- `runner_toggle` and `score_adjust` action types in engine
+- `useGameState` hook — `useReducer` wrapper with undo/redo stacks and `initFromFirestore`
+- Extracted helpers: `handleForceAdvance`, `handleSingleAdvance`, `formatPositions`
+- `objectActions.test.js` (8 tests), `expandedOuts.test.js` (22 tests)
+
+### Changed
+- ManualScoreController rewritten from 690 → ~350 lines using `useGameState` dispatch
+- Generic `handleAction` pattern replaces 14 duplicated handler functions
+- Double play now properly clears scoring runners (timing play fix)
+
+### Fixed
+- DP pitch overcount resolved: `double_play` action records 2 outs from 1 pitch (AB-006)
+
+---
+
 ## [0.5.0] — 2026-03-09
 
 ### Added

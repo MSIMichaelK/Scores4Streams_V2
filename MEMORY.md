@@ -1,6 +1,6 @@
 # MEMORY.md — Quick Reference
 
-> Last updated: 2026-03-09
+> Last updated: 2026-03-10
 
 ## Firebase
 
@@ -13,7 +13,7 @@
 - **Node.js:** v25.6.1 at `/opt/homebrew/bin/node`
 - **PATH prefix:** `export PATH="/opt/homebrew/bin:/usr/bin:$PATH"` (required before npm commands)
 - **Dev server:** Vite on port 5173 (`npm run dev`)
-- **Tests:** Jest (`npm test`) — 5 suites, 42 tests
+- **Tests:** Jest (`npm test`) — 9 suites, 106 tests
 
 ## Routes
 
@@ -66,9 +66,12 @@
 
 | File | Purpose |
 |------|---------|
-| `src/components/ManualScoreController.jsx` | Scoring UI — all action handlers, state management |
+| `src/utils/scoringEngine.js` | Pure scoring engine — 35 action types, polymorphic dispatch |
+| `src/hooks/useGameState.js` | useReducer wrapper around engine with undo/redo stacks |
 | `src/hooks/useGameEvents.js` | Event recording hook — dual-write, pending queue, commit |
-| `src/utils/scoringEngine.js` | Pure scoring engine for testing — mirrors component logic |
+| `src/components/ManualScoreController.jsx` | Scoring UI — generic handleAction, expandable menus |
+| `src/components/FielderPickerModal.jsx` | 3x3 fielder position grid for building chains |
+| `src/components/RunnerPickerModal.jsx` | Base runner selection (single/multi-select) |
 | `src/components/EventLog.jsx` | Collapsible play-by-play feed |
 | `src/components/GameCreationForm.jsx` | New game form with scoring mode selector |
 | `src/components/GameList.jsx` | Game list with mode badges |
@@ -79,7 +82,13 @@
 
 ## Scoring Engine Actions
 
-`ball`, `strike`, `foul`, `out`, `single`, `double`, `triple`, `homerun`, `error`, `hbp`, `fc`, `sac_fly`, `toggle_first`, `toggle_second`, `toggle_third`, `score_home`, `score_away`
+**Count:** `ball`, `strike`, `foul`
+**Hits:** `single`, `double`, `triple`, `homerun`
+**Outs (legacy):** `out`, `strikeout`, `walk`
+**Outs (expanded):** `ground_out`, `fly_out`, `line_drive_out`, `popup_out`, `foul_fly_out`, `infield_fly`, `strikeout_swinging`, `strikeout_looking`, `double_play`, `triple_play`
+**Plays:** `error`, `hbp`, `fc`, `sac_fly`, `sacrifice_bunt`, `bunt_hit`, `slap_hit`, `dropped_third_strike`, `intentional_walk`, `obstruction`, `interference`
+**Base running:** `stolen_base`, `caught_stealing`, `pick_off`, `wild_pitch`, `passed_ball`, `illegal_pitch`
+**Manual:** `toggle_first`, `toggle_second`, `toggle_third`, `score_home`, `score_away`, `runner_toggle`, `score_adjust`
 
 ## Test Game Data
 
@@ -91,14 +100,14 @@
 ## Known Bugs
 
 - ~~Walk force-advance bug~~ **FIXED** — Walk handler now uses the same force-chain logic as HBP. Regression tests in `walkForceAdvance.test.js`.
+- ~~DP pitch overcount~~ **FIXED** — `double_play` action records 2 outs from 1 pitch (AB-006 resolved).
 - **Logo uploads disabled:** Cloud Function for logo processing is incomplete.
 
 ## Known Limitations
 
-- DPs modeled as 2x `out` — overcounts 1 pitch per DP
-- FC-without-out cannot be modeled (FC action always records an out)
-- Pickoff modeled as `out` — overcounts 1 pitch
+- FC-without-out cannot be modeled (FC action always records an out) (AB-007)
 - Runner auto-advancement on hits is simplified (single always advances runner from 2nd to 3rd)
+- Sac fly only scores runner from 3rd — tag-ups from 2nd need manual toggle (AB-009)
 
 ## Version History
 
@@ -109,3 +118,5 @@
 | 0.3.0 | 2026-03-09 | E/HBP/FC/SAC actions, force-advance logic, Drillers test, score_home/score_away |
 | 0.4.0 | 2026-03-09 | Simple vs Advanced scoring mode selection |
 | 0.5.0 | 2026-03-09 | Project workflow: context recovery, ARCHITECTURE.md, MEMORY.md, as-built.md |
+| 0.6.0 | 2026-03-10 | Engine refactor: polymorphic dispatch, expanded outs, useGameState hook, controller rewrite |
+| 0.7.0 | 2026-03-10 | Phase 2 play types, picker modals, decluttered Advanced UI |
