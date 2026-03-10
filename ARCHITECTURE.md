@@ -1,6 +1,6 @@
 # ARCHITECTURE.md — System Map
 
-> Version: 0.5.0 | Last updated: 2026-03-09
+> Version: 0.7.0 | Last updated: 2026-03-10
 
 ## Overview
 
@@ -74,23 +74,31 @@ Scores4Streams_V2/
 │   │   ├── Console.jsx          # Dashboard page wrapper
 │   │   ├── GameCreationForm.jsx # New game form (incl. scoring mode selector)
 │   │   ├── GameList.jsx         # Game list with mode badges
-│   │   ├── ManualScoreController.jsx  # Main scoring UI (all handlers, state)
+│   │   ├── ManualScoreController.jsx  # Main scoring UI (generic handleAction dispatch)
+│   │   ├── FielderPickerModal.jsx     # 3x3 position grid for fielder chains
+│   │   ├── RunnerPickerModal.jsx      # Base runner selection (single/multi)
 │   │   └── EventLog.jsx         # Collapsible play-by-play feed
 │   ├── contexts/
 │   │   ├── AuthContext.jsx      # Firebase Auth + custom claims (user, tenantId, roles)
 │   │   └── FirebaseContext.jsx  # Firebase app instance
 │   ├── hooks/
+│   │   ├── useGameState.js      # useReducer wrapper: scoring engine + undo/redo
 │   │   └── useGameEvents.js     # Event recording: queue, commit, undo/redo, pitch count
 │   ├── pages/
 │   │   ├── LoginPage.jsx        # Login route wrapper
 │   │   ├── ManualScoringPage.jsx # Scoring route wrapper (extracts gameId)
 │   │   └── OverlayFromFigma.jsx # SVG overlay page (public, onSnapshot listener)
 │   ├── utils/
-│   │   ├── scoringEngine.js     # Pure scoring engine for game replay testing
+│   │   ├── scoringEngine.js     # Pure scoring engine — 35 action types, polymorphic dispatch
 │   │   └── updateSVGNodes.js    # SVG DOM manipulation for overlay
 │   ├── __tests__/
 │   │   ├── gameReplay.test.js           # Sunshine vs Knox (5-inning game)
 │   │   ├── gameReplayDrillers.test.js   # Drillers vs Chiefs (7-inning walkoff)
+│   │   ├── objectActions.test.js        # Polymorphic dispatch (8 tests)
+│   │   ├── expandedOuts.test.js         # Expanded out types, DP, TP (22 tests)
+│   │   ├── baseRunning.test.js          # SB, CS, PK, WP, PB, IP (22 tests)
+│   │   ├── battingVariants.test.js      # Sac bunt, bunt hit, D3K, IBB, etc (12 tests)
+│   │   ├── walkForceAdvance.test.js     # AB-004 regression tests (10 tests)
 │   │   ├── OverlayFromFigma.test.jsx    # Overlay unit tests
 │   │   └── OverlayFromFigma.integration.test.jsx
 │   ├── Doco/
@@ -120,13 +128,13 @@ Scores4Streams_V2/
 ## Data Flow: Scoring Action
 
 ```
-1. Scorer taps button (e.g., "Strike")
+1. Scorer taps button (e.g., "Ground Out" → FielderPickerModal → 6-3)
    │
-2. ManualScoreController handler:
-   ├── saveSnapshot() → push to undoStack (for undo/redo)
-   ├── recordEvent() → queue pending event in useGameEvents
-   │   (event has countBefore, type, isPitch, etc.)
-   ├── Update local React state (setBalls, setStrikes, etc.)
+2. ManualScoreController.handleAction(action):
+   ├── Clone state → run applyAction preview → extract new events
+   ├── recordEvent() for each event → queue in useGameEvents (countBefore captured)
+   ├── dispatch(action) → useGameState reducer → applyAction(state, action)
+   │   (useGameState manages undo/redo stacks automatically)
    │
 3. React state change triggers Firestore sync useEffect:
    ├── setDoc(games/{gameId}, { aggregate state }, { merge: true })
@@ -161,9 +169,12 @@ OBS Browser Source → /overlay/{gameId}
 | **Default** | Yes | No (opt-in at game creation) |
 | **Count** | Ball, Strike, Foul, Out | Same |
 | **Hits** | 1B, 2B, 3B, HR | Same |
-| **Plays** | — | E, HBP, FC, SAC |
+| **Outs** | Generic Out | Expandable: GO, FO, LO, PO, FF, IF, K, KC, DP, TP, INT |
+| **Plays** | — | E, HBP, FC, SAC, SAC-B, BH, SL, D3K, IBB, OBS |
+| **Base running** | — | SB, CS, PK, WP, PB (via "More Plays" toggle) |
+| **Fielder tracking** | — | Position picker (e.g., 6-4-3) |
 | **Manual adjustments** | Runner toggles, Score +/- | Same |
-| **Player tracking** | No (batterId/pitcherId null) | Planned |
+| **Player tracking** | No (batterId/pitcherId null) | Planned (Phase 3) |
 | **Events recorded** | Yes (coarse) | Yes (granular play types) |
 | **Target user** | Parent, volunteer | Dedicated scorer/statistician |
 | **Firestore doc** | Same `games/{gameId}` | Same |
