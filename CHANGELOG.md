@@ -6,6 +6,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions follow 
 
 ---
 
+## [0.8.0] — 2026-03-10
+
+### Added
+- **Game-level rosters:** per-game player tracking with name, jersey number, position, batting order
+- **DP/FLEX/DR support:** 10-player lineup with designated player, flex, and designated runner positions
+- **LineupEditor component:** mobile-first lineup entry form with position dropdowns
+- **Pre-game lineup flow:** Advanced mode prompts for lineup entry before first pitch (skippable)
+- **Batter auto-advance:** batting order automatically advances after plate appearances
+- **Matchup display:** shows current batter and pitcher above count section
+- **Pitcher change action:** `pitcher_change` records pitching changes in event log
+- **Runner identity tracking:** parallel `runnerIdentity` map tracks which players are on base
+- **Overlay integration:** `batterName`/`pitcherName` populated from roster for live display
+- `rosterHelpers.js` — pure helpers: `getBattingLineup`, `getCurrentBatter/Pitcher`, `updateRunnerIdentity`, `validateLineup`
+- `roster.test.js` (39 tests) — lineup helpers, batter auto-advance, runner identity, validation
+
+### Changed
+- `useGameState` hook: `__SET_LINEUP__` and `__SET_BATTER_INDEX__` reducer actions, runner identity auto-update
+- `useGameEvents`: `recordEvent` accepts `batterId`/`pitcherId` params (no longer hardcoded null)
+- `ManualScoreController`: Firestore sync includes roster fields, Lineups button in header
+- `createGameState` extended with roster fields (null defaults, fully backward compatible)
+
+---
+
 ## [0.7.0] — 2026-03-10
 
 ### Added
