@@ -203,3 +203,23 @@ The mode is set at game creation but can be switched mid-game (no data loss — 
 - On `changeSides`, all identities clear to null
 
 **Why it matters:** Never change `runners` from booleans to objects — the engine has dozens of `if (state.runners.first)` checks that depend on boolean truthiness. The parallel map pattern keeps the engine pure and testable while giving the UI layer player identity for display.
+
+---
+
+## AB-014: Stats Computed from Events, Not Maintained Incrementally
+
+**Date:** 2026-03-11 | **Affects:** statsEngine.js, GameStats.jsx
+
+**Finding:** Statistics can be maintained incrementally (update on each action) or computed from scratch each time from the event stream. Incremental is faster but breaks on undo/redo and requires careful sync. Compute-from-events is simpler and handles undo correctly.
+
+**Decision:** `computeGameStats(events, homeRoster, awayRoster)` recomputes all stats from the full event array every time. Events with `undone: true` are filtered out first, so undo/redo automatically adjusts all stats.
+
+**Key choices:**
+- **Ball/strike/foul NOT filtered** — they carry `isPitch: true` which is needed for accurate pitch counts. They pass through batting accumulators harmlessly (not in PA_TYPES).
+- **All runs treated as earned** — no earned/unearned classification yet. ERA uses total runs. Phase 5 adds proper ER logic.
+- **Inherited runners not attributed** — all runs charged to pitcherId on the event, regardless of which pitcher put the runner on base. This is a simplification.
+- **Fielding stats from positions arrays** — only available in Advanced mode where fielder chains are recorded. Returns null otherwise.
+- **Softball 7-inning ERA** — `ERA = (ER × 7) / IP`, not the baseball 9-inning formula.
+- **WHIP excludes IBB** — `WHIP = (BB - IBB + H) / IP` per standard definition.
+
+**Why it matters:** Don't add incremental stat tracking — it's unnecessary complexity. The event array for a single game is small enough (<500 events) that recomputation is instant. If you add earned run classification, modify `computeGameStats` to separate ER from R, don't add a separate tracking system.

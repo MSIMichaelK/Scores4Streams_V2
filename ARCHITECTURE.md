@@ -1,6 +1,6 @@
 # ARCHITECTURE.md — System Map
 
-> Version: 0.8.0 | Last updated: 2026-03-10
+> Version: 0.9.0 | Last updated: 2026-03-11
 
 ## Overview
 
@@ -92,6 +92,7 @@ Scores4Streams_V2/
 │   ├── utils/
 │   │   ├── scoringEngine.js     # Pure scoring engine — 36 action types, polymorphic dispatch
 │   │   ├── rosterHelpers.js     # Roster helpers: lineup, batter/pitcher, runner identity
+│   │   ├── statsEngine.js      # Per-game stats: batting/pitching/fielding from events
 │   │   └── updateSVGNodes.js    # SVG DOM manipulation for overlay
 │   ├── __tests__/
 │   │   ├── gameReplay.test.js           # Sunshine vs Knox (5-inning game)
@@ -101,6 +102,7 @@ Scores4Streams_V2/
 │   │   ├── baseRunning.test.js          # SB, CS, PK, WP, PB, IP (22 tests)
 │   │   ├── battingVariants.test.js      # Sac bunt, bunt hit, D3K, IBB, etc (12 tests)
 │   │   ├── roster.test.js              # Roster helpers, batter auto-advance, validation (39 tests)
+│   │   ├── statsEngine.test.js        # Per-game stats: team/player batting, pitching, fielding (36 tests)
 │   │   ├── walkForceAdvance.test.js     # AB-004 regression tests (10 tests)
 │   │   ├── OverlayFromFigma.test.jsx    # Overlay unit tests
 │   │   └── OverlayFromFigma.integration.test.jsx

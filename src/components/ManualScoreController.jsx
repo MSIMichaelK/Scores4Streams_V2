@@ -6,6 +6,7 @@ import useGameState from "../hooks/useGameState";
 import { applyAction } from "../utils/scoringEngine";
 import { getCurrentBatter, getCurrentPitcher } from "../utils/rosterHelpers";
 import EventLog from "./EventLog";
+import GameStats from "./GameStats";
 import FielderPickerModal from "./FielderPickerModal";
 import RunnerPickerModal from "./RunnerPickerModal";
 import LineupEditor from "./LineupEditor";
@@ -601,6 +602,17 @@ const ManualScoreController = ({ gameId }) => {
           )}
         </>
       )}
+
+      {/* Game Stats */}
+      <div className="action-section">
+        <GameStats
+          events={state.events}
+          homeRoster={state.homeRoster}
+          awayRoster={state.awayRoster}
+          homeTeamName={state.homeTeamName}
+          awayTeamName={state.awayTeamName}
+        />
+      </div>
 
       {/* Event Log */}
       <div className="action-section">

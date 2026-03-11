@@ -6,6 +6,25 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions follow 
 
 ---
 
+## [0.9.0] — 2026-03-11
+
+### Added
+- **Per-game statistics engine:** `statsEngine.js` — pure functions computing batting, pitching, and fielding stats from event stream
+- **Batting stats:** PA, AB, H, 1B, 2B, 3B, HR, RBI, BB, IBB, HBP, K, SF, SH, SB, CS, GDP, R, TB, XBH, BA, OBP, SLG, OPS
+- **Pitching stats:** BF, IP, H, R, ER, BB, HBP, K, WP, pitches, ERA, WHIP, K/9, BB/9, K/BB (softball 7-inning ERA)
+- **Fielding stats:** PO, A, E, DP, TC, FPCT (from positions arrays in Advanced mode)
+- **Per-player breakdowns:** individual batting and pitching lines when rosters are loaded
+- **GameStats component:** collapsible stats panel on scoring page with batting/pitching tabs
+- **Team summary view:** quick-glance AB/H/HR/R/BB/K/BA line for each team
+- **Player stat tables:** detailed batting and pitching tables with horizontal scroll for mobile
+- `statsEngine.test.js` (36 tests) — team-level, per-player, edge cases, fielding
+
+### Known Limitations
+- All runs treated as earned (earned/unearned classification deferred to Phase 5)
+- Inherited runner attribution not implemented (all runs charged to current pitcher)
+
+---
+
 ## [0.8.0] — 2026-03-10
 
 ### Added

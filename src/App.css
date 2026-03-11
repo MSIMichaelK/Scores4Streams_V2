@@ -1268,6 +1268,134 @@ label input, label select {
   margin-left: 8px;
 }
 
+/* === Game Stats === */
+
+.game-stats {
+  margin-bottom: 8px;
+}
+
+.stats-toggle {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 6px 0;
+  width: 100%;
+  text-align: left;
+}
+
+.stats-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 10px;
+}
+
+.stats-tab {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  padding: 6px 16px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.stats-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.stats-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stats-summary {
+  background: var(--bg-secondary);
+  border-radius: var(--btn-radius);
+  padding: 8px 10px;
+}
+
+.stats-summary-label {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.stats-summary-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+}
+
+.stats-summary-line span {
+  white-space: nowrap;
+}
+
+.stats-table-wrapper {
+  margin-top: 6px;
+}
+
+.stats-table-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+  padding: 0 4px;
+}
+
+.stats-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+.stats-table th {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-weight: 600;
+  padding: 4px 6px;
+  text-align: right;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.stats-table th:first-child,
+.stats-table th:nth-child(2) {
+  text-align: left;
+}
+
+.stats-table td {
+  padding: 3px 6px;
+  text-align: right;
+  color: var(--text-primary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stats-table td:first-child,
+.stats-table td:nth-child(2) {
+  text-align: left;
+}
+
+.stats-table td.stats-name {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* === Responsive === */
 @media (min-width: 481px) {
   #root {
