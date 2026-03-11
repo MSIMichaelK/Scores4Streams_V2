@@ -13,7 +13,7 @@
 - **Node.js:** v25.6.1 at `/opt/homebrew/bin/node`
 - **PATH prefix:** `export PATH="/opt/homebrew/bin:/usr/bin:$PATH"` (required before npm commands)
 - **Dev server:** Vite on port 5173 (`npm run dev`)
-- **Tests:** Jest (`npm test`) — 10 suites, 145 tests
+- **Tests:** Jest (`npm test`) — 11 suites, 181 tests
 
 ## Routes
 
@@ -68,12 +68,14 @@
 |------|---------|
 | `src/utils/scoringEngine.js` | Pure scoring engine — 36 action types, polymorphic dispatch |
 | `src/utils/rosterHelpers.js` | Roster helpers: lineup, batter/pitcher lookup, runner identity |
+| `src/utils/statsEngine.js` | Per-game statistics: batting/pitching/fielding from events |
 | `src/hooks/useGameState.js` | useReducer wrapper with undo/redo, roster management, runner identity |
 | `src/hooks/useGameEvents.js` | Event recording hook — dual-write, pending queue, batterId/pitcherId |
 | `src/components/ManualScoreController.jsx` | Scoring UI — matchup display, lineup flow, expandable menus |
 | `src/components/LineupEditor.jsx` | Mobile-first lineup entry form (9/10 slots, DP/FLEX/DR) |
 | `src/components/FielderPickerModal.jsx` | 3x3 fielder position grid for building chains |
 | `src/components/RunnerPickerModal.jsx` | Base runner selection (single/multi-select) |
+| `src/components/GameStats.jsx` | Collapsible game statistics panel (batting/pitching tabs) |
 | `src/components/EventLog.jsx` | Collapsible play-by-play feed |
 | `src/components/GameCreationForm.jsx` | New game form with scoring mode selector |
 | `src/components/GameList.jsx` | Game list with mode badges |
@@ -123,3 +125,4 @@
 | 0.6.0 | 2026-03-10 | Engine refactor: polymorphic dispatch, expanded outs, useGameState hook, controller rewrite |
 | 0.7.0 | 2026-03-10 | Phase 2 play types, picker modals, decluttered Advanced UI |
 | 0.8.0 | 2026-03-10 | Game-level rosters, lineup entry, batter/pitcher tracking, DP/FLEX/DR |
+| 0.9.0 | 2026-03-11 | Per-game statistics engine, batting/pitching/fielding stats, GameStats UI |
