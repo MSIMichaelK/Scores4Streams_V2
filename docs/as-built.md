@@ -216,10 +216,52 @@ The mode is set at game creation but can be switched mid-game (no data loss — 
 
 **Key choices:**
 - **Ball/strike/foul NOT filtered** — they carry `isPitch: true` which is needed for accurate pitch counts. They pass through batting accumulators harmlessly (not in PA_TYPES).
-- **All runs treated as earned** — no earned/unearned classification yet. ERA uses total runs. Phase 5 adds proper ER logic.
-- **Inherited runners not attributed** — all runs charged to pitcherId on the event, regardless of which pitcher put the runner on base. This is a simplification.
+- **All runs treated as earned** — no earned/unearned classification yet. ERA uses total runs. Earned/unearned deferred to v1.1.0.
+- **Inherited runners attributed via `inheritedRunnerPitcherIds`** — see AB-016.
 - **Fielding stats from positions arrays** — only available in Advanced mode where fielder chains are recorded. Returns null otherwise.
 - **Softball 7-inning ERA** — `ERA = (ER × 7) / IP`, not the baseball 9-inning formula.
 - **WHIP excludes IBB** — `WHIP = (BB - IBB + H) / IP` per standard definition.
 
 **Why it matters:** Don't add incremental stat tracking — it's unnecessary complexity. The event array for a single game is small enough (<500 events) that recomputation is instant. If you add earned run classification, modify `computeGameStats` to separate ER from R, don't add a separate tracking system.
+
+---
+
+## AB-015: L2 Practice Game as Integration Test
+
+**Date:** 2026-03-13 | **Affects:** gameReplayL2.test.js
+
+**Finding:** The two existing game replay tests (Sunshine Knox, Drillers) use legacy string actions (`"out"`, `"single"`, `"strike"`) because they were encoded before Advanced mode existed. No test exercised the full set of polymorphic object actions.
+
+**Decision:** Encoded the Softball Australia L2 manual's practice game (ACT 6 vs SA 4, 7 innings) as a comprehensive integration test. This game exercises ground_out, fly_out, line_drive_out, strikeout_swinging, strikeout_looking, error, hbp, wild_pitch, caught_stealing, and all hit types using Advanced mode object actions.
+
+**Key encoding choices:**
+- **D3K thrown out** → modeled as `strikeout_swinging` (not `dropped_third_strike`, which puts batter ON base)
+- **WP with multiple runner advancement** → one `wild_pitch` action for lead runner + manual toggles for extra advancement
+- **Runner scoring on ground out** → ground_out + `toggle_third` + `score_home`/`score_away`
+- **Substitutions** → comments only (no general substitution action type)
+- **Force out at base** → modeled as `ground_out` with positions
+
+**Why it matters:** This is the first test proving Advanced mode object actions produce correct game state over a full 7-inning game. Any changes to polymorphic action dispatch or runner advancement should be validated against this test.
+
+---
+
+## AB-016: Inherited Runner Attribution
+
+**Date:** 2026-03-13 | **Affects:** statsEngine.js
+
+**Finding:** When pitcher A puts a runner on base and pitcher B allows the hit that scores them, the run should be charged to pitcher A (the pitcher who put the runner on base). The initial stats engine charged all runs to the `pitcherId` on the event (pitcher B).
+
+**Decision:** Optional `inheritedRunnerPitcherIds` array on events. Each entry is the pitcher ID responsible for one run scored. The array length equals `runsScored`. The stats engine redistributes runs after initial accumulation:
+```javascript
+if (event.inheritedRunnerPitcherIds && event.runsScored > 0) {
+  for (const origPitcherId of event.inheritedRunnerPitcherIds) {
+    if (origPitcherId !== event.pitcherId) {
+      // Move 1R + 1ER from current pitcher to original pitcher
+    }
+  }
+}
+```
+
+**Backward compatible:** Events without `inheritedRunnerPitcherIds` charge all runs to `event.pitcherId` (old behavior). The hooks layer (`useGameState`/`useGameEvents`) will need to populate this field when pitcher changes leave inherited runners — that wiring is separate from the stats computation.
+
+**Why it matters:** The stats engine now correctly supports inherited runner attribution, but it requires the event-recording layer to stamp `inheritedRunnerPitcherIds` on events. Until that wiring is done, the stats engine falls back to the old behavior for live games. The 5 tests in statsEngine.test.js verify both the new attribution and backward compatibility.
