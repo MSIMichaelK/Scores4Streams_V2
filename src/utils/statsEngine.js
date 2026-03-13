@@ -6,9 +6,10 @@
  * Handles both team-level (always available) and per-player (when rosters exist).
  *
  * Known limitations:
- * - All runs treated as earned (earned/unearned classification in Phase 5)
+ * - All runs treated as earned (earned/unearned classification deferred)
  * - Fielding stats require positions arrays (Advanced mode only)
  * - Softball 7-inning game assumed for rate stats (ERA, K/9, BB/9)
+ * - Inherited runner attribution requires `inheritedRunnerPitcherIds` on events
  */
 
 // ─── Constants ──────────────────────────────────────────────────
@@ -228,7 +229,7 @@ function accumulatePitchingEvent(line, event) {
   // Runs allowed (all events including base running)
   if (event.runsScored) {
     line.R += event.runsScored;
-    line.ER += event.runsScored; // All earned for now (Phase 5 fixes)
+    line.ER += event.runsScored; // All earned for now (earned/unearned deferred)
   }
 
   // Walks
@@ -474,6 +475,23 @@ function computePlayerStats(allEvents, roster, isAway) {
       pitchingByPlayer[event.pitcherId] = emptyPitchingLine();
     }
     accumulatePitchingEvent(pitchingByPlayer[event.pitcherId], event);
+
+    // Inherited runner attribution: redistribute runs to original pitchers
+    if (event.inheritedRunnerPitcherIds && event.runsScored > 0) {
+      const currentLine = pitchingByPlayer[event.pitcherId];
+      for (const origPitcherId of event.inheritedRunnerPitcherIds) {
+        if (origPitcherId !== event.pitcherId) {
+          // Move 1 R + 1 ER from current pitcher to original pitcher
+          currentLine.R--;
+          currentLine.ER--;
+          if (!pitchingByPlayer[origPitcherId]) {
+            pitchingByPlayer[origPitcherId] = emptyPitchingLine();
+          }
+          pitchingByPlayer[origPitcherId].R++;
+          pitchingByPlayer[origPitcherId].ER++;
+        }
+      }
+    }
   }
 
   // Compute rates and attach player info

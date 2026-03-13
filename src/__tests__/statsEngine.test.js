@@ -516,7 +516,191 @@ describe("statsEngine", () => {
       const p2 = homePitching.find((p) => p.playerId === "p2");
       expect(p2.BF).toBe(1);
       expect(p2.H).toBe(1); // HR is a hit
-      expect(p2.R).toBe(2); // 2 runs: batter + inherited runner (inherited runner attribution deferred)
+      expect(p2.R).toBe(2); // 2 runs (no inheritedRunnerPitcherIds → all to current pitcher)
+    });
+
+    test("inherited runner attribution: run charged to original pitcher", () => {
+      const game = createGameState("Home", "Away");
+
+      game.homeRoster = [
+        makePlayer("pA", "PitcherA", 10, 1, "P"),
+        makePlayer("pB", "PitcherB", 20, 2, "P"),
+      ];
+
+      // pA allows a single (runner on 1st)
+      applyAction(game, "single");
+      game.events[game.events.length - 1].pitcherId = "pA";
+
+      // pA records an out
+      applyAction(game, "out");
+      game.events[game.events.length - 1].pitcherId = "pA";
+
+      // Pitcher change: pA → pB
+      applyAction(game, { type: "pitcher_change", team: "home", pitcherId: "pB" });
+
+      // pB gives up a HR scoring inherited runner + batter = 2 runs
+      applyAction(game, "homerun");
+      const hrEvent = game.events[game.events.length - 1];
+      hrEvent.pitcherId = "pB";
+      // The inherited runner was put on by pA
+      hrEvent.inheritedRunnerPitcherIds = ["pA", "pB"];
+
+      const stats = computeGameStats(game.events, game.homeRoster, null);
+      const pitching = stats.home.players.pitching;
+
+      const pA = pitching.find((p) => p.playerId === "pA");
+      expect(pA.R).toBe(1);  // Inherited runner charged to pA
+      expect(pA.ER).toBe(1);
+
+      const pB = pitching.find((p) => p.playerId === "pB");
+      expect(pB.R).toBe(1);  // Only the batter's run charged to pB
+      expect(pB.ER).toBe(1);
+    });
+
+    test("inherited runner: all runs to new pitcher when no inherited runners", () => {
+      const game = createGameState("Home", "Away");
+
+      game.homeRoster = [
+        makePlayer("pA", "PitcherA", 10, 1, "P"),
+        makePlayer("pB", "PitcherB", 20, 2, "P"),
+      ];
+
+      // pA pitches 3 outs, no runners
+      applyAction(game, "out");
+      game.events[game.events.length - 1].pitcherId = "pA";
+      applyAction(game, "out");
+      game.events[game.events.length - 1].pitcherId = "pA";
+      applyAction(game, "out");
+      game.events[game.events.length - 1].pitcherId = "pA";
+
+      // Side change
+      applyAction(game, "out");
+      applyAction(game, "out");
+      applyAction(game, "out");
+
+      // New inning top, pB pitches
+      applyAction(game, { type: "pitcher_change", team: "home", pitcherId: "pB" });
+      applyAction(game, "single");
+      game.events[game.events.length - 1].pitcherId = "pB";
+      applyAction(game, "homerun");
+      const hrEvent = game.events[game.events.length - 1];
+      hrEvent.pitcherId = "pB";
+      // Both runs belong to pB (no inherited runner)
+      hrEvent.inheritedRunnerPitcherIds = ["pB", "pB"];
+
+      const stats = computeGameStats(game.events, game.homeRoster, null);
+      const pitching = stats.home.players.pitching;
+
+      const pA = pitching.find((p) => p.playerId === "pA");
+      expect(pA.R).toBe(0);
+
+      const pB = pitching.find((p) => p.playerId === "pB");
+      expect(pB.R).toBe(2);
+    });
+
+    test("inherited runner scores on wild pitch — charged to original pitcher", () => {
+      const game = createGameState("Home", "Away");
+
+      game.homeRoster = [
+        makePlayer("pA", "PitcherA", 10, 1, "P"),
+        makePlayer("pB", "PitcherB", 20, 2, "P"),
+      ];
+
+      // pA walks a batter
+      replayActions(game, ["ball", "ball", "ball", "ball"]);
+      game.events[game.events.length - 1].pitcherId = "pA";
+
+      // Manual advance runner to 3rd for testing
+      applyAction(game, "toggle_first");
+      applyAction(game, "toggle_third");
+
+      // Pitcher change
+      applyAction(game, { type: "pitcher_change", team: "home", pitcherId: "pB" });
+
+      // Wild pitch scores the runner from 3rd
+      applyAction(game, { type: "wild_pitch", runners: ["third"] });
+      const wpEvent = game.events[game.events.length - 1];
+      wpEvent.pitcherId = "pB";
+      wpEvent.inheritedRunnerPitcherIds = ["pA"];
+
+      const stats = computeGameStats(game.events, game.homeRoster, null);
+      const pitching = stats.home.players.pitching;
+
+      const pA = pitching.find((p) => p.playerId === "pA");
+      expect(pA.R).toBe(1);  // Run charged to pA (put the runner on)
+      expect(pA.WP).toBe(0); // WP stat stays on pB
+
+      const pB = pitching.find((p) => p.playerId === "pB");
+      expect(pB.R).toBe(0);  // No runs charged
+      expect(pB.WP).toBe(1); // WP counted for pB
+    });
+
+    test("multiple inherited runners from different pitchers", () => {
+      const game = createGameState("Home", "Away");
+
+      game.homeRoster = [
+        makePlayer("pA", "PitcherA", 10, 1, "P"),
+        makePlayer("pB", "PitcherB", 20, 2, "P"),
+        makePlayer("pC", "PitcherC", 30, 3, "P"),
+      ];
+
+      // pA allows a single
+      applyAction(game, "single");
+      game.events[game.events.length - 1].pitcherId = "pA";
+
+      // pB comes in and allows a single (pA runner on 2nd, pB runner on 1st)
+      applyAction(game, { type: "pitcher_change", team: "home", pitcherId: "pB" });
+      applyAction(game, "single");
+      game.events[game.events.length - 1].pitcherId = "pB";
+
+      // pC comes in and gives up a HR scoring all 3
+      applyAction(game, { type: "pitcher_change", team: "home", pitcherId: "pC" });
+      applyAction(game, "homerun");
+      const hrEvent = game.events[game.events.length - 1];
+      hrEvent.pitcherId = "pC";
+      // 3 runs: inherited from pA, inherited from pB, batter (pC)
+      hrEvent.inheritedRunnerPitcherIds = ["pA", "pB", "pC"];
+
+      const stats = computeGameStats(game.events, game.homeRoster, null);
+      const pitching = stats.home.players.pitching;
+
+      const pA = pitching.find((p) => p.playerId === "pA");
+      expect(pA.R).toBe(1);
+
+      const pB = pitching.find((p) => p.playerId === "pB");
+      expect(pB.R).toBe(1);
+
+      const pC = pitching.find((p) => p.playerId === "pC");
+      expect(pC.R).toBe(1);
+    });
+
+    test("backward compat: events without inheritedRunnerPitcherIds charge all to pitcherId", () => {
+      const game = createGameState("Home", "Away");
+
+      game.homeRoster = [
+        makePlayer("pA", "PitcherA", 10, 1, "P"),
+        makePlayer("pB", "PitcherB", 20, 2, "P"),
+      ];
+
+      // pA allows a runner
+      applyAction(game, "single");
+      game.events[game.events.length - 1].pitcherId = "pA";
+
+      applyAction(game, { type: "pitcher_change", team: "home", pitcherId: "pB" });
+
+      // pB gives up HR but NO inheritedRunnerPitcherIds (old event format)
+      applyAction(game, "homerun");
+      game.events[game.events.length - 1].pitcherId = "pB";
+      // No inheritedRunnerPitcherIds set — backward compat
+
+      const stats = computeGameStats(game.events, game.homeRoster, null);
+      const pitching = stats.home.players.pitching;
+
+      const pA = pitching.find((p) => p.playerId === "pA");
+      expect(pA.R).toBe(0);  // No inherited attribution without the array
+
+      const pB = pitching.find((p) => p.playerId === "pB");
+      expect(pB.R).toBe(2);  // All runs charged to current pitcher (old behavior)
     });
   });
 

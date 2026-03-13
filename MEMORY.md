@@ -13,7 +13,7 @@
 - **Node.js:** v25.6.1 at `/opt/homebrew/bin/node`
 - **PATH prefix:** `export PATH="/opt/homebrew/bin:/usr/bin:$PATH"` (required before npm commands)
 - **Dev server:** Vite on port 5173 (`npm run dev`)
-- **Tests:** Jest (`npm test`) — 11 suites, 181 tests
+- **Tests:** Jest (`npm test`) — 12 suites, 203 tests
 
 ## Routes
 
@@ -100,6 +100,7 @@
 |------|------|-------------|---------------------|
 | Sunshine vs Knox | `gameReplay.test.js` | Away 9 – Home 8 | 5 innings, walks, strikeouts, hits, errors, full-count scenarios |
 | NE Drillers vs Hill United Chiefs | `gameReplayDrillers.test.js` | Away 5 – Home 6 (walkoff) | 7 innings, HBP, sac fly, FC, DPs, stolen bases, pickoff |
+| ACT vs South Australia (L2) | `gameReplayL2.test.js` | ACT 6 – SA 4 | 7 innings, Advanced mode object actions, DP/FLEX lineups, ground/fly/line outs, K swinging/looking, D3K, HR, 2B, 1B, BB, HBP, errors, SB, CS, WP |
 
 ## Known Bugs
 
@@ -112,6 +113,8 @@
 - FC-without-out cannot be modeled (FC action always records an out) (AB-007)
 - Runner auto-advancement on hits is simplified (single always advances runner from 2nd to 3rd)
 - Sac fly only scores runner from 3rd — tag-ups from 2nd need manual toggle (AB-009)
+- All runs treated as earned — earned/unearned classification deferred to v1.1.0
+- Inherited runner attribution supported in statsEngine but requires hooks layer wiring (AB-016)
 
 ## Version History
 
@@ -126,3 +129,4 @@
 | 0.7.0 | 2026-03-10 | Phase 2 play types, picker modals, decluttered Advanced UI |
 | 0.8.0 | 2026-03-10 | Game-level rosters, lineup entry, batter/pitcher tracking, DP/FLEX/DR |
 | 0.9.0 | 2026-03-11 | Per-game statistics engine, batting/pitching/fielding stats, GameStats UI |
+| 1.0.0 | 2026-03-13 | L2 practice game integration test, inherited runner attribution |

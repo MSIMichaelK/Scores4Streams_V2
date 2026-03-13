@@ -1,6 +1,6 @@
 # ARCHITECTURE.md — System Map
 
-> Version: 0.9.0 | Last updated: 2026-03-11
+> Version: 1.0.0 | Last updated: 2026-03-13
 
 ## Overview
 
@@ -102,7 +102,8 @@ Scores4Streams_V2/
 │   │   ├── baseRunning.test.js          # SB, CS, PK, WP, PB, IP (22 tests)
 │   │   ├── battingVariants.test.js      # Sac bunt, bunt hit, D3K, IBB, etc (12 tests)
 │   │   ├── roster.test.js              # Roster helpers, batter auto-advance, validation (39 tests)
-│   │   ├── statsEngine.test.js        # Per-game stats: team/player batting, pitching, fielding (36 tests)
+│   │   ├── gameReplayL2.test.js          # ACT vs SA L2 practice game (17 tests, Advanced mode actions)
+│   │   ├── statsEngine.test.js        # Per-game stats: team/player batting, pitching, fielding (41 tests)
 │   │   ├── walkForceAdvance.test.js     # AB-004 regression tests (10 tests)
 │   │   ├── OverlayFromFigma.test.jsx    # Overlay unit tests
 │   │   └── OverlayFromFigma.integration.test.jsx

@@ -6,6 +6,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions follow 
 
 ---
 
+## [1.0.0] — 2026-03-13
+
+### Added
+- **L2 Practice Game integration test:** `gameReplayL2.test.js` — 7-inning ACT 6 vs SA 4 game from Softball Australia L2 scoring manual. First test using Advanced mode polymorphic object actions (ground_out, fly_out, line_drive_out, strikeout_swinging, strikeout_looking, error, hbp, wild_pitch, caught_stealing)
+- **Inherited runner attribution:** runs charged to the pitcher who put the runner on base, not the pitcher who allowed the scoring event. Uses `inheritedRunnerPitcherIds` array on events (backward compatible — events without it use old behavior)
+- 5 new inherited runner attribution tests in `statsEngine.test.js`
+
+### Changed
+- Stats engine now redistributes runs when `event.inheritedRunnerPitcherIds` is present
+- Total: 12 test suites, 203 tests
+
+### Known Limitations
+- All runs treated as earned (earned/unearned classification deferred to v1.1.0)
+- No general player substitution action (only `pitcher_change` exists)
+
+---
+
 ## [0.9.0] — 2026-03-11
 
 ### Added
