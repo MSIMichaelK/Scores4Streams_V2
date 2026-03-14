@@ -356,11 +356,22 @@ const ManualScoreController = ({ gameId }) => {
         />
       )}
 
-      {/* Mode badge + Lineups button */}
-      <div className="scoring-mode-badge">
+      {/* Flash message — fixed toast overlay */}
+      {changeHighlight && (
+        <div className="flash-message">{changeHighlight}</div>
+      )}
+
+      {/* Error message */}
+      {error && (
+        <div className="error-message">{error}</div>
+      )}
+
+      {/* ── Compact header: mode + pitch count + lineups ── */}
+      <div className="scorer-header">
         <span className={`mode-tag ${scoringMode}`}>
           {scoringMode === "simple" ? "Simple" : "Advanced"}
         </span>
+        <span className="pitch-count-inline">Pitches: {pitchCount}</span>
         {scoringMode === "advanced" && (
           <button
             className="lineup-edit-btn"
@@ -371,7 +382,35 @@ const ManualScoreController = ({ gameId }) => {
         )}
       </div>
 
-      {/* Current matchup (Advanced mode with rosters) */}
+      {/* ── Scoreboard with inline score adjust ── */}
+      <div className="scoreboard">
+        <div className={`scoreboard-team ${battingTeam === "away" ? "batting" : ""}`}>
+          <div className="team-label">Away</div>
+          <div className="team-name">{state.awayTeamName}</div>
+          <div className="team-score">{state.awayScore}</div>
+          <div className="score-adjust-inline">
+            <button onClick={() => handleScoreAdjust("away", -1)}>-</button>
+            <button onClick={() => handleScoreAdjust("away", 1)}>+</button>
+          </div>
+        </div>
+        <div className="scoreboard-divider">
+          <div className="inning-display">
+            <div className="inning-half">{state.isTop ? "\u25B2" : "\u25BC"}</div>
+            <div className="inning-number">{state.inning}</div>
+          </div>
+        </div>
+        <div className={`scoreboard-team ${battingTeam === "home" ? "batting" : ""}`}>
+          <div className="team-label">Home</div>
+          <div className="team-name">{state.homeTeamName}</div>
+          <div className="team-score">{state.homeScore}</div>
+          <div className="score-adjust-inline">
+            <button onClick={() => handleScoreAdjust("home", -1)}>-</button>
+            <button onClick={() => handleScoreAdjust("home", 1)}>+</button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Matchup (Advanced mode with rosters) ── */}
       {scoringMode === "advanced" && currentBatter && (
         <div className="matchup-display">
           <div className="matchup-batter">
@@ -391,231 +430,187 @@ const ManualScoreController = ({ gameId }) => {
         </div>
       )}
 
-      {/* Scoreboard */}
-      <div className="scoreboard">
-        <div className={`scoreboard-team ${battingTeam === "away" ? "batting" : ""}`}>
-          <div className="team-label">Away</div>
-          <div className="team-name">{state.awayTeamName}</div>
-          <div className="team-score">{state.awayScore}</div>
-        </div>
-        <div className="scoreboard-divider">
-          <div className="inning-display">
-            <div className="inning-half">{state.isTop ? "\u25B2" : "\u25BC"}</div>
-            <div className="inning-number">{state.inning}</div>
+      {/* ── BSO + Diamond side-by-side ── */}
+      <div className="bso-diamond-row">
+        <div className="bso-section">
+          <div className="bso-group">
+            <div className="bso-label">B</div>
+            <div className="bso-dots">
+              {[0, 1, 2, 3].map(i => (
+                <div key={i} className={`bso-dot ball ${i < state.balls ? "active" : ""}`} />
+              ))}
+            </div>
+          </div>
+          <div className="bso-group">
+            <div className="bso-label">S</div>
+            <div className="bso-dots">
+              {[0, 1, 2].map(i => (
+                <div key={i} className={`bso-dot strike ${i < state.strikes ? "active" : ""}`} />
+              ))}
+            </div>
+          </div>
+          <div className="bso-group">
+            <div className="bso-label">O</div>
+            <div className="bso-dots">
+              {[0, 1, 2].map(i => (
+                <div key={i} className={`bso-dot out ${i < state.outs ? "active" : ""}`} />
+              ))}
+            </div>
           </div>
         </div>
-        <div className={`scoreboard-team ${battingTeam === "home" ? "batting" : ""}`}>
-          <div className="team-label">Home</div>
-          <div className="team-name">{state.homeTeamName}</div>
-          <div className="team-score">{state.homeScore}</div>
-        </div>
-      </div>
 
-      {/* Score adjust buttons */}
-      <div className="score-adjust">
-        <div className="score-adjust-group">
-          <span>{state.awayTeamName}</span>
-          <button onClick={() => handleScoreAdjust("away", -1)}>-</button>
-          <button onClick={() => handleScoreAdjust("away", 1)}>+</button>
-        </div>
-        <div className="score-adjust-group">
-          <span>{state.homeTeamName}</span>
-          <button onClick={() => handleScoreAdjust("home", -1)}>-</button>
-          <button onClick={() => handleScoreAdjust("home", 1)}>+</button>
-        </div>
-      </div>
-
-      {/* Pitch count */}
-      <div className="pitch-count">
-        Pitches: {pitchCount}
-      </div>
-
-      {/* Flash message */}
-      {changeHighlight && (
-        <div className="flash-message">{changeHighlight}</div>
-      )}
-
-      {/* Error message */}
-      {error && (
-        <div className="error-message">{error}</div>
-      )}
-
-      {/* BSO Indicators */}
-      <div className="bso-section">
-        <div className="bso-group">
-          <div className="bso-label">Balls</div>
-          <div className="bso-dots">
-            {[0, 1, 2, 3].map(i => (
-              <div key={i} className={`bso-dot ball ${i < state.balls ? "active" : ""}`} />
-            ))}
-          </div>
-        </div>
-        <div className="bso-group">
-          <div className="bso-label">Strikes</div>
-          <div className="bso-dots">
-            {[0, 1, 2].map(i => (
-              <div key={i} className={`bso-dot strike ${i < state.strikes ? "active" : ""}`} />
-            ))}
-          </div>
-        </div>
-        <div className="bso-group">
-          <div className="bso-label">Outs</div>
-          <div className="bso-dots">
-            {[0, 1, 2].map(i => (
-              <div key={i} className={`bso-dot out ${i < state.outs ? "active" : ""}`} />
-            ))}
+        <div className="diamond-container">
+          <div className="diamond">
+            <div
+              className={`base base-second ${state.runners.second ? "occupied" : ""}`}
+              onClick={() => toggleRunner("second")}
+            />
+            <div
+              className={`base base-third ${state.runners.third ? "occupied" : ""}`}
+              onClick={() => toggleRunner("third")}
+            />
+            <div
+              className={`base base-first ${state.runners.first ? "occupied" : ""}`}
+              onClick={() => toggleRunner("first")}
+            />
+            <div className="base base-home" />
           </div>
         </div>
       </div>
 
-      {/* Base Diamond */}
-      <div className="diamond-container">
-        <div className="diamond">
-          <div
-            className={`base base-second ${state.runners.second ? "occupied" : ""}`}
-            onClick={() => toggleRunner("second")}
-          />
-          <div
-            className={`base base-third ${state.runners.third ? "occupied" : ""}`}
-            onClick={() => toggleRunner("third")}
-          />
-          <div
-            className={`base base-first ${state.runners.first ? "occupied" : ""}`}
-            onClick={() => toggleRunner("first")}
-          />
-          <div className="base base-home" />
-        </div>
-      </div>
-
-      {/* Count Actions */}
-      <div className="action-section">
-        <h3>Count</h3>
-        <div className="action-grid action-grid-4">
-          <button className="action-btn ball" onClick={handleBall}>Ball</button>
-          <button className="action-btn strike" onClick={handleStrike}>Strike</button>
-          <button className="action-btn foul" onClick={handleFoul}>Foul</button>
-          <button
-            className={`action-btn out ${outExpanded ? "expanded" : ""}`}
-            onClick={scoringMode === "advanced"
-              ? () => setOutExpanded((p) => !p)
-              : handleOut
-            }
-          >
-            {scoringMode === "advanced" ? (outExpanded ? "Out \u25B2" : "Out \u25BC") : "Out"}
-          </button>
-        </div>
-      </div>
-
-      {/* Hit Actions */}
-      <div className="action-section">
-        <h3>Hits</h3>
-        <div className="action-grid action-grid-4">
-          <button className="action-btn hit" onClick={() => handleHit("Single")}>1B</button>
-          <button className="action-btn hit" onClick={() => handleHit("Double")}>2B</button>
-          <button className="action-btn hit" onClick={() => handleHit("Triple")}>3B</button>
-          <button className="action-btn hr" onClick={() => handleHit("Home Run")}>HR</button>
-        </div>
-      </div>
-
-      {/* Plays (Advanced mode only) */}
-      {scoringMode === "advanced" && (
-        <>
-          {/* Fielding Plays */}
+      {/* ── Scoring controls + sidebar wrapper ── */}
+      <div className="scoring-main">
+        <div className="scoring-controls">
+          {/* Count + Hit Actions */}
           <div className="action-section">
-            <h3>Plays</h3>
-            <div className="action-grid action-grid-4">
-              <button className="action-btn error" onClick={() => openFielderPicker("error", "Error")}>E</button>
-              <button className="action-btn hbp" onClick={() => handleAction("hbp")}>HBP</button>
-              <button className="action-btn fc" onClick={() => openFielderPicker("fc", "Fielder's Choice")}>FC</button>
-              <button className="action-btn sacfly" onClick={() => handleAction("sac_fly")}>SAC-F</button>
+            <h3 className="section-heading">Count</h3>
+            <div className="action-grid action-grid-4 action-grid-count">
+              <button className="action-btn ball" onClick={handleBall}>Ball</button>
+              <button className="action-btn strike" onClick={handleStrike}>Strike</button>
+              <button className="action-btn foul" onClick={handleFoul}>Foul</button>
+              <button
+                className={`action-btn out ${outExpanded ? "expanded" : ""}`}
+                onClick={scoringMode === "advanced"
+                  ? () => setOutExpanded((p) => !p)
+                  : handleOut
+                }
+              >
+                {scoringMode === "advanced" ? (outExpanded ? "Out \u25B2" : "Out \u25BC") : "Out"}
+              </button>
             </div>
           </div>
 
-          {/* Out sub-menu — expands inline from the Out button */}
-          {outExpanded && (
-            <div className="action-section expandable-section">
-              <div className="action-grid action-grid-4">
-                <button className="action-btn out" onClick={() => { openFielderPicker("ground_out", "Ground Out"); setOutExpanded(false); }}>GO</button>
-                <button className="action-btn out" onClick={() => { openFielderPicker("fly_out", "Fly Out"); setOutExpanded(false); }}>FO</button>
-                <button className="action-btn out" onClick={() => { openFielderPicker("line_drive_out", "Line Drive Out"); setOutExpanded(false); }}>LO</button>
-                <button className="action-btn out" onClick={() => { openFielderPicker("popup_out", "Popup Out"); setOutExpanded(false); }}>PO</button>
-              </div>
-              <div className="action-grid action-grid-4" style={{ marginTop: 8 }}>
-                <button className="action-btn out" onClick={() => { openFielderPicker("foul_fly_out", "Foul Fly Out"); setOutExpanded(false); }}>FF</button>
-                <button className="action-btn out" onClick={() => { openFielderPicker("infield_fly", "Infield Fly"); setOutExpanded(false); }}>IF</button>
-                <button className="action-btn strike" onClick={() => { handleAction({ type: "strikeout_swinging" }); setOutExpanded(false); }}>K</button>
-                <button className="action-btn strike" onClick={() => { handleAction({ type: "strikeout_looking" }); setOutExpanded(false); }}>KC</button>
-              </div>
-              <div className="action-grid action-grid-4" style={{ marginTop: 8 }}>
-                <button className="action-btn out" onClick={() => { openFielderPicker("double_play", "Double Play"); setOutExpanded(false); }}>DP</button>
-                <button className="action-btn out" onClick={() => { openFielderPicker("triple_play", "Triple Play"); setOutExpanded(false); }}>TP</button>
-                <button className="action-btn int" onClick={() => { handleAction({ type: "interference" }); setOutExpanded(false); }}>INT</button>
-                <button className="action-btn" onClick={() => { handleOut(); setOutExpanded(false); }}>Out</button>
-              </div>
-            </div>
-          )}
-
-          {/* More Plays toggle — batting variants + base running */}
           <div className="action-section">
-            <button
-              className="expand-toggle"
-              onClick={() => setMorePlays((p) => !p)}
-            >
-              {morePlays ? "\u25BC" : "\u25B6"} More Plays
-            </button>
+            <h3 className="section-heading">Hits</h3>
+            <div className="action-grid action-grid-4 action-grid-hits">
+              <button className="action-btn hit" onClick={() => handleHit("Single")}>1B</button>
+              <button className="action-btn hit" onClick={() => handleHit("Double")}>2B</button>
+              <button className="action-btn hit" onClick={() => handleHit("Triple")}>3B</button>
+              <button className="action-btn hr" onClick={() => handleHit("Home Run")}>HR</button>
+            </div>
           </div>
 
-          {morePlays && (
+          {/* Plays (Advanced mode only) */}
+          {scoringMode === "advanced" && (
             <>
-              {/* Batting Variants */}
-              <div className="action-section expandable-section">
-                <h3>Batting</h3>
+              <div className="action-section">
+                <h3 className="section-heading">Plays</h3>
                 <div className="action-grid action-grid-4">
-                  <button className="action-btn sacbunt" onClick={() => openFielderPicker("sacrifice_bunt", "Sac Bunt")}>SAC-B</button>
-                  <button className="action-btn bunt" onClick={() => handleAction({ type: "bunt_hit" })}>BH</button>
-                  <button className="action-btn bunt" onClick={() => handleAction({ type: "slap_hit" })}>SL</button>
-                  <button className="action-btn d3k" onClick={() => handleAction({ type: "dropped_third_strike" })}>D3K</button>
-                </div>
-                <div className="action-grid action-grid-3" style={{ marginTop: 8 }}>
-                  <button className="action-btn ibb" onClick={() => handleAction({ type: "intentional_walk" })}>IBB</button>
-                  <button className="action-btn obs" onClick={() => handleAction({ type: "obstruction" })}>OBS</button>
-                  <button className="action-btn obs" onClick={() => handleAction({ type: "illegal_pitch" })}>IP</button>
+                  <button className="action-btn error" onClick={() => openFielderPicker("error", "Error")}>E</button>
+                  <button className="action-btn hbp" onClick={() => handleAction("hbp")}>HBP</button>
+                  <button className="action-btn fc" onClick={() => openFielderPicker("fc", "Fielder's Choice")}>FC</button>
+                  <button className="action-btn sacfly" onClick={() => handleAction("sac_fly")}>SAC-F</button>
                 </div>
               </div>
 
-              {/* Base Running — only if runners on base */}
-              {hasRunners && (
+              {outExpanded && (
                 <div className="action-section expandable-section">
-                  <h3>Base Running</h3>
-                  <div className="action-grid action-grid-3">
-                    <button className="action-btn sb" onClick={() => openRunnerPicker("stolen_base", "Stolen Base")}>SB</button>
-                    <button className="action-btn strike" onClick={() => openRunnerPicker("caught_stealing", "Caught Stealing")}>CS</button>
-                    <button className="action-btn strike" onClick={() => openRunnerPicker("pick_off", "Pick Off")}>PK</button>
+                  <div className="action-grid action-grid-4">
+                    <button className="action-btn out" onClick={() => { openFielderPicker("ground_out", "Ground Out"); setOutExpanded(false); }}>GO</button>
+                    <button className="action-btn out" onClick={() => { openFielderPicker("fly_out", "Fly Out"); setOutExpanded(false); }}>FO</button>
+                    <button className="action-btn out" onClick={() => { openFielderPicker("line_drive_out", "Line Drive Out"); setOutExpanded(false); }}>LO</button>
+                    <button className="action-btn out" onClick={() => { openFielderPicker("popup_out", "Popup Out"); setOutExpanded(false); }}>PO</button>
                   </div>
-                  <div className="action-grid action-grid-3" style={{ marginTop: 8 }}>
-                    <button className="action-btn wp" onClick={() => openRunnerPicker("wild_pitch", "Wild Pitch", true)}>WP</button>
-                    <button className="action-btn wp" onClick={() => openRunnerPicker("passed_ball", "Passed Ball", true)}>PB</button>
+                  <div className="action-grid action-grid-4" style={{ marginTop: 8 }}>
+                    <button className="action-btn out" onClick={() => { openFielderPicker("foul_fly_out", "Foul Fly Out"); setOutExpanded(false); }}>FF</button>
+                    <button className="action-btn out" onClick={() => { openFielderPicker("infield_fly", "Infield Fly"); setOutExpanded(false); }}>IF</button>
+                    <button className="action-btn strike" onClick={() => { handleAction({ type: "strikeout_swinging" }); setOutExpanded(false); }}>K</button>
+                    <button className="action-btn strike" onClick={() => { handleAction({ type: "strikeout_looking" }); setOutExpanded(false); }}>KC</button>
+                  </div>
+                  <div className="action-grid action-grid-4" style={{ marginTop: 8 }}>
+                    <button className="action-btn out" onClick={() => { openFielderPicker("double_play", "Double Play"); setOutExpanded(false); }}>DP</button>
+                    <button className="action-btn out" onClick={() => { openFielderPicker("triple_play", "Triple Play"); setOutExpanded(false); }}>TP</button>
+                    <button className="action-btn int" onClick={() => { handleAction({ type: "interference" }); setOutExpanded(false); }}>INT</button>
+                    <button className="action-btn" onClick={() => { handleOut(); setOutExpanded(false); }}>Out</button>
                   </div>
                 </div>
               )}
+
+              <div className="action-section">
+                <button
+                  className="expand-toggle"
+                  onClick={() => setMorePlays((p) => !p)}
+                >
+                  {morePlays ? "\u25BC" : "\u25B6"} More Plays
+                </button>
+              </div>
+
+              {morePlays && (
+                <>
+                  <div className="action-section expandable-section">
+                    <h3 className="section-heading">Batting</h3>
+                    <div className="action-grid action-grid-4">
+                      <button className="action-btn sacbunt" onClick={() => openFielderPicker("sacrifice_bunt", "Sac Bunt")}>SAC-B</button>
+                      <button className="action-btn bunt" onClick={() => handleAction({ type: "bunt_hit" })}>BH</button>
+                      <button className="action-btn bunt" onClick={() => handleAction({ type: "slap_hit" })}>SL</button>
+                      <button className="action-btn d3k" onClick={() => handleAction({ type: "dropped_third_strike" })}>D3K</button>
+                    </div>
+                    <div className="action-grid action-grid-3" style={{ marginTop: 8 }}>
+                      <button className="action-btn ibb" onClick={() => handleAction({ type: "intentional_walk" })}>IBB</button>
+                      <button className="action-btn obs" onClick={() => handleAction({ type: "obstruction" })}>OBS</button>
+                      <button className="action-btn obs" onClick={() => handleAction({ type: "illegal_pitch" })}>IP</button>
+                    </div>
+                  </div>
+
+                  {hasRunners && (
+                    <div className="action-section expandable-section">
+                      <h3 className="section-heading">Base Running</h3>
+                      <div className="action-grid action-grid-3">
+                        <button className="action-btn sb" onClick={() => openRunnerPicker("stolen_base", "Stolen Base")}>SB</button>
+                        <button className="action-btn strike" onClick={() => openRunnerPicker("caught_stealing", "Caught Stealing")}>CS</button>
+                        <button className="action-btn strike" onClick={() => openRunnerPicker("pick_off", "Pick Off")}>PK</button>
+                      </div>
+                      <div className="action-grid action-grid-3" style={{ marginTop: 8 }}>
+                        <button className="action-btn wp" onClick={() => openRunnerPicker("wild_pitch", "Wild Pitch", true)}>WP</button>
+                        <button className="action-btn wp" onClick={() => openRunnerPicker("passed_ball", "Passed Ball", true)}>PB</button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </>
           )}
-        </>
-      )}
 
-      {/* Game Stats */}
-      <div className="action-section">
-        <GameStats
-          events={state.events}
-          homeRoster={state.homeRoster}
-          awayRoster={state.awayRoster}
-          homeTeamName={state.homeTeamName}
-          awayTeamName={state.awayTeamName}
-        />
+          {/* Game Stats (phone: in flow; tablet: sidebar) */}
+          <div className="action-section scoring-secondary">
+            <GameStats
+              events={state.events}
+              homeRoster={state.homeRoster}
+              awayRoster={state.awayRoster}
+              homeTeamName={state.homeTeamName}
+              awayTeamName={state.awayTeamName}
+            />
+          </div>
+        </div>
+
+        {/* Sidebar — visible on tablet+, hidden on phone */}
+        <div className="scoring-sidebar">
+          <EventLog events={events} />
+        </div>
       </div>
 
-      {/* Event Log */}
-      <div className="action-section">
+      {/* Event Log — phone only (below controls) */}
+      <div className="action-section scoring-eventlog-phone">
         <EventLog events={events} />
       </div>
 

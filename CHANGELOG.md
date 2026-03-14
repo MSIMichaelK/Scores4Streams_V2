@@ -6,6 +6,28 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions follow 
 
 ---
 
+## [1.2.0] — 2026-03-14
+
+### Added
+- **Responsive layout:** Three breakpoints — phone (<600px), tablet (600-1023px), desktop (1024px+)
+- **Phone-first scoring:** Scoreboard + BSO + diamond + action buttons all fit on one screen without scrolling
+- **BSO + Diamond side-by-side:** Saves ~124px vertical space on phone
+- **Compact scorer header:** Mode badge, pitch count, and Lineups button merged into one row
+- **Inline score adjust:** +/- buttons embedded in scoreboard, eliminating separate row
+- **Flash toast overlay:** Flash messages no longer push content down
+- **Tablet 2-column layout:** Scoring controls on left, event log sidebar on right
+- **Desktop wide layout:** 1024px max-width with generous spacing
+
+### Changed
+- Removed hard `max-width: 480px` on `#root` — now responsive
+- Action buttons: 44px min-height on phone (was 52px), 52px on tablet+
+- Diamond: 90×90px on phone (was 120px), 120px on tablet+
+- BSO dots: 16px on phone (was 20px), 22px on tablet+
+- Section headings hidden on phone to save space
+- Matchup display compacted to single-line style
+
+---
+
 ## [1.1.0] — 2026-03-14
 
 ### Added
