@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { POSITIONS as VALID_POSITIONS } from "../utils/rosterHelpers";
 
 /**
@@ -27,11 +27,21 @@ function generateId() {
 function createEmptyPlayer(battingOrder) {
   return {
     id: generateId(),
+    firstName: "",
+    lastName: "",
     name: "",
     number: "",
     battingOrder,
     position: "",
   };
+}
+
+/** Split existing name into first/last for backward compat with old rosters */
+function splitName(name) {
+  if (!name) return { firstName: "", lastName: "" };
+  const parts = name.trim().split(/\s+/);
+  if (parts.length <= 1) return { firstName: parts[0] || "", lastName: "" };
+  return { firstName: parts[0], lastName: parts.slice(1).join(" ") };
 }
 
 const LineupEditor = ({ teamName = "Team", roster, onSave, onCancel }) => {
@@ -45,7 +55,12 @@ const LineupEditor = ({ teamName = "Team", roster, onSave, onCancel }) => {
         if (b.battingOrder === 0) return -1;
         return a.battingOrder - b.battingOrder;
       });
-      return sorted;
+      // Backward compat: split name into first/last if not already split
+      return sorted.map((p) => {
+        if (p.firstName !== undefined) return p;
+        const { firstName, lastName } = splitName(p.name);
+        return { ...p, firstName, lastName };
+      });
     }
     return Array.from({ length: 9 }, (_, i) => createEmptyPlayer(i + 1));
   });
@@ -53,10 +68,28 @@ const LineupEditor = ({ teamName = "Team", roster, onSave, onCancel }) => {
   const updatePlayer = useCallback((index, field, value) => {
     setPlayers((prev) => {
       const next = [...prev];
-      next[index] = { ...next[index], [field]: value };
+      const updated = { ...next[index], [field]: value };
+      // Sync combined name when first/last changes
+      if (field === "firstName" || field === "lastName") {
+        const first = field === "firstName" ? value : updated.firstName || "";
+        const last = field === "lastName" ? value : updated.lastName || "";
+        updated.name = `${first} ${last}`.trim();
+      }
+      next[index] = updated;
       return next;
     });
   }, []);
+
+  // Track which positions are already taken (for duplicate warnings)
+  const usedPositions = useMemo(() => {
+    const counts = {};
+    for (const p of players) {
+      if (p.position && p.position !== "") {
+        counts[p.position] = (counts[p.position] || 0) + 1;
+      }
+    }
+    return counts;
+  }, [players]);
 
   const addPlayer = useCallback(() => {
     setPlayers((prev) => [...prev, createEmptyPlayer(0)]);
@@ -87,6 +120,20 @@ const LineupEditor = ({ teamName = "Team", roster, onSave, onCancel }) => {
       alert("Please enter at least one player");
       return;
     }
+    // Check for duplicate positions (excluding EH/DH which can have multiples)
+    const dupePositions = Object.entries(usedPositions)
+      .filter(([pos, count]) => count > 1 && pos !== "EH" && pos !== "DH")
+      .map(([pos]) => pos);
+    if (dupePositions.length > 0) {
+      alert(`Duplicate positions: ${dupePositions.join(", ")}. Each fielding position can only be assigned to one player.`);
+      return;
+    }
+    // Check players have at least a last name
+    const noLastName = filled.filter((p) => !(p.lastName || "").trim());
+    if (noLastName.length > 0) {
+      alert(`${noLastName.length} player(s) missing last name`);
+      return;
+    }
     // Find the pitcher
     const pitcher = filled.find((p) => p.position === "P");
     onSave(filled, pitcher?.id || null);
@@ -112,15 +159,24 @@ const LineupEditor = ({ teamName = "Team", roster, onSave, onCancel }) => {
         {/* Batting order players */}
         {lineupPlayers.map((player) => {
           const idx = players.indexOf(player);
+          const isDupePos = player.position && usedPositions[player.position] > 1
+            && player.position !== "EH" && player.position !== "DH";
           return (
             <div key={player.id} className="lineup-row">
               <span className="lineup-order">#{player.battingOrder}</span>
               <input
-                className="lineup-name-input"
+                className="lineup-firstname-input"
                 type="text"
-                placeholder="Name"
-                value={player.name}
-                onChange={(e) => updatePlayer(idx, "name", e.target.value)}
+                placeholder="First"
+                value={player.firstName || ""}
+                onChange={(e) => updatePlayer(idx, "firstName", e.target.value)}
+              />
+              <input
+                className="lineup-lastname-input"
+                type="text"
+                placeholder="Last"
+                value={player.lastName || ""}
+                onChange={(e) => updatePlayer(idx, "lastName", e.target.value)}
               />
               <input
                 className="lineup-number-input"
@@ -131,7 +187,7 @@ const LineupEditor = ({ teamName = "Team", roster, onSave, onCancel }) => {
                 maxLength={3}
               />
               <select
-                className="lineup-pos-select"
+                className={`lineup-pos-select${isDupePos ? " lineup-pos-dupe" : ""}`}
                 value={player.position}
                 onChange={(e) => updatePlayer(idx, "position", e.target.value)}
               >
@@ -152,15 +208,24 @@ const LineupEditor = ({ teamName = "Team", roster, onSave, onCancel }) => {
             <div className="lineup-section-label">Substitutes</div>
             {subs.map((player) => {
               const idx = players.indexOf(player);
+              const isDupePos = player.position && usedPositions[player.position] > 1
+                && player.position !== "EH" && player.position !== "DH";
               return (
                 <div key={player.id} className="lineup-row lineup-row-sub">
                   <span className="lineup-order">SUB</span>
                   <input
-                    className="lineup-name-input"
+                    className="lineup-firstname-input"
                     type="text"
-                    placeholder="Name"
-                    value={player.name}
-                    onChange={(e) => updatePlayer(idx, "name", e.target.value)}
+                    placeholder="First"
+                    value={player.firstName || ""}
+                    onChange={(e) => updatePlayer(idx, "firstName", e.target.value)}
+                  />
+                  <input
+                    className="lineup-lastname-input"
+                    type="text"
+                    placeholder="Last"
+                    value={player.lastName || ""}
+                    onChange={(e) => updatePlayer(idx, "lastName", e.target.value)}
                   />
                   <input
                     className="lineup-number-input"
@@ -171,7 +236,7 @@ const LineupEditor = ({ teamName = "Team", roster, onSave, onCancel }) => {
                     maxLength={3}
                   />
                   <select
-                    className="lineup-pos-select"
+                    className={`lineup-pos-select${isDupePos ? " lineup-pos-dupe" : ""}`}
                     value={player.position}
                     onChange={(e) =>
                       updatePlayer(idx, "position", e.target.value)

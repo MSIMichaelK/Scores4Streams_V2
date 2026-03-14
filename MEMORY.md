@@ -130,3 +130,4 @@
 | 0.8.0 | 2026-03-10 | Game-level rosters, lineup entry, batter/pitcher tracking, DP/FLEX/DR |
 | 0.9.0 | 2026-03-11 | Per-game statistics engine, batting/pitching/fielding stats, GameStats UI |
 | 1.0.0 | 2026-03-13 | L2 practice game integration test, inherited runner attribution |
+| 1.1.0 | 2026-03-14 | Lineup validation: duplicate position prevention, first/last name split |

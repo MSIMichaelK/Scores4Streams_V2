@@ -1098,6 +1098,33 @@ label input, label select {
   min-width: 0;
 }
 
+.lineup-firstname-input {
+  flex: 0.7;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 0.9rem;
+  min-width: 0;
+}
+
+.lineup-lastname-input {
+  flex: 1;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 0.9rem;
+  min-width: 0;
+}
+
+.lineup-pos-dupe {
+  border-color: #e74c3c !important;
+  background: rgba(231, 76, 60, 0.15) !important;
+}
+
 .lineup-number-input {
   width: 40px;
   background: var(--bg-input);
