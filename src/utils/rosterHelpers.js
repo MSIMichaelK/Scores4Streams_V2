@@ -193,6 +193,20 @@ export function validateLineup(roster) {
     errors.push("No pitcher assigned");
   }
 
+  // Check for duplicate fielding positions (excluding subs with no position)
+  const fieldingPositions = roster
+    .filter((p) => p.position && p.position !== "")
+    .map((p) => p.position);
+  const posCounts = {};
+  for (const pos of fieldingPositions) {
+    posCounts[pos] = (posCounts[pos] || 0) + 1;
+  }
+  for (const [pos, count] of Object.entries(posCounts)) {
+    if (count > 1 && pos !== "EH" && pos !== "DH") {
+      errors.push(`Duplicate position: ${pos} (${count} players)`);
+    }
+  }
+
   // DP/FLEX validation
   const dps = roster.filter((p) => p.position === "DP");
   const flexes = roster.filter((p) => p.position === "FLEX");

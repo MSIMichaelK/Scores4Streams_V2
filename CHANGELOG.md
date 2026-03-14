@@ -6,6 +6,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions follow 
 
 ---
 
+## [1.1.0] — 2026-03-14
+
+### Added
+- **Duplicate position validation:** LineupEditor prevents assigning the same fielding position to multiple players (EH/DH exempted). Position dropdown highlights red on duplicates; save is blocked with an error message.
+- **First/Last name fields:** Single "Name" input replaced with separate "First" and "Last" inputs. Combined `name` field auto-synced for backward compatibility. Save requires last name for each player.
+- Duplicate position check added to `validateLineup()` in `rosterHelpers.js`
+
+### Changed
+- `createEmptyPlayer` now includes `firstName` and `lastName` fields
+- Old rosters with single `name` field are auto-split on load via `splitName()`
+
+---
+
 ## [1.0.0] — 2026-03-13
 
 ### Added
