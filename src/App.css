@@ -31,7 +31,7 @@ body {
 }
 
 #root {
-  max-width: 480px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 0;
   text-align: left;
@@ -339,6 +339,71 @@ label input, label select {
   background: var(--bg-secondary);
 }
 
+/* ── Compact scorer header (mode + pitch count + lineups) ── */
+.scorer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 12px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.pitch-count-inline {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* ── Inline score adjust (inside scoreboard) ── */
+.score-adjust-inline {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.score-adjust-inline button {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+}
+
+/* ── BSO + Diamond side-by-side row ── */
+.bso-diamond-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 8px 16px;
+  background: var(--bg-secondary);
+  margin-bottom: 8px;
+}
+
+/* ── Scoring main grid (controls + sidebar) ── */
+.scoring-main {
+  display: block; /* phone: single column */
+}
+
+.scoring-controls {
+  /* phone: full width */
+}
+
+.scoring-sidebar {
+  display: none; /* phone: hidden, event log shown separately */
+}
+
+.scoring-eventlog-phone {
+  display: block; /* phone: visible */
+}
+
 /* === Auth Form === */
 .auth-page {
   padding: 24px 16px;
@@ -394,10 +459,10 @@ label input, label select {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  padding: 16px;
+  padding: 8px 12px;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
-  gap: 12px;
+  gap: 8px;
 }
 
 .scoreboard-team {
@@ -405,6 +470,7 @@ label input, label select {
 }
 
 .scoreboard-team .team-label {
+  display: none; /* phone: hidden, team name is sufficient */
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -422,7 +488,7 @@ label input, label select {
 }
 
 .scoreboard-team .team-score {
-  font-size: 48px;
+  font-size: 36px;
   font-weight: 700;
   line-height: 1;
 }
@@ -453,14 +519,9 @@ label input, label select {
   font-size: 16px;
 }
 
-/* Score adjust buttons */
+/* Score adjust buttons (legacy standalone — hidden, now inline in scoreboard) */
 .score-adjust {
-  display: flex;
-  justify-content: center;
-  gap: 24px;
-  padding: 8px 16px;
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
+  display: none;
 }
 
 .score-adjust-group {
@@ -484,8 +545,13 @@ label input, label select {
   border: 1px solid var(--border-color);
 }
 
-/* Flash notification */
+/* Flash notification — fixed toast overlay */
 .flash-message {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
   background: var(--accent-orange);
   color: white;
   text-align: center;
@@ -503,34 +569,36 @@ label input, label select {
 /* BSO (Balls/Strikes/Outs) section */
 .bso-section {
   display: flex;
-  justify-content: space-around;
-  padding: 16px;
-  background: var(--bg-secondary);
-  margin: 0 0 12px 0;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+  background: transparent;
+  margin: 0;
 }
 
 .bso-group {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .bso-label {
   font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1px;
   color: var(--text-secondary);
+  width: 14px;
 }
 
 .bso-dots {
   display: flex;
-  gap: 6px;
+  gap: 4px;
 }
 
 .bso-dot {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   border: 2px solid;
 }
@@ -548,19 +616,19 @@ label input, label select {
 .diamond-container {
   display: flex;
   justify-content: center;
-  padding: 20px 16px;
+  padding: 0;
 }
 
 .diamond {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 90px;
+  height: 90px;
 }
 
 .diamond .base {
   position: absolute;
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
   transform: rotate(45deg);
   border: 2px solid var(--text-secondary);
   background: transparent;
@@ -576,41 +644,43 @@ label input, label select {
 .diamond .base-second {
   top: 0;
   left: 50%;
-  margin-left: -15px;
+  margin-left: -12px;
 }
 
 .diamond .base-third {
   top: 50%;
   left: 0;
-  margin-top: -15px;
+  margin-top: -12px;
 }
 
 .diamond .base-first {
   top: 50%;
   right: 0;
-  margin-top: -15px;
+  margin-top: -12px;
 }
 
 .diamond .base-home {
   bottom: 0;
   left: 50%;
-  margin-left: -15px;
+  margin-left: -12px;
   border-color: var(--border-color);
   cursor: default;
 }
 
 /* Action buttons grid */
 .action-section {
-  padding: 0 16px 12px;
+  padding: 0 12px 8px;
 }
 
-.action-section h3 {
+.action-section h3,
+.section-heading {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--text-secondary);
   margin-bottom: 10px;
   padding-left: 4px;
+  display: none; /* phone: hide section headings to save space */
 }
 
 .action-grid {
@@ -631,11 +701,12 @@ label input, label select {
 }
 
 .action-btn {
-  padding: 16px 8px;
-  font-size: 15px;
+  padding: 10px 6px;
+  font-size: 14px;
   font-weight: 600;
   border-radius: var(--btn-radius);
-  min-height: 52px;
+  min-height: 44px;
+  cursor: pointer;
 }
 
 .action-btn.ball {
@@ -802,14 +873,9 @@ label input, label select {
   font-size: 13px;
 }
 
-/* Pitch count */
+/* Pitch count (legacy standalone — hidden, now in scorer-header) */
 .pitch-count {
-  text-align: center;
-  padding: 6px 16px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
+  display: none;
 }
 
 /* === New Play Button Colors (Phase 2) === */
@@ -1254,10 +1320,9 @@ label input, label select {
   justify-content: space-between;
   align-items: center;
   background: var(--bg-secondary);
-  padding: 8px 12px;
-  margin: 0 12px 8px;
-  border-radius: var(--btn-radius);
-  border: 1px solid var(--border-color);
+  padding: 4px 12px;
+  margin: 0 0 4px 0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .matchup-batter,
@@ -1424,9 +1489,121 @@ label input, label select {
 }
 
 /* === Responsive === */
-@media (min-width: 481px) {
+
+/* ── Tablet (600px+) ── */
+@media (min-width: 600px) {
   #root {
+    max-width: 768px;
     border-left: 1px solid var(--border-color);
     border-right: 1px solid var(--border-color);
+  }
+
+  /* Restore team labels on tablet */
+  .scoreboard-team .team-label {
+    display: block;
+  }
+
+  /* Larger scores on tablet */
+  .scoreboard {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .scoreboard-team .team-score {
+    font-size: 48px;
+  }
+
+  /* Restore section headings */
+  .action-section h3,
+  .section-heading {
+    display: block;
+  }
+
+  /* Larger action buttons */
+  .action-btn {
+    padding: 14px 8px;
+    font-size: 15px;
+    min-height: 52px;
+  }
+
+  /* Count + Hits merged into one 8-col row */
+  .action-grid-count,
+  .action-grid-hits {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+
+  /* Larger diamond on tablet */
+  .diamond {
+    width: 120px;
+    height: 120px;
+  }
+
+  .diamond .base {
+    width: 30px;
+    height: 30px;
+  }
+
+  .diamond .base-second { margin-left: -15px; }
+  .diamond .base-third { margin-top: -15px; }
+  .diamond .base-first { margin-top: -15px; }
+  .diamond .base-home { margin-left: -15px; }
+
+  /* BSO dots slightly larger */
+  .bso-dot {
+    width: 22px;
+    height: 22px;
+  }
+
+  .bso-diamond-row {
+    gap: 32px;
+    padding: 12px 24px;
+  }
+
+  /* Two-column layout: scoring controls + sidebar */
+  .scoring-main {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 0;
+    min-height: 300px;
+  }
+
+  .scoring-sidebar {
+    display: block;
+    border-left: 1px solid var(--border-color);
+    padding: 12px;
+    background: var(--bg-secondary);
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  /* Hide phone-only event log */
+  .scoring-eventlog-phone {
+    display: none;
+  }
+
+  /* Matchup with more breathing room */
+  .matchup-display {
+    padding: 6px 16px;
+    margin: 0 0 8px 0;
+  }
+
+  .action-section {
+    padding: 0 16px 12px;
+  }
+}
+
+/* ── Desktop / iPad landscape (1024px+) ── */
+@media (min-width: 1024px) {
+  #root {
+    max-width: 1024px;
+  }
+
+  .scoring-main {
+    grid-template-columns: 1fr 340px;
+  }
+
+  .bso-diamond-row {
+    gap: 48px;
+    padding: 16px 32px;
   }
 }
