@@ -132,11 +132,13 @@ const LineupEditor = ({ teamName = "Team", teamId = null, roster, onSave, onCanc
       alert(`Duplicate positions: ${dupePositions.join(", ")}. Each fielding position can only be assigned to one player.`);
       return;
     }
-    // Check players have at least a last name
-    const noLastName = filled.filter((p) => !(p.lastName || "").trim());
-    if (noLastName.length > 0) {
-      alert(`${noLastName.length} player(s) missing last name`);
-      return;
+    // Auto-fix: if name was entered in firstName only, treat as lastName for display
+    for (const p of filled) {
+      if (!(p.lastName || "").trim() && (p.firstName || "").trim()) {
+        p.lastName = p.firstName;
+        p.firstName = "";
+        p.name = p.lastName;
+      }
     }
     // Find the pitcher
     const pitcher = filled.find((p) => p.position === "P");
