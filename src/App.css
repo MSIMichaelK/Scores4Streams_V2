@@ -1488,6 +1488,92 @@ label input, label select {
   text-overflow: ellipsis;
 }
 
+/* === Bottom Nav Bar === */
+.nav-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 56px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  z-index: 20;
+}
+
+.nav-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex: 1;
+  height: 100%;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.nav-tab.active {
+  color: var(--accent-blue);
+}
+
+.nav-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.nav-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Pages with nav bar need bottom padding to avoid overlap */
+.console-page,
+.stats-page,
+.settings-page {
+  padding-bottom: 68px;
+}
+
+/* === Runner Labels on Diamond === */
+.runner-label {
+  position: absolute;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--accent-yellow);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.runner-label-second {
+  top: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.runner-label-third {
+  top: calc(50% + 14px);
+  left: -4px;
+  text-align: left;
+  transform: none;
+}
+
+.runner-label-first {
+  top: calc(50% + 14px);
+  right: -4px;
+  text-align: right;
+  transform: none;
+}
+
 /* === Responsive === */
 
 /* ── Tablet (600px+) ── */
@@ -1590,6 +1676,31 @@ label input, label select {
   .action-section {
     padding: 0 16px 12px;
   }
+
+  /* Larger runner labels on tablet */
+  .runner-label {
+    font-size: 11px;
+    max-width: 90px;
+  }
+
+  .runner-label-second {
+    top: 32px;
+  }
+
+  .runner-label-third {
+    top: calc(50% + 18px);
+  }
+
+  .runner-label-first {
+    top: calc(50% + 18px);
+  }
+
+  /* Nav bar centered on tablet */
+  .nav-bar {
+    max-width: 768px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
 }
 
 /* ── Desktop / iPad landscape (1024px+) ── */
@@ -1605,5 +1716,9 @@ label input, label select {
   .bso-diamond-row {
     gap: 48px;
     padding: 16px 32px;
+  }
+
+  .nav-bar {
+    max-width: 1024px;
   }
 }

@@ -1,8 +1,11 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import Console from "./components/Console";
 import ManualScoringPage from "./pages/ManualScoringPage";
 import LoginPage from "./pages/LoginPage";
 import OverlayFromFigma from "./pages/OverlayFromFigma";
+import StatsPage from "./pages/StatsPage";
+import SettingsPage from "./pages/SettingsPage";
+import NavBar from "./components/NavBar";
 
 const ErrorFallback = () => (
   <div style={{ padding: "2rem" }}>
@@ -11,32 +14,28 @@ const ErrorFallback = () => (
   </div>
 );
 
+/** Layout wrapper — renders NavBar below page content */
+const AppLayout = () => (
+  <>
+    <Outlet />
+    <NavBar />
+  </>
+);
+
 const router = createBrowserRouter([
   {
-    path: "/",
-    element: <Console />,
-    errorElement: <ErrorFallback />
+    element: <AppLayout />,
+    errorElement: <ErrorFallback />,
+    children: [
+      { path: "/", element: <Console /> },
+      { path: "/console", element: <Console /> },
+      { path: "/stats", element: <StatsPage /> },
+      { path: "/settings", element: <SettingsPage /> },
+      { path: "/manual/:gameId", element: <ManualScoringPage /> },
+      { path: "/overlay/:gameId", element: <OverlayFromFigma showGrid={false} /> },
+      { path: "/login", element: <LoginPage /> },
+    ],
   },
-  {
-    path: "/console",
-    element: <Console />,
-    errorElement: <ErrorFallback />
-  },
-  {
-    path: "/manual/:gameId",
-    element: <ManualScoringPage />,
-    errorElement: <ErrorFallback />
-  },
-  {
-    path: "/overlay/:gameId",
-    element: <OverlayFromFigma showGrid={false} />,
-    errorElement: <ErrorFallback />
-  },
-  {
-    path: "/login",
-    element: <LoginPage />,
-    errorElement: <ErrorFallback />
-  }
 ]);
 
 const AppRouter = () => <RouterProvider router={router} />;

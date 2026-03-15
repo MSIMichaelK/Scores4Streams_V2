@@ -4,7 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import useGameEvents from "../hooks/useGameEvents";
 import useGameState from "../hooks/useGameState";
 import { applyAction } from "../utils/scoringEngine";
-import { getCurrentBatter, getCurrentPitcher } from "../utils/rosterHelpers";
+import { getCurrentBatter, getCurrentPitcher, getPlayerById } from "../utils/rosterHelpers";
 import EventLog from "./EventLog";
 import GameStats from "./GameStats";
 import FielderPickerModal from "./FielderPickerModal";
@@ -465,14 +465,26 @@ const ManualScoreController = ({ gameId }) => {
               className={`base base-second ${state.runners.second ? "occupied" : ""}`}
               onClick={() => toggleRunner("second")}
             />
+            {state.runners.second && state.runnerIdentity?.second && (() => {
+              const p = getPlayerById(state, state.runnerIdentity.second);
+              return p ? <span className="runner-label runner-label-second">#{p.number} {p.lastName || p.name}</span> : null;
+            })()}
             <div
               className={`base base-third ${state.runners.third ? "occupied" : ""}`}
               onClick={() => toggleRunner("third")}
             />
+            {state.runners.third && state.runnerIdentity?.third && (() => {
+              const p = getPlayerById(state, state.runnerIdentity.third);
+              return p ? <span className="runner-label runner-label-third">#{p.number} {p.lastName || p.name}</span> : null;
+            })()}
             <div
               className={`base base-first ${state.runners.first ? "occupied" : ""}`}
               onClick={() => toggleRunner("first")}
             />
+            {state.runners.first && state.runnerIdentity?.first && (() => {
+              const p = getPlayerById(state, state.runnerIdentity.first);
+              return p ? <span className="runner-label runner-label-first">#{p.number} {p.lastName || p.name}</span> : null;
+            })()}
             <div className="base base-home" />
           </div>
         </div>
