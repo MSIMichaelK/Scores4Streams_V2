@@ -6,6 +6,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions follow 
 
 ---
 
+## [1.3.0] — 2026-03-15
+
+### Added
+- **Bottom tab bar navigation:** Score / Stats / Settings tabs, persistent across pages
+- **Settings page:** User profile, team switching, sign out, app version (moved from Console)
+- **Stats page:** Placeholder for upcoming statistics features
+- **Player names on diamond:** Occupied bases show `#number LastName` labels
+- New routes: `/stats`, `/settings`
+
+### Changed
+- Console simplified — profile section moved to Settings page
+- Router restructured with layout route pattern for NavBar support
+- Nav bar hidden during live scoring and overlay views
+
+---
+
 ## [1.2.0] — 2026-03-14
 
 ### Added

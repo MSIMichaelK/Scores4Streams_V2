@@ -132,3 +132,4 @@
 | 1.0.0 | 2026-03-13 | L2 practice game integration test, inherited runner attribution |
 | 1.1.0 | 2026-03-14 | Lineup validation: duplicate position prevention, first/last name split |
 | 1.2.0 | 2026-03-14 | Responsive layout: phone/tablet/desktop breakpoints, one-screen scoring on mobile |
+| 1.3.0 | 2026-03-15 | Bottom tab navigation, Settings page, player names on diamond |
