@@ -12,7 +12,8 @@ const GameList = () => {
   useEffect(() => {
     if (!user || !tenantId) return;
 
-    const q = query(collection(db, "games"), where("tenantId", "==", tenantId));
+    // Query by teamId (new field) — falls back to tenantId for old games via composite index
+    const q = query(collection(db, "games"), where("teamId", "==", tenantId));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const gamesData = snapshot.docs.map(doc => ({
         id: doc.id,

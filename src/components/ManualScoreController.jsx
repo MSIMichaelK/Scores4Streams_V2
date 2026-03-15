@@ -105,7 +105,8 @@ const ManualScoreController = ({ gameId }) => {
             // Overlay reads these for display
             batterName: batter ? `#${batter.number} ${batter.name}` : "",
             pitcherName: pitcher ? `#${pitcher.number} ${pitcher.name}` : "",
-            scorerTeamId: tenantId,
+            teamId: tenantId,
+            scorerTeamId: tenantId, // backward compat
             lastUpdated: new Date().toISOString(),
           },
           { merge: true }
@@ -274,6 +275,7 @@ const ManualScoreController = ({ gameId }) => {
     return (
       <LineupEditor
         teamName={teamName}
+        teamId={tenantId}
         roster={existingRoster}
         onSave={handleLineupSave}
         onCancel={() => setLineupEditor(null)}

@@ -1,12 +1,14 @@
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 import { createContext, useContext, useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged, getIdTokenResult } from "firebase/auth";
+import { createTeam, getTeam } from "../hooks/useTeams";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [claims, setClaims] = useState({ role: null, tenantId: null, roles: [] });
+  const [teamName, setTeamName] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,13 +22,18 @@ export const AuthProvider = ({ children }) => {
         const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
-          const defaultTeamId = "defaultTeam";
+          // Create a real team document instead of using a hardcoded string
+          const teamId = await createTeam({
+            name: "My Team",
+            createdBy: user.uid,
+          });
           await setDoc(userRef, {
             email: user.email,
-            activeTenant: defaultTeamId,
+            activeTenant: teamId,
             memberships: {
-              [defaultTeamId]: {
-                roles: ["scorer"]
+              [teamId]: {
+                roles: ["scorer"],
+                teamName: "My Team",
               }
             }
           });
@@ -57,9 +64,20 @@ export const AuthProvider = ({ children }) => {
           roles: roles || [],
           role: role || null
         });
+
+        // Load team name for display
+        if (activeTenant) {
+          try {
+            const team = await getTeam(activeTenant);
+            setTeamName(team?.name || activeTenant);
+          } catch {
+            setTeamName(activeTenant);
+          }
+        }
       } else {
         setUser(null);
         setClaims({ role: null, tenantId: null, roles: [] });
+        setTeamName(null);
       }
       setLoading(false);
     });
@@ -69,7 +87,7 @@ export const AuthProvider = ({ children }) => {
 
   const claimsReady = !!user && !!claims.tenantId && claims.roles.length > 0;
   return (
-    <AuthContext.Provider value={{ user, role: claims.role, roles: claims.roles, tenantId: claims.tenantId, loading, claimsReady }}>
+    <AuthContext.Provider value={{ user, role: claims.role, roles: claims.roles, tenantId: claims.tenantId, teamName, loading, claimsReady }}>
       {children}
     </AuthContext.Provider>
   );
