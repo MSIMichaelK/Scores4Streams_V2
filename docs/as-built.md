@@ -265,3 +265,26 @@ if (event.inheritedRunnerPitcherIds && event.runsScored > 0) {
 **Backward compatible:** Events without `inheritedRunnerPitcherIds` charge all runs to `event.pitcherId` (old behavior). The hooks layer (`useGameState`/`useGameEvents`) will need to populate this field when pitcher changes leave inherited runners — that wiring is separate from the stats computation.
 
 **Why it matters:** The stats engine now correctly supports inherited runner attribution, but it requires the event-recording layer to stamp `inheritedRunnerPitcherIds` on events. Until that wiring is done, the stats engine falls back to the old behavior for live games. The 5 tests in statsEngine.test.js verify both the new attribution and backward compatibility.
+
+---
+
+## AB-017: Database Redesign — Teams Collection and Persistent Players
+
+**Date:** 2026-03-15 | **Affects:** AuthForm, AuthContext, SettingsPage, GameCreationForm, GameList, ManualScoreController, LineupEditor, firestore.rules
+
+**Finding:** The app had a flat Firestore structure with arbitrary string tenant IDs, no real team documents, no persistent players, and wide-open security rules. Players were re-entered for every game. There was no way to scope game writes to team members.
+
+**Decision:** Three new Firestore collections/subcollections:
+1. `teams/{teamId}` — real team documents with name, shortName, logoUrl
+2. `teams/{teamId}/players/{playerId}` — persistent players with soft-delete via `active` flag
+3. Games get a `teamId` field (real team doc ID) alongside the existing `tenantId` for backward compat
+
+**Key choices:**
+- **Games stay at root, not nested under teams** — overlay reads unauthenticated, games have TWO teams, security rules use `teamId` field
+- **`teamId` = creating team** — the team whose scorer created the game owns it
+- **Game rosters keep per-game UUIDs** — the existing `id` field stays for runner identity, events, etc. A new `playerId` field links back to persistent players
+- **Custom claim key stays `tenantId`** — renaming in JWT claims would touch every consumer; the value changes but the key stays
+- **`teamName` denormalized in memberships** — avoids extra reads when displaying team lists
+- **Lineup import is additive** — "Import from Team Roster" replaces current lineup, manual entry remains as fallback
+
+**Why it matters:** This is a schema migration. Old games with `tenantId` but no `teamId` won't appear in the new GameList query. The purge script (`scripts/purge-test-data.js`) exists to clean up pre-deployment test data. New games write both `teamId` and `tenantId` for backward compat during the transition period.

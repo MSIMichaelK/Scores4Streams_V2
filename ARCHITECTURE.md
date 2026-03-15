@@ -37,11 +37,15 @@ Scores4Streams V2 is a mobile-first web app for real-time baseball/softball scor
 │                                                             │
 │  Auth ──── Firestore ──── Cloud Functions ──── Storage      │
 │  │         │                │                   │           │
-│  │         ├─ games/{id}    │ setClaims          │ logos     │
-│  │         │   (aggregate)  │ (custom claims)    │ (planned)│
+│  │         ├─ teams/{id}    │ setClaims          │ logos     │
+│  │         │   └─ players   │ (custom claims)    │ (planned)│
 │  │         │                │                               │
-│  │         └─ games/{id}/events/{eid}                       │
-│  │            (play-by-play subcollection)                   │
+│  │         ├─ games/{id}    │                               │
+│  │         │   (aggregate)  │                               │
+│  │         │   └─ events    │                               │
+│  │         │                │                               │
+│  │         └─ users/{uid}                                   │
+│  │            (memberships → team IDs)                      │
 │  │                                                          │
 │  └─ email/password + Google OAuth                           │
 │     custom claims: { tenantId, roles[] }                    │
@@ -75,7 +79,8 @@ Scores4Streams_V2/
 │   │   ├── GameCreationForm.jsx # New game form (incl. scoring mode selector)
 │   │   ├── GameList.jsx         # Game list with mode badges
 │   │   ├── ManualScoreController.jsx  # Main scoring UI (matchup display, lineup flow)
-│   │   ├── LineupEditor.jsx           # Mobile-first lineup entry (9/10 slots, DP/FLEX/DR)
+│   │   ├── LineupEditor.jsx           # Mobile-first lineup entry (9/10 slots, DP/FLEX/DR, team import)
+│   │   ├── TeamRosterManager.jsx      # Persistent team roster CRUD (add/edit/deactivate players)
 │   │   ├── FielderPickerModal.jsx     # 3x3 position grid for fielder chains
 │   │   ├── RunnerPickerModal.jsx      # Base runner selection (single/multi)
 │   │   └── EventLog.jsx         # Collapsible play-by-play feed
@@ -84,7 +89,9 @@ Scores4Streams_V2/
 │   │   └── FirebaseContext.jsx  # Firebase app instance
 │   ├── hooks/
 │   │   ├── useGameState.js      # useReducer wrapper: scoring engine + undo/redo
-│   │   └── useGameEvents.js     # Event recording: queue, commit, undo/redo, pitch count
+│   │   ├── useGameEvents.js     # Event recording: queue, commit, undo/redo, pitch count
+│   │   ├── useTeams.js          # Team CRUD: createTeam, getTeam, listUserTeams
+│   │   └── useTeamRoster.js     # Player CRUD: addPlayer, getActivePlayers, updatePlayer
 │   ├── pages/
 │   │   ├── LoginPage.jsx        # Login route wrapper
 │   │   ├── ManualScoringPage.jsx # Scoring route wrapper (extracts gameId)
@@ -125,6 +132,9 @@ Scores4Streams_V2/
 │   ├── hooks/
 │   │   └── context-recovery.sh  # Mandatory context recovery script
 │   └── worktree-prompt-template.md  # Template for starting new worktree sessions
+├── scripts/
+│   ├── purge-test-data.js       # Firebase Admin: delete all test data
+│   └── seed-dev-data.js         # Firebase Admin: create sample teams/players/users
 ├── firebase.json
 ├── firestore.rules
 ├── package.json

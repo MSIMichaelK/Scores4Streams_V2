@@ -43,7 +43,10 @@ const GameCreationForm = () => {
       awayTeamName: awayTeam.trim(),
       status: "scheduled",
       createdBy: user.uid,
-      tenantId,
+      teamId: tenantId,     // owning team (real team doc ID)
+      tenantId,             // backward compat alias
+      homeTeamId: null,     // TODO: team picker in future
+      awayTeamId: null,     // TODO: team picker in future
       scheduledStart: Timestamp.fromDate(new Date(startTime)),
       homeScore: 0,
       awayScore: 0,

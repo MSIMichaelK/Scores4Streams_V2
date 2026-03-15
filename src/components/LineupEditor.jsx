@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { POSITIONS as VALID_POSITIONS } from "../utils/rosterHelpers";
+import { getActivePlayers } from "../hooks/useTeamRoster";
 
 /**
  * Full-screen lineup editor for entering a team's batting order.
@@ -24,9 +25,10 @@ function generateId() {
   return "p-" + Math.random().toString(36).slice(2, 10);
 }
 
-function createEmptyPlayer(battingOrder) {
+function createEmptyPlayer(battingOrder, playerId = null) {
   return {
     id: generateId(),
+    playerId: playerId || null,
     firstName: "",
     lastName: "",
     name: "",
@@ -44,7 +46,9 @@ function splitName(name) {
   return { firstName: parts[0], lastName: parts.slice(1).join(" ") };
 }
 
-const LineupEditor = ({ teamName = "Team", roster, onSave, onCancel }) => {
+const LineupEditor = ({ teamName = "Team", teamId = null, roster, onSave, onCancel }) => {
+  const [importLoading, setImportLoading] = useState(false);
+
   // Initialize with existing roster or 9 empty slots
   const [players, setPlayers] = useState(() => {
     if (roster && roster.length > 0) {
@@ -143,6 +147,34 @@ const LineupEditor = ({ teamName = "Team", roster, onSave, onCancel }) => {
   const subs = players.filter((p) => p.battingOrder === 0);
   const hasDPFlex = players.some((p) => p.position === "DP" || p.position === "FLEX");
 
+  const handleImportFromTeamRoster = async () => {
+    if (!teamId) return;
+    setImportLoading(true);
+    try {
+      const teamPlayers = await getActivePlayers(teamId);
+      if (teamPlayers.length === 0) {
+        alert("No players found on team roster. Add players in Settings first.");
+        return;
+      }
+      // Map persistent players into game roster format with playerId link
+      const imported = teamPlayers.map((tp, i) => ({
+        id: generateId(), // per-game UUID stays unique
+        playerId: tp.id,  // link back to persistent player
+        firstName: tp.firstName || "",
+        lastName: tp.lastName || "",
+        name: tp.name || `${tp.firstName || ""} ${tp.lastName || ""}`.trim(),
+        number: tp.number || "",
+        battingOrder: i + 1,
+        position: "",
+      }));
+      setPlayers(imported);
+    } catch (err) {
+      alert("Failed to load team roster");
+    } finally {
+      setImportLoading(false);
+    }
+  };
+
   return (
     <div className="lineup-editor">
       <div className="lineup-header">
@@ -154,6 +186,18 @@ const LineupEditor = ({ teamName = "Team", roster, onSave, onCancel }) => {
           Done
         </button>
       </div>
+
+      {teamId && (
+        <div style={{ padding: "0 12px 8px", textAlign: "center" }}>
+          <button
+            className="btn-secondary btn-small"
+            onClick={handleImportFromTeamRoster}
+            disabled={importLoading}
+          >
+            {importLoading ? "Loading..." : "Import from Team Roster"}
+          </button>
+        </div>
+      )}
 
       <div className="lineup-list">
         {/* Batting order players */}
