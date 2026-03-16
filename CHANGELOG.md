@@ -6,7 +6,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions follow 
 
 ---
 
-## [1.4.0] — 2026-03-16
+## [2.1.0] — 2026-03-16
 
 ### Added
 - **Interactive diamond:** Tap occupied base to select runner, tap destination to move
@@ -21,6 +21,43 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions follow 
 - Base touch targets: 40px phone / 44px tablet / 48px desktop (was 24/30/30)
 - Layout restructured: diamond centred with BSO compact below (was side-by-side)
 - Runner labels enlarged: 11px phone / 13px tablet / 14px desktop
+
+---
+
+## [2.0.0] — 2026-03-15
+
+### Added
+- **Teams collection:** `teams/{teamId}` Firestore documents with name, shortName, logoUrl, createdBy
+- **Persistent players:** `teams/{teamId}/players/{playerId}` subcollection with firstName, lastName, number, active flag
+- **Team roster manager:** `TeamRosterManager` component for add/edit/deactivate players (accessible from Settings page)
+- **Lineup import:** "Import from Team Roster" button in LineupEditor loads persistent players with `playerId` link
+- **`useTeams` hook:** createTeam, getTeam, listUserTeams helper functions
+- **`useTeamRoster` hook:** addPlayer, getActivePlayers, getAllPlayers, updatePlayer, deactivatePlayer
+- **Firestore security rules:** teams collection rules with role-based access (admin for update/delete, scorer for players)
+- **Admin scripts:** `scripts/purge-test-data.js` and `scripts/seed-dev-data.js` for Firebase Admin data management
+- `teamId` field on game documents (references real team doc)
+- `homeTeamId`/`awayTeamId` fields on game documents (nullable, for future team picker)
+- `playerId` field on game roster entries (links to persistent player doc)
+- `teamName` denormalized in user memberships for display
+
+### Changed
+- **AuthForm:** "Team ID" input replaced with "Team Name" — signup creates real team doc + user doc
+- **AuthContext:** Default user creation generates real team document instead of hardcoded "defaultTeam" string
+- **AuthContext:** Now exposes `teamName` from team doc for display
+- **SettingsPage:** Displays real team names resolved from team documents; includes TeamRosterManager
+- **GameCreationForm:** Writes `teamId` field alongside `tenantId` (backward compat)
+- **GameList:** Queries by `teamId` instead of `tenantId`
+- **ManualScoreController:** Writes `teamId` field to Firestore sync; passes `teamId` to LineupEditor
+- **Firestore rules:** Added `teams/{teamId}` with players and seasons subcollection rules
+- **Google sign-in:** Creates real "My Team" team doc for new Google OAuth users
+- Version bumped to 2.0.0 (breaking: new Firestore schema)
+
+### Unchanged
+- Scoring engine, stats engine, all 203 tests
+- Dual-write pattern, pending event queue, soft-delete undo
+- Overlay (still reads `games/{gameId}` unauthenticated)
+- Runner identity parallel map, boolean runners
+- Cloud Function `setClaims` (still reads `activeTenant` from user doc)
 
 ---
 

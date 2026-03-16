@@ -4,11 +4,13 @@ import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import { useAuth } from "../contexts/AuthContext";
 import { callSetCustomClaims } from "../utils/authUtils";
+import { listUserTeams } from "../hooks/useTeams";
+import TeamRosterManager from "../components/TeamRosterManager";
 
 const SettingsPage = () => {
-  const { user, tenantId, loading } = useAuth();
+  const { user, tenantId, teamName, loading } = useAuth();
   const navigate = useNavigate();
-  const [memberships, setMemberships] = useState({});
+  const [teams, setTeams] = useState([]);
   const [activeTenant, setActiveTenant] = useState(tenantId);
   const [updating, setUpdating] = useState(false);
 
@@ -21,8 +23,10 @@ const SettingsPage = () => {
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
           const data = userSnap.data();
-          setMemberships(data.memberships || {});
           setActiveTenant(data.activeTenant);
+          // Resolve team names from team documents
+          const resolved = await listUserTeams(data.memberships || {});
+          setTeams(resolved);
         }
       } catch (err) {
         console.error("Error fetching user data:", err);
@@ -54,9 +58,9 @@ const SettingsPage = () => {
     return null;
   }
 
-  const currentRoles = Array.isArray(memberships?.[activeTenant]?.roles)
-    ? memberships[activeTenant].roles.join(", ")
-    : "none";
+  const activeTeam = teams.find(t => t.id === activeTenant);
+  const currentRoles = activeTeam?.roles?.join(", ") || "none";
+  const displayTeamName = activeTeam?.name || teamName || activeTenant;
 
   return (
     <div className="settings-page">
@@ -68,21 +72,25 @@ const SettingsPage = () => {
         <h3>Profile</h3>
         <p className="profile-info"><strong>Email:</strong> {user?.email}</p>
         <p className="profile-info"><strong>Role(s):</strong> {currentRoles}</p>
-        <p className="profile-info"><strong>Active Team:</strong> {activeTenant}</p>
+        <p className="profile-info"><strong>Active Team:</strong> {displayTeamName}</p>
       </div>
 
-      {Object.keys(memberships).length > 1 && (
+      {activeTenant && (
+        <TeamRosterManager teamId={activeTenant} />
+      )}
+
+      {teams.length > 1 && (
         <div className="card">
           <h3>Switch Team</h3>
           <ul className="team-list">
-            {Object.entries(memberships).map(([teamId, info]) => (
-              <li key={teamId}>
+            {teams.map((team) => (
+              <li key={team.id}>
                 <button
-                  disabled={updating || teamId === activeTenant}
-                  onClick={() => handleSwitchTeam(teamId)}
+                  disabled={updating || team.id === activeTenant}
+                  onClick={() => handleSwitchTeam(team.id)}
                 >
-                  {teamId} ({Array.isArray(info.roles) ? info.roles.join(", ") : "no roles"})
-                  {teamId === activeTenant ? " (active)" : ""}
+                  {team.name} ({team.roles?.join(", ") || "no roles"})
+                  {team.id === activeTenant ? " (active)" : ""}
                 </button>
               </li>
             ))}
@@ -92,7 +100,7 @@ const SettingsPage = () => {
 
       <div className="card">
         <h3>App</h3>
-        <p className="profile-info"><strong>Version:</strong> 1.3.0</p>
+        <p className="profile-info"><strong>Version:</strong> 2.0.0</p>
         <button
           className="btn-danger btn-small"
           onClick={handleSignOut}

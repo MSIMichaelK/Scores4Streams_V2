@@ -26,6 +26,35 @@
 
 ## Firestore Schema
 
+### `teams/{teamId}` (NEW in v2.0.0)
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `name` | string | Full team name |
+| `shortName` | string | 3-4 chars for scoreboard display |
+| `logoUrl` | string | Optional |
+| `createdBy` | string | UID of creator |
+| `createdAt` | Timestamp | |
+
+### `teams/{teamId}/players/{playerId}` (NEW in v2.0.0)
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `firstName` | string | |
+| `lastName` | string | |
+| `name` | string | Computed "First Last" |
+| `number` | string | Jersey number |
+| `active` | boolean | Soft-delete for roster management |
+| `createdAt` | Timestamp | |
+
+### `users/{uid}` (UPDATED in v2.0.0)
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `email` | string | |
+| `activeTenant` | string | Real team doc ID (references `teams/{teamId}`) |
+| `memberships` | map | `{ [teamId]: { roles: [...], teamName: "..." } }` |
+
 ### `games/{gameId}` (aggregate state — overlay reads this)
 
 | Field | Type | Notes |
@@ -38,7 +67,10 @@
 | `homeTeamName`, `awayTeamName` | string | |
 | `scoringMode` | string | `"simple"` (default) or `"advanced"` |
 | `pitchCount` | int | |
-| `tenantId` | string | |
+| `teamId` | string | Owning team doc ID (replaces `tenantId`) |
+| `tenantId` | string | Backward compat alias for `teamId` |
+| `homeTeamId` | string/null | References `teams/{teamId}`, null for ad-hoc |
+| `awayTeamId` | string/null | Same |
 | `createdBy` | string | user UID |
 | `leagueName` | string | |
 | `status` | string | `"scheduled"`, `"live"`, `"final"` |
@@ -79,6 +111,9 @@
 | `src/components/EventLog.jsx` | Collapsible play-by-play feed |
 | `src/components/GameCreationForm.jsx` | New game form with scoring mode selector |
 | `src/components/GameList.jsx` | Game list with mode badges |
+| `src/components/TeamRosterManager.jsx` | Persistent team roster CRUD |
+| `src/hooks/useTeams.js` | Team CRUD: createTeam, getTeam, listUserTeams |
+| `src/hooks/useTeamRoster.js` | Player CRUD: addPlayer, getActivePlayers, updatePlayer |
 | `src/pages/OverlayFromFigma.jsx` | SVG overlay page (reads aggregate state only) |
 | `src/utils/updateSVGNodes.js` | SVG node manipulation for overlay |
 | `src/contexts/AuthContext.jsx` | Firebase Auth context with custom claims |
@@ -133,4 +168,5 @@
 | 1.1.0 | 2026-03-14 | Lineup validation: duplicate position prevention, first/last name split |
 | 1.2.0 | 2026-03-14 | Responsive layout: phone/tablet/desktop breakpoints, one-screen scoring on mobile |
 | 1.3.0 | 2026-03-15 | Bottom tab navigation, Settings page, player names on diamond |
-| 1.4.0 | 2026-03-16 | Interactive diamond: tap-to-select/move runners, enlarged diamond, layout redesign |
+| 2.0.0 | 2026-03-15 | Database redesign: teams collection, persistent players, team-based auth |
+| 2.1.0 | 2026-03-16 | Interactive diamond: tap-to-select/move runners, enlarged diamond, layout redesign |
