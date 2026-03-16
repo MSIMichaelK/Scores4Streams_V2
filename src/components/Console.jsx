@@ -5,14 +5,15 @@ import GameCreationForm from "./GameCreationForm";
 import GameList from "./GameList";
 
 const Console = () => {
-  const { user, loading, claimsReady } = useAuth();
+  const { user, loading, claimsReady, refreshClaims } = useAuth();
   const navigate = useNavigate();
 
+  // If user is signed in but claims aren't ready, trigger a refresh
   useEffect(() => {
-    if (user) {
-      user.getIdToken(true).catch(() => {});
+    if (user && !loading && !claimsReady) {
+      refreshClaims();
     }
-  }, [user]);
+  }, [user, loading, claimsReady, refreshClaims]);
 
   useEffect(() => {
     if (!loading && !user) {

@@ -15,7 +15,17 @@ const GameCreationForm = () => {
   const navigate = useNavigate();
   const db = getFirestore();
 
-  if (!user || !tenantId || !roles?.some(r => r === "admin" || r === "scorer")) {
+  // Still resolving claims — show loading
+  if (!user || !tenantId) {
+    return (
+      <div style={{ padding: "1rem", textAlign: "center", color: "var(--text-secondary)" }}>
+        Loading game creation...
+      </div>
+    );
+  }
+
+  // User has no create permissions
+  if (!roles?.some(r => r === "admin" || r === "scorer")) {
     return null;
   }
 
