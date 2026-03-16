@@ -2,6 +2,18 @@
 
 > This file is auto-loaded at session start. A SessionStart hook enforces context recovery.
 
+## ⚠️ CRITICAL: Branch Divergence (resolve FIRST — see #46)
+
+**Main and worktree branches have diverged.** Before doing any feature work:
+
+1. `main` (`32c945d`) has auth fixes but NOT interactive diamond/layout changes
+2. `claude/distracted-thompson` (`1893dea`) has diamond features but NOT auth fixes
+3. **Prod was deployed from the worktree branch** — it has diamond but not auth fixes
+4. **Resolution:** Merge worktree into main, apply auth fixes, redeploy, delete worktree
+5. **Do NOT create new worktrees** — work directly on main (#41)
+
+See issue #46 for full details.
+
 ## Mandatory Context Recovery
 
 **Before doing ANY work**, read these files and commands in order. No exceptions — not even for "quick fixes."
@@ -75,18 +87,17 @@ npm test             # Run Jest tests (4 suites, 32 tests)
 6. **Don't assume walk force-advance is correct** — it has a known bug (AB-004). Test any changes.
 7. **Don't model edge cases in actions** — use manual adjustments (toggles, score +/-) for uncommon plays. See AB-005, AB-007, AB-009.
 8. **Don't forget to bump version in MEMORY.md and CHANGELOG.md** when releasing.
-9. **Don't push directly to main from a worktree** — create a PR via `gh pr create`.
+9. **Work on main** — don't create worktrees unless explicitly asked. Worktrees caused branch divergence (#41, #46).
 10. **Keep responses short** — this project hits the 32K output token limit. Break up large changes across multiple responses.
 
-## Worktree Workflow
+## Workflow
 
-All feature work happens in worktrees, never directly on `main`.
+**Work directly on `main`.** Do NOT create worktrees unless explicitly asked for parallel work.
 
-- **Create:** `claude -w issue-N-slug` (named) or click "+ New session" in Desktop
-- **Active worktrees** live at `.claude/worktrees/` (gitignored)
-- **Each worktree** gets its own branch and version bump
-- **Merge** via `gh pr create` to `main`
-- **See** `.claude/worktree-prompt-template.md` for how to start a new session
+- Commit directly to `main` for fixes and features
+- Use feature branches (`git checkout -b feature/name`) only for large multi-session changes
+- Worktrees caused branch divergence, stale deploys, and lost changes (see #41, #46)
+- If a worktree exists from a previous session, **do not use it** — merge or delete it first
 
 ## Documentation Map
 
