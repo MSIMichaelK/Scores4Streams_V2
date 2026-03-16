@@ -1,7 +1,7 @@
 {
   "name": "scores4streams",
   "private": true,
-  "version": "0.0.0",
+  "version": "2.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -30,6 +30,7 @@
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",
+    "firebase-admin": "^13.7.0",
     "globals": "^15.15.0",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",

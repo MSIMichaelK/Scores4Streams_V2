@@ -1,6 +1,6 @@
 # MEMORY.md — Quick Reference
 
-> Last updated: 2026-03-10
+> Last updated: 2026-03-16
 
 ## Firebase
 
@@ -26,7 +26,7 @@
 - **Node.js:** v25.6.1 at `/opt/homebrew/bin/node`
 - **PATH prefix:** `export PATH="/opt/homebrew/bin:/usr/bin:$PATH"` (required before npm commands)
 - **Dev server:** Vite on port 5173 (`npm run dev`)
-- **Tests:** Jest (`npm test`) — 12 suites, 203 tests
+- **Tests:** Jest (`npm test`) — 13 suites, 211 tests
 
 ## Routes
 
@@ -121,6 +121,7 @@
 | `src/components/FielderPickerModal.jsx` | 3x3 fielder position grid for building chains |
 | `src/components/RunnerPickerModal.jsx` | Base runner selection (single/multi-select) |
 | `src/components/GameStats.jsx` | Collapsible game statistics panel (batting/pitching tabs) |
+| `src/components/BaseballField.jsx` | Full field SVG with fielder positions and interactive diamond |
 | `src/components/EventLog.jsx` | Collapsible play-by-play feed |
 | `src/components/GameCreationForm.jsx` | New game form with scoring mode selector |
 | `src/components/GameList.jsx` | Game list with mode badges |

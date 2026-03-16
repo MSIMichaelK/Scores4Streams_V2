@@ -2,18 +2,6 @@
 
 > This file is auto-loaded at session start. A SessionStart hook enforces context recovery.
 
-## ⚠️ CRITICAL: Branch Divergence (resolve FIRST — see #46)
-
-**Main and worktree branches have diverged.** Before doing any feature work:
-
-1. `main` (`32c945d`) has auth fixes but NOT interactive diamond/layout changes
-2. `claude/distracted-thompson` (`1893dea`) has diamond features but NOT auth fixes
-3. **Prod was deployed from the worktree branch** — it has diamond but not auth fixes
-4. **Resolution:** Merge worktree into main, apply auth fixes, redeploy, delete worktree
-5. **Do NOT create new worktrees** — work directly on main (#41)
-
-See issue #46 for full details.
-
 ## Mandatory Context Recovery
 
 **Before doing ANY work**, read these files and commands in order. No exceptions — not even for "quick fixes."
@@ -31,8 +19,8 @@ After reading, post a checklist citing ONE specific fact from each file to prove
 ```
 [x] ARCHITECTURE.md — dual-write: aggregate to games/{id}, events to games/{id}/events
 [x] MEMORY.md — Firebase project: scores4streams-v2, region us-central1
-[x] as-built.md — AB-004: walk handler has pre-existing force-advance bug, HBP is fixed
-[x] CHANGELOG.md — current version: 0.5.0
+[x] as-built.md — AB-004: walk and HBP both use force-chain logic (both fixed)
+[x] CHANGELOG.md — current version: 2.1.0
 [x] gh issues — N open issues
 ```
 
@@ -40,7 +28,7 @@ After reading, post a checklist citing ONE specific fact from each file to prove
 
 Context gets lost across sessions and compactions. Real incidents from this project:
 - **isPitch regression:** Pitch count was ~30% too low because outs/hits weren't counting as pitches. Fixed in AB-003 but nearly re-broken in a later session.
-- **HBP force-advance bug:** First implementation cleared non-forced runners. Fixed, but the walk handler STILL has the same bug (AB-004).
+- **HBP force-advance bug:** First implementation cleared non-forced runners. Both HBP and walk handlers now fixed with force-chain logic (AB-004).
 - **Duplicate work:** Scoring mode split was partially re-planned in a session that didn't know it was already done.
 - **Test data contradictions:** A session tried to change strikeout counts without reading the Drillers test — the count was correct (7, not 6).
 
@@ -51,7 +39,7 @@ These are the facts most likely to cause regressions if forgotten:
 ### Scoring Engine
 - **isPitch: true** for ALL ball-in-play events: out, hit, error, hbp, fc, sac_fly (AB-003)
 - **Force-advance (HBP):** Only runners in continuous chain from 1st are forced (AB-004)
-- **Force-advance (walk):** BUGGY — uses simplified logic, not yet fixed (AB-004)
+- **Force-advance (walk):** FIXED — now uses same force-chain logic as HBP (AB-004)
 - **Error = single-equivalent advancement** + manual adjustments (AB-005)
 - **DP = 2x out** — overcounts 1 pitch per DP (AB-006)
 - **FC always records an out** — FC-without-out can't be modeled (AB-007)
@@ -74,7 +62,7 @@ These are the facts most likely to cause regressions if forgotten:
 export PATH="/opt/homebrew/bin:/usr/bin:$PATH"   # Required before npm commands
 npm run dev          # Start Vite dev server (port 5173)
 npm run build        # Production build
-npm test             # Run Jest tests (4 suites, 32 tests)
+npm test             # Run Jest tests (13 suites, 211 tests)
 ```
 
 ## Common Mistakes to Avoid
@@ -84,7 +72,7 @@ npm test             # Run Jest tests (4 suites, 32 tests)
 3. **Don't add complexity to Simple mode** — its value is being lean. Gate new features behind Advanced mode.
 4. **Don't merge aggregate state and events** — they serve different consumers (overlay vs stats).
 5. **Don't call recordEvent after state changes** — countBefore will be wrong. Always call BEFORE.
-6. **Don't assume walk force-advance is correct** — it has a known bug (AB-004). Test any changes.
+6. **Walk force-advance is now FIXED** — uses same force-chain as HBP (AB-004). Regression tests in `walkForceAdvance.test.js`.
 7. **Don't model edge cases in actions** — use manual adjustments (toggles, score +/-) for uncommon plays. See AB-005, AB-007, AB-009.
 8. **Don't forget to bump version in MEMORY.md and CHANGELOG.md** when releasing.
 9. **Work on main** — don't create worktrees unless explicitly asked. Worktrees caused branch divergence (#41, #46).
