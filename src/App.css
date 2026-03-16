@@ -376,15 +376,15 @@ label input, label select {
   cursor: pointer;
 }
 
-/* ── BSO + Diamond side-by-side row ── */
-.bso-diamond-row {
+/* ── BSO compact row under scoreboard ── */
+.bso-row {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 16px;
-  padding: 8px 16px;
+  padding: 6px 16px;
   background: var(--bg-secondary);
-  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 /* ── Scoring main grid (controls + sidebar) ── */
@@ -566,7 +566,7 @@ label input, label select {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* BSO (Balls/Strikes/Outs) section */
+/* BSO (Balls/Strikes/Outs) section — legacy wrapper, kept for compat */
 .bso-section {
   display: flex;
   flex-direction: column;
@@ -1574,6 +1574,22 @@ label input, label select {
   transform: none;
 }
 
+/* === Baseball Field View === */
+.field-container {
+  padding: 4px 8px 8px;
+  background: var(--bg-secondary);
+  margin-bottom: 8px;
+}
+
+.baseball-field-svg {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  border-radius: 8px;
+}
+
 /* === Responsive === */
 
 /* ── Tablet (600px+) ── */
@@ -1618,31 +1634,24 @@ label input, label select {
     grid-template-columns: 1fr 1fr 1fr 1fr;
   }
 
-  /* Larger diamond on tablet */
-  .diamond {
-    width: 120px;
-    height: 120px;
-  }
-
-  .diamond .base {
-    width: 30px;
-    height: 30px;
-  }
-
-  .diamond .base-second { margin-left: -15px; }
-  .diamond .base-third { margin-top: -15px; }
-  .diamond .base-first { margin-top: -15px; }
-  .diamond .base-home { margin-left: -15px; }
-
   /* BSO dots slightly larger */
   .bso-dot {
     width: 22px;
     height: 22px;
   }
 
-  .bso-diamond-row {
-    gap: 32px;
-    padding: 12px 24px;
+  .bso-row {
+    gap: 24px;
+    padding: 8px 24px;
+  }
+
+  /* Constrain field size on tablet */
+  .field-container {
+    padding: 8px 16px 12px;
+  }
+
+  .baseball-field-svg {
+    max-width: 400px;
   }
 
   /* Two-column layout: scoring controls + sidebar */
@@ -1677,24 +1686,6 @@ label input, label select {
     padding: 0 16px 12px;
   }
 
-  /* Larger runner labels on tablet */
-  .runner-label {
-    font-size: 11px;
-    max-width: 90px;
-  }
-
-  .runner-label-second {
-    top: 32px;
-  }
-
-  .runner-label-third {
-    top: calc(50% + 18px);
-  }
-
-  .runner-label-first {
-    top: calc(50% + 18px);
-  }
-
   /* Nav bar centered on tablet */
   .nav-bar {
     max-width: 768px;
@@ -1713,9 +1704,8 @@ label input, label select {
     grid-template-columns: 1fr 340px;
   }
 
-  .bso-diamond-row {
-    gap: 48px;
-    padding: 16px 32px;
+  .baseball-field-svg {
+    max-width: 450px;
   }
 
   .nav-bar {

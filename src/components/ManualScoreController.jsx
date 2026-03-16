@@ -10,6 +10,7 @@ import GameStats from "./GameStats";
 import FielderPickerModal from "./FielderPickerModal";
 import RunnerPickerModal from "./RunnerPickerModal";
 import LineupEditor from "./LineupEditor";
+import BaseballField from "./BaseballField";
 
 const ManualScoreController = ({ gameId }) => {
   // ─── Game state (scoring engine is single source of truth) ───
@@ -432,65 +433,36 @@ const ManualScoreController = ({ gameId }) => {
         </div>
       )}
 
-      {/* ── BSO + Diamond side-by-side ── */}
-      <div className="bso-diamond-row">
-        <div className="bso-section">
-          <div className="bso-group">
-            <div className="bso-label">B</div>
-            <div className="bso-dots">
-              {[0, 1, 2, 3].map(i => (
-                <div key={i} className={`bso-dot ball ${i < state.balls ? "active" : ""}`} />
-              ))}
-            </div>
-          </div>
-          <div className="bso-group">
-            <div className="bso-label">S</div>
-            <div className="bso-dots">
-              {[0, 1, 2].map(i => (
-                <div key={i} className={`bso-dot strike ${i < state.strikes ? "active" : ""}`} />
-              ))}
-            </div>
-          </div>
-          <div className="bso-group">
-            <div className="bso-label">O</div>
-            <div className="bso-dots">
-              {[0, 1, 2].map(i => (
-                <div key={i} className={`bso-dot out ${i < state.outs ? "active" : ""}`} />
-              ))}
-            </div>
+      {/* ── BSO compact row under scoreboard ── */}
+      <div className="bso-row">
+        <div className="bso-group">
+          <div className="bso-label">B</div>
+          <div className="bso-dots">
+            {[0, 1, 2, 3].map(i => (
+              <div key={i} className={`bso-dot ball ${i < state.balls ? "active" : ""}`} />
+            ))}
           </div>
         </div>
-
-        <div className="diamond-container">
-          <div className="diamond">
-            <div
-              className={`base base-second ${state.runners.second ? "occupied" : ""}`}
-              onClick={() => toggleRunner("second")}
-            />
-            {state.runners.second && state.runnerIdentity?.second && (() => {
-              const p = getPlayerById(state, state.runnerIdentity.second);
-              return p ? <span className="runner-label runner-label-second">#{p.number} {p.lastName || p.name}</span> : null;
-            })()}
-            <div
-              className={`base base-third ${state.runners.third ? "occupied" : ""}`}
-              onClick={() => toggleRunner("third")}
-            />
-            {state.runners.third && state.runnerIdentity?.third && (() => {
-              const p = getPlayerById(state, state.runnerIdentity.third);
-              return p ? <span className="runner-label runner-label-third">#{p.number} {p.lastName || p.name}</span> : null;
-            })()}
-            <div
-              className={`base base-first ${state.runners.first ? "occupied" : ""}`}
-              onClick={() => toggleRunner("first")}
-            />
-            {state.runners.first && state.runnerIdentity?.first && (() => {
-              const p = getPlayerById(state, state.runnerIdentity.first);
-              return p ? <span className="runner-label runner-label-first">#{p.number} {p.lastName || p.name}</span> : null;
-            })()}
-            <div className="base base-home" />
+        <div className="bso-group">
+          <div className="bso-label">S</div>
+          <div className="bso-dots">
+            {[0, 1, 2].map(i => (
+              <div key={i} className={`bso-dot strike ${i < state.strikes ? "active" : ""}`} />
+            ))}
+          </div>
+        </div>
+        <div className="bso-group">
+          <div className="bso-label">O</div>
+          <div className="bso-dots">
+            {[0, 1, 2].map(i => (
+              <div key={i} className={`bso-dot out ${i < state.outs ? "active" : ""}`} />
+            ))}
           </div>
         </div>
       </div>
+
+      {/* ── Full baseball field view ── */}
+      <BaseballField state={state} onToggleRunner={toggleRunner} />
 
       {/* ── Scoring controls + sidebar wrapper ── */}
       <div className="scoring-main">
