@@ -905,6 +905,40 @@ export function applyAction(state, action) {
       break;
     }
 
+    // ─── Runner Move (tap-to-select, tap-to-move) ────────
+    case "runner_move": {
+      const { from, to } = act;
+      const fromLabel = from === "first" ? "1B" : from === "second" ? "2B" : "3B";
+      state.runners[from] = false;
+      if (to === "home") {
+        // Score the run for the batting team
+        if (state.isTop) {
+          state.awayScore++;
+        } else {
+          state.homeScore++;
+        }
+        recordEvent(state, {
+          type: "runner_move",
+          subType: `${from}-home`,
+          isPitch: false,
+          resultedInOut: false,
+          runsScored: 1,
+          description: `Runner scored from ${fromLabel}`,
+        });
+      } else {
+        const toLabel = to === "first" ? "1B" : to === "second" ? "2B" : "3B";
+        state.runners[to] = true;
+        recordEvent(state, {
+          type: "runner_move",
+          subType: `${from}-${to}`,
+          isPitch: false,
+          resultedInOut: false,
+          description: `Runner ${fromLabel} → ${toLabel}`,
+        });
+      }
+      break;
+    }
+
     // ─── Score Adjustments ───────────────────────────────
 
     case "score_home":

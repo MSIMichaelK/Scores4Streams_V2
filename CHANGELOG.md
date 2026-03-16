@@ -6,6 +6,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions follow 
 
 ---
 
+## [2.1.0] — 2026-03-16
+
+### Added
+- **Interactive diamond:** Tap occupied base to select runner, tap destination to move
+- **Runner move to home:** Tap home plate with selected runner to score a run
+- **`runner_move` action:** Single action/event/undo step with direct identity transfer
+- **Selected runner glow:** Pulsing yellow animation on selected base
+- **Home plate target:** Yellow border on home when runner is selected
+- 8 new unit tests for runner_move (211 total)
+
+### Changed
+- Diamond enlarged: 170px phone / 210px tablet / 240px desktop (was 90/120/120)
+- Base touch targets: 40px phone / 44px tablet / 48px desktop (was 24/30/30)
+- Layout restructured: diamond centred with BSO compact below (was side-by-side)
+- Runner labels enlarged: 11px phone / 13px tablet / 14px desktop
+
+---
+
 ## [2.0.0] — 2026-03-15
 
 ### Added

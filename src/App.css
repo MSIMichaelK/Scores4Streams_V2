@@ -376,15 +376,18 @@ label input, label select {
   cursor: pointer;
 }
 
-/* ── BSO + Diamond side-by-side row ── */
-.bso-diamond-row {
+/* ── Diamond section (prominent, centred) ── */
+.diamond-section {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 8px 16px;
+  padding: 12px 16px 8px;
   background: var(--bg-secondary);
   margin-bottom: 8px;
+}
+
+.bso-compact {
+  margin-top: 8px;
 }
 
 /* ── Scoring main grid (controls + sidebar) ── */
@@ -621,19 +624,19 @@ label input, label select {
 
 .diamond {
   position: relative;
-  width: 90px;
-  height: 90px;
+  width: 170px;
+  height: 170px;
 }
 
 .diamond .base {
   position: absolute;
-  width: 24px;
-  height: 24px;
+  width: 40px;
+  height: 40px;
   transform: rotate(45deg);
   border: 2px solid var(--text-secondary);
   background: transparent;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
 .diamond .base.occupied {
@@ -641,30 +644,48 @@ label input, label select {
   border-color: var(--accent-yellow);
 }
 
+.diamond .base.selected {
+  border-color: #fff;
+  box-shadow: 0 0 12px 4px rgba(255, 204, 0, 0.6);
+  animation: pulse-glow 1s infinite alternate;
+}
+
+@keyframes pulse-glow {
+  from { box-shadow: 0 0 8px 2px rgba(255, 204, 0, 0.4); }
+  to   { box-shadow: 0 0 16px 6px rgba(255, 204, 0, 0.7); }
+}
+
 .diamond .base-second {
   top: 0;
   left: 50%;
-  margin-left: -12px;
+  margin-left: -20px;
 }
 
 .diamond .base-third {
   top: 50%;
   left: 0;
-  margin-top: -12px;
+  margin-top: -20px;
 }
 
 .diamond .base-first {
   top: 50%;
   right: 0;
-  margin-top: -12px;
+  margin-top: -20px;
 }
 
 .diamond .base-home {
   bottom: 0;
   left: 50%;
-  margin-left: -12px;
+  margin-left: -20px;
   border-color: var(--border-color);
   cursor: default;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.diamond .base-home.home-target {
+  border-color: var(--accent-yellow);
+  cursor: pointer;
+  box-shadow: 0 0 8px 2px rgba(255, 204, 0, 0.3);
 }
 
 /* Action buttons grid */
@@ -1543,32 +1564,32 @@ label input, label select {
 /* === Runner Labels on Diamond === */
 .runner-label {
   position: absolute;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--accent-yellow);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 70px;
+  max-width: 100px;
   text-align: center;
   pointer-events: none;
 }
 
 .runner-label-second {
-  top: 26px;
+  top: 44px;
   left: 50%;
   transform: translateX(-50%);
 }
 
 .runner-label-third {
-  top: calc(50% + 14px);
+  top: calc(50% + 24px);
   left: -4px;
   text-align: left;
   transform: none;
 }
 
 .runner-label-first {
-  top: calc(50% + 14px);
+  top: calc(50% + 24px);
   right: -4px;
   text-align: right;
   transform: none;
@@ -1620,19 +1641,19 @@ label input, label select {
 
   /* Larger diamond on tablet */
   .diamond {
-    width: 120px;
-    height: 120px;
+    width: 210px;
+    height: 210px;
   }
 
   .diamond .base {
-    width: 30px;
-    height: 30px;
+    width: 44px;
+    height: 44px;
   }
 
-  .diamond .base-second { margin-left: -15px; }
-  .diamond .base-third { margin-top: -15px; }
-  .diamond .base-first { margin-top: -15px; }
-  .diamond .base-home { margin-left: -15px; }
+  .diamond .base-second { margin-left: -22px; }
+  .diamond .base-third { margin-top: -22px; }
+  .diamond .base-first { margin-top: -22px; }
+  .diamond .base-home { margin-left: -22px; }
 
   /* BSO dots slightly larger */
   .bso-dot {
@@ -1640,9 +1661,8 @@ label input, label select {
     height: 22px;
   }
 
-  .bso-diamond-row {
-    gap: 32px;
-    padding: 12px 24px;
+  .diamond-section {
+    padding: 16px 24px 8px;
   }
 
   /* Two-column layout: scoring controls + sidebar */
@@ -1679,20 +1699,20 @@ label input, label select {
 
   /* Larger runner labels on tablet */
   .runner-label {
-    font-size: 11px;
-    max-width: 90px;
+    font-size: 13px;
+    max-width: 110px;
   }
 
   .runner-label-second {
-    top: 32px;
+    top: 50px;
   }
 
   .runner-label-third {
-    top: calc(50% + 18px);
+    top: calc(50% + 28px);
   }
 
   .runner-label-first {
-    top: calc(50% + 18px);
+    top: calc(50% + 28px);
   }
 
   /* Nav bar centered on tablet */
@@ -1713,9 +1733,40 @@ label input, label select {
     grid-template-columns: 1fr 340px;
   }
 
-  .bso-diamond-row {
-    gap: 48px;
-    padding: 16px 32px;
+  .diamond {
+    width: 240px;
+    height: 240px;
+  }
+
+  .diamond .base {
+    width: 48px;
+    height: 48px;
+  }
+
+  .diamond .base-second { margin-left: -24px; }
+  .diamond .base-third { margin-top: -24px; }
+  .diamond .base-first { margin-top: -24px; }
+  .diamond .base-home { margin-left: -24px; }
+
+  .runner-label {
+    font-size: 14px;
+    max-width: 120px;
+  }
+
+  .runner-label-second {
+    top: 54px;
+  }
+
+  .runner-label-third {
+    top: calc(50% + 30px);
+  }
+
+  .runner-label-first {
+    top: calc(50% + 30px);
+  }
+
+  .diamond-section {
+    padding: 20px 32px 12px;
   }
 
   .nav-bar {
