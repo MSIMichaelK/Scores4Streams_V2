@@ -382,16 +382,15 @@ label input, label select {
   align-items: center;
   justify-content: center;
   gap: 16px;
-  padding: 6px 16px;
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
+  padding: 4px 16px 6px;
+  background: var(--bg-card);
 }
 
 /* ── Full field view ── */
 .field-container {
   display: flex;
   justify-content: center;
-  padding: 8px;
+  padding: 4px 4px 0;
   background: var(--bg-primary);
 }
 
@@ -486,9 +485,8 @@ label input, label select {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  padding: 8px 12px;
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
+  padding: 8px 12px 4px;
+  background: var(--bg-card);
   gap: 8px;
 }
 

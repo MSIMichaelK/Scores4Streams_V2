@@ -50,7 +50,7 @@ function FielderMarker({ position, player }) {
       </text>
       {nameLine && (
         <text x={coord.x} y={coord.y + 16} textAnchor="middle"
-          fontSize={7.5} fontWeight="500" fill="#a0a0b0">
+          fontSize={9} fontWeight="500" fill="#a0a0b0">
           {nameLine}
         </text>
       )}
@@ -103,7 +103,7 @@ function BaseDiamond({ base, occupied, selected, isTarget, runnerLabel, onTap })
           x={base === "third" ? coord.x - 18 : base === "first" ? coord.x + 18 : coord.x}
           y={base === "second" ? coord.y - 16 : coord.y + 20}
           textAnchor={base === "third" ? "end" : base === "first" ? "start" : "middle"}
-          fontSize={8} fontWeight="600" fill="#f1c40f"
+          fontSize={9.5} fontWeight="600" fill="#f1c40f"
           style={{ pointerEvents: "none" }}
         >
           {runnerLabel}
@@ -139,12 +139,12 @@ const BaseballField = ({ state, selectedRunner, onBaseTap, onDeselect }) => {
     <div className="field-container" onClick={(e) => {
       if (e.target === e.currentTarget && onDeselect) onDeselect();
     }}>
-      <svg viewBox="0 0 300 300" className="baseball-field-svg" onClick={(e) => {
+      <svg viewBox="0 10 300 265" className="baseball-field-svg" onClick={(e) => {
         // Deselect when tapping empty field area
         if (e.target.tagName === "rect" && onDeselect) onDeselect();
       }}>
         {/* Grass background */}
-        <rect x="0" y="0" width="300" height="300" fill="#1a3a1a" rx="8" />
+        <rect x="0" y="10" width="300" height="265" fill="#1a3a1a" rx="8" />
 
         {/* Outfield arc */}
         <path
