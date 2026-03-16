@@ -376,18 +376,42 @@ label input, label select {
   cursor: pointer;
 }
 
-/* ── Diamond section (prominent, centred) ── */
-.diamond-section {
+/* ── BSO compact row under scoreboard ── */
+.bso-row {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 12px 16px 8px;
+  justify-content: center;
+  gap: 16px;
+  padding: 6px 16px;
   background: var(--bg-secondary);
-  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.bso-compact {
-  margin-top: 8px;
+/* ── Full field view ── */
+.field-container {
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+  background: var(--bg-primary);
+}
+
+.baseball-field-svg {
+  width: 100%;
+  max-width: 350px;
+  height: auto;
+  border-radius: 8px;
+}
+
+@media (min-width: 600px) {
+  .baseball-field-svg {
+    max-width: 400px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .baseball-field-svg {
+    max-width: 450px;
+  }
 }
 
 /* ── Scoring main grid (controls + sidebar) ── */
@@ -614,79 +638,6 @@ label input, label select {
 
 .bso-dot.out { border-color: var(--accent-yellow); }
 .bso-dot.out.active { background: var(--accent-yellow); }
-
-/* Base diamond */
-.diamond-container {
-  display: flex;
-  justify-content: center;
-  padding: 0;
-}
-
-.diamond {
-  position: relative;
-  width: 170px;
-  height: 170px;
-}
-
-.diamond .base {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  transform: rotate(45deg);
-  border: 2px solid var(--text-secondary);
-  background: transparent;
-  cursor: pointer;
-  transition: background 0.15s, box-shadow 0.15s;
-}
-
-.diamond .base.occupied {
-  background: var(--accent-yellow);
-  border-color: var(--accent-yellow);
-}
-
-.diamond .base.selected {
-  border-color: #fff;
-  box-shadow: 0 0 12px 4px rgba(255, 204, 0, 0.6);
-  animation: pulse-glow 1s infinite alternate;
-}
-
-@keyframes pulse-glow {
-  from { box-shadow: 0 0 8px 2px rgba(255, 204, 0, 0.4); }
-  to   { box-shadow: 0 0 16px 6px rgba(255, 204, 0, 0.7); }
-}
-
-.diamond .base-second {
-  top: 0;
-  left: 50%;
-  margin-left: -20px;
-}
-
-.diamond .base-third {
-  top: 50%;
-  left: 0;
-  margin-top: -20px;
-}
-
-.diamond .base-first {
-  top: 50%;
-  right: 0;
-  margin-top: -20px;
-}
-
-.diamond .base-home {
-  bottom: 0;
-  left: 50%;
-  margin-left: -20px;
-  border-color: var(--border-color);
-  cursor: default;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.diamond .base-home.home-target {
-  border-color: var(--accent-yellow);
-  cursor: pointer;
-  box-shadow: 0 0 8px 2px rgba(255, 204, 0, 0.3);
-}
 
 /* Action buttons grid */
 .action-section {
@@ -1561,40 +1512,6 @@ label input, label select {
   padding-bottom: 68px;
 }
 
-/* === Runner Labels on Diamond === */
-.runner-label {
-  position: absolute;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--accent-yellow);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100px;
-  text-align: center;
-  pointer-events: none;
-}
-
-.runner-label-second {
-  top: 44px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.runner-label-third {
-  top: calc(50% + 24px);
-  left: -4px;
-  text-align: left;
-  transform: none;
-}
-
-.runner-label-first {
-  top: calc(50% + 24px);
-  right: -4px;
-  text-align: right;
-  transform: none;
-}
-
 /* === Responsive === */
 
 /* ── Tablet (600px+) ── */
@@ -1639,32 +1556,6 @@ label input, label select {
     grid-template-columns: 1fr 1fr 1fr 1fr;
   }
 
-  /* Larger diamond on tablet */
-  .diamond {
-    width: 210px;
-    height: 210px;
-  }
-
-  .diamond .base {
-    width: 44px;
-    height: 44px;
-  }
-
-  .diamond .base-second { margin-left: -22px; }
-  .diamond .base-third { margin-top: -22px; }
-  .diamond .base-first { margin-top: -22px; }
-  .diamond .base-home { margin-left: -22px; }
-
-  /* BSO dots slightly larger */
-  .bso-dot {
-    width: 22px;
-    height: 22px;
-  }
-
-  .diamond-section {
-    padding: 16px 24px 8px;
-  }
-
   /* Two-column layout: scoring controls + sidebar */
   .scoring-main {
     display: grid;
@@ -1698,23 +1589,6 @@ label input, label select {
   }
 
   /* Larger runner labels on tablet */
-  .runner-label {
-    font-size: 13px;
-    max-width: 110px;
-  }
-
-  .runner-label-second {
-    top: 50px;
-  }
-
-  .runner-label-third {
-    top: calc(50% + 28px);
-  }
-
-  .runner-label-first {
-    top: calc(50% + 28px);
-  }
-
   /* Nav bar centered on tablet */
   .nav-bar {
     max-width: 768px;
@@ -1731,42 +1605,6 @@ label input, label select {
 
   .scoring-main {
     grid-template-columns: 1fr 340px;
-  }
-
-  .diamond {
-    width: 240px;
-    height: 240px;
-  }
-
-  .diamond .base {
-    width: 48px;
-    height: 48px;
-  }
-
-  .diamond .base-second { margin-left: -24px; }
-  .diamond .base-third { margin-top: -24px; }
-  .diamond .base-first { margin-top: -24px; }
-  .diamond .base-home { margin-left: -24px; }
-
-  .runner-label {
-    font-size: 14px;
-    max-width: 120px;
-  }
-
-  .runner-label-second {
-    top: 54px;
-  }
-
-  .runner-label-third {
-    top: calc(50% + 30px);
-  }
-
-  .runner-label-first {
-    top: calc(50% + 30px);
-  }
-
-  .diamond-section {
-    padding: 20px 32px 12px;
   }
 
   .nav-bar {
