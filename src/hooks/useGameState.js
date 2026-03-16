@@ -43,8 +43,17 @@ function gameReducer(state, action) {
 
   applyAction(newState, action);
 
-  // Update runner identity by diffing before/after
-  if (newState.homeRoster || newState.awayRoster) {
+  // Update runner identity
+  const act = typeof action === "string" ? { type: action } : action;
+  if (act.type === "runner_move" && (newState.homeRoster || newState.awayRoster)) {
+    // Direct identity transfer — skip heuristic diff
+    const movedId = identityBefore[act.from];
+    newState.runnerIdentity = { ...identityBefore };
+    newState.runnerIdentity[act.from] = null;
+    if (act.to !== "home") {
+      newState.runnerIdentity[act.to] = movedId;
+    }
+  } else if (newState.homeRoster || newState.awayRoster) {
     newState.runnerIdentity = updateRunnerIdentity(
       identityBefore,
       runnersBefore,

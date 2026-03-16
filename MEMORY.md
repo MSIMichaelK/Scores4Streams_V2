@@ -133,3 +133,4 @@
 | 1.1.0 | 2026-03-14 | Lineup validation: duplicate position prevention, first/last name split |
 | 1.2.0 | 2026-03-14 | Responsive layout: phone/tablet/desktop breakpoints, one-screen scoring on mobile |
 | 1.3.0 | 2026-03-15 | Bottom tab navigation, Settings page, player names on diamond |
+| 1.4.0 | 2026-03-16 | Interactive diamond: tap-to-select/move runners, enlarged diamond, layout redesign |
