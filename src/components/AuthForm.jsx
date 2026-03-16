@@ -1,37 +1,22 @@
 import { callSetCustomClaims } from "../utils/authUtils";
-import { useState, useEffect } from "react";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { useState } from "react";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useFirebase } from "../contexts/FirebaseContext";
-import { doc, setDoc, getDoc, writeBatch } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { createTeam } from "../hooks/useTeams";
+import { useAuth } from "../contexts/AuthContext";
 
 const AuthForm = () => {
   const { auth, db } = useFirebase();
-  const [user, setUser] = useState(null);
+  const { refreshClaims } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [teamName, setTeamName] = useState("");
   const [role, setRole] = useState("scorer");
   const [error, setError] = useState(null);
+  const [signingUp, setSigningUp] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        const userRef = doc(db, "users", currentUser.uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          setUser({ uid: currentUser.uid, ...userSnap.data() });
-        } else {
-          setUser(currentUser);
-        }
-      } else {
-        setUser(null);
-      }
-    });
-    return () => unsubscribe();
-  }, [auth, db]);
 
   const handleSignUp = async () => {
     setError(null);
@@ -39,6 +24,7 @@ const AuthForm = () => {
       setError("Team name is required for sign up");
       return;
     }
+    setSigningUp(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const userId = userCredential.user.uid;
@@ -61,10 +47,13 @@ const AuthForm = () => {
         activeTenant: teamId,
       });
 
+      // Set custom claims on server, then force AuthContext to re-read
       await callSetCustomClaims();
-      navigate("/");
+      await refreshClaims();
+      navigate("/console");
     } catch (err) {
       setError(err.message);
+      setSigningUp(false);
     }
   };
 
@@ -73,7 +62,8 @@ const AuthForm = () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       await callSetCustomClaims();
-      navigate("/");
+      await refreshClaims();
+      navigate("/console");
     } catch (err) {
       setError(err.message);
     }
@@ -108,47 +98,37 @@ const AuthForm = () => {
       }
 
       await callSetCustomClaims();
-      navigate("/");
+      await refreshClaims();
+      navigate("/console");
     } catch (err) {
       setError(err.message);
     }
   };
-
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  if (user) {
-    return (
-      <div className="auth-form">
-        <p style={{ marginBottom: 12 }}>Signed in as <strong>{user.email}</strong></p>
-        <button className="btn-danger" onClick={handleSignOut} style={{ width: "100%" }}>
-          Sign Out
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div className="auth-form">
       {error && <div className="error-message">{error}</div>}
-      <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-      <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-      <input type="text" placeholder="Team Name (for sign up)" value={teamName} onChange={(e) => setTeamName(e.target.value)} />
-      <select value={role} onChange={(e) => setRole(e.target.value)}>
-        <option value="scorer">Scorer</option>
-        <option value="admin">Admin</option>
-        <option value="viewer">Viewer</option>
-      </select>
-      <div className="auth-buttons">
-        <button className="btn-primary" onClick={handleSignIn}>Sign In</button>
-        <button className="btn-secondary" onClick={handleSignUp}>Sign Up</button>
-        <button className="btn-google" onClick={handleGoogleSignIn}>Sign In with Google</button>
-      </div>
+      {signingUp ? (
+        <div style={{ textAlign: "center", padding: "1rem" }}>
+          <p>Creating your team...</p>
+        </div>
+      ) : (
+        <>
+          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <input type="text" placeholder="Team Name (for sign up)" value={teamName} onChange={(e) => setTeamName(e.target.value)} />
+          <select value={role} onChange={(e) => setRole(e.target.value)}>
+            <option value="scorer">Scorer</option>
+            <option value="admin">Admin</option>
+            <option value="viewer">Viewer</option>
+          </select>
+          <div className="auth-buttons">
+            <button className="btn-primary" onClick={handleSignIn}>Sign In</button>
+            <button className="btn-secondary" onClick={handleSignUp}>Sign Up</button>
+            <button className="btn-google" onClick={handleGoogleSignIn}>Sign In with Google</button>
+          </div>
+        </>
+      )}
     </div>
   );
 };
