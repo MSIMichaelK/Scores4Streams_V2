@@ -1,7 +1,7 @@
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { createContext, useContext, useEffect, useState } from "react";
-import { getAuth, onAuthStateChanged, getIdTokenResult } from "firebase/auth";
-import { createTeam, getTeam } from "../hooks/useTeams";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getTeam } from "../hooks/useTeams";
 
 const AuthContext = createContext(null);
 
@@ -16,46 +16,33 @@ export const AuthProvider = ({ children }) => {
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // Create default Firestore user profile if it doesn't exist
-        const db = getFirestore();
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-
-        if (!userSnap.exists()) {
-          // Create a real team document instead of using a hardcoded string
-          const teamId = await createTeam({
-            name: "My Team",
-            createdBy: user.uid,
-          });
-          await setDoc(userRef, {
-            email: user.email,
-            activeTenant: teamId,
-            memberships: {
-              [teamId]: {
-                roles: ["scorer"],
-                teamName: "My Team",
-              }
-            }
-          });
-        }
-
-        const tokenResult = await getIdTokenResult(user);
-        // Force refresh to ensure updated custom claims
-        const refreshedTokenResult = await user.getIdTokenResult(true);
-
         setUser(user);
-        let activeTenant = refreshedTokenResult.claims.tenantId;
-        let roles = refreshedTokenResult.claims.roles;
-        let role = refreshedTokenResult.claims.role;
 
+        // Try to read claims from token first
+        const tokenResult = await user.getIdTokenResult(true);
+        let activeTenant = tokenResult.claims.tenantId;
+        let roles = tokenResult.claims.roles;
+        let role = tokenResult.claims.role;
+
+        // Fall back to Firestore user doc if token claims not set
         if (!activeTenant || !roles) {
           const db = getFirestore();
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            activeTenant = data.activeTenant;
-            roles = data.memberships?.[activeTenant]?.roles || [];
-            role = roles[0] || null;
+          // Retry up to 3 times with delay — AuthForm may still be writing the doc
+          for (let attempt = 0; attempt < 3; attempt++) {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+              const data = userDoc.data();
+              activeTenant = data.activeTenant;
+              if (activeTenant && data.memberships?.[activeTenant]) {
+                roles = data.memberships[activeTenant].roles || [];
+                role = roles[0] || null;
+                break;
+              }
+            }
+            // Wait 500ms before retry (AuthForm may still be writing)
+            if (attempt < 2) {
+              await new Promise(r => setTimeout(r, 500));
+            }
           }
         }
 

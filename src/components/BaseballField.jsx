@@ -34,10 +34,11 @@ function FielderMarker({ position, player }) {
   const coord = FIELDER_COORDS[position];
   if (!coord) return null;
 
-  const label = player
-    ? `#${player.number || ""}`
-    : position;
-  const nameLine = player
+  const isPlaceholder = player?.id?.startsWith("placeholder-");
+  const label = !player || isPlaceholder
+    ? position
+    : `#${player.number || ""}`;
+  const nameLine = player && !isPlaceholder
     ? (player.lastName || player.name || "").slice(0, 8)
     : "";
 
@@ -113,17 +114,26 @@ function BaseDiamond({ base, occupied, selected, isTarget, runnerLabel, onTap })
   );
 }
 
+// Default placeholder roster — shows positions when no lineup is set
+const PLACEHOLDER_ROSTER = Object.keys(FIELDER_COORDS).map((pos, i) => ({
+  id: `placeholder-${pos}`,
+  number: String(i + 1),
+  firstName: "",
+  lastName: pos,
+  name: pos,
+  position: pos,
+  battingOrder: i + 1,
+}));
+
 const BaseballField = ({ state, selectedRunner, onBaseTap, onDeselect }) => {
-  // Fielding team roster (opposite of batting team)
-  const fieldingRoster = state.isTop ? state.homeRoster : state.awayRoster;
+  // Fielding team roster (opposite of batting team), fall back to placeholders
+  const fieldingRoster = (state.isTop ? state.homeRoster : state.awayRoster) || PLACEHOLDER_ROSTER;
 
   // Build a position → player map from the fielding roster
   const fielderMap = {};
-  if (fieldingRoster) {
-    for (const player of fieldingRoster) {
-      if (player.position && FIELDER_COORDS[player.position]) {
-        fielderMap[player.position] = player;
-      }
+  for (const player of fieldingRoster) {
+    if (player.position && FIELDER_COORDS[player.position]) {
+      fielderMap[player.position] = player;
     }
   }
 

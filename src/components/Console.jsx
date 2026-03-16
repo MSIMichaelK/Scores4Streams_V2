@@ -5,7 +5,7 @@ import GameCreationForm from "./GameCreationForm";
 import GameList from "./GameList";
 
 const Console = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, claimsReady } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,11 +14,13 @@ const Console = () => {
     }
   }, [user]);
 
-  if (loading) return <div className="loading-page">Loading...</div>;
-  if (!user && !loading) {
-    navigate("/login");
-    return null;
-  }
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/login");
+    }
+  }, [loading, user, navigate]);
+
+  if (loading || (!loading && !user)) return <div className="loading-page">Loading...</div>;
 
   return (
     <div className="console-page">

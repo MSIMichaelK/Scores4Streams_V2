@@ -8,6 +8,19 @@
 - **Region:** us-central1
 - **Console:** https://console.firebase.google.com/project/scores4streams-v2
 
+## Test Account
+
+- **Email:** claude-test@scores4streams.dev
+- **Password:** TestAccount2026!
+- **Team:** Test Thunder
+- **Role:** Scorer
+- **Purpose:** Claude's dev/test account for UI reviews and testing
+
+## Firebase Admin
+
+- **Service account key:** `/Users/mkronk/Downloads/scores4streams-v2-firebase-adminsdk-fbsvc-31e5c4b534.json`
+- **Usage:** `export GOOGLE_APPLICATION_CREDENTIALS="/Users/mkronk/Downloads/scores4streams-v2-firebase-adminsdk-fbsvc-31e5c4b534.json"`
+
 ## Development
 
 - **Node.js:** v25.6.1 at `/opt/homebrew/bin/node`
