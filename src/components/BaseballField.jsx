@@ -2,7 +2,7 @@
  * BaseballField — Full field view with fielder positions and interactive bases.
  *
  * Renders an SVG baseball field (outfield arc, foul lines, infield diamond)
- * with 9 fielder position markers and tappable bases for runner toggles.
+ * with 9 fielder position markers and tappable bases for runner moves.
  */
 import { getPlayerById } from "../utils/rosterHelpers";
 
@@ -58,7 +58,7 @@ function FielderMarker({ position, player }) {
   );
 }
 
-function BaseDiamond({ base, occupied, runnerLabel, onToggle }) {
+function BaseDiamond({ base, occupied, selected, isTarget, runnerLabel, onTap }) {
   const coord = BASE_COORDS[base];
   const isHome = base === "home";
   const half = BASE_SIZE / 2;
@@ -66,23 +66,36 @@ function BaseDiamond({ base, occupied, runnerLabel, onToggle }) {
   // Diamond shape rotated 45deg
   const points = `${coord.x},${coord.y - half} ${coord.x + half},${coord.y} ${coord.x},${coord.y + half} ${coord.x - half},${coord.y}`;
 
+  let fill = "transparent";
+  let stroke = "#a0a0b0";
+  if (selected) {
+    fill = "#f39c12";
+    stroke = "#f39c12";
+  } else if (occupied) {
+    fill = "#f1c40f";
+    stroke = "#f1c40f";
+  } else if (isHome && isTarget) {
+    fill = "transparent";
+    stroke = "#f1c40f";
+  }
+
   return (
     <g>
       <polygon
         points={points}
-        fill={occupied ? "#f1c40f" : "transparent"}
-        stroke={isHome ? "#2a2a4a" : (occupied ? "#f1c40f" : "#a0a0b0")}
+        fill={fill}
+        stroke={stroke}
         strokeWidth={2}
-        style={{ cursor: isHome ? "default" : "pointer" }}
-        onClick={isHome ? undefined : onToggle}
+        style={{ cursor: onTap ? "pointer" : "default" }}
+        onClick={onTap}
       />
       {/* Touch target — larger invisible hit area for mobile */}
-      {!isHome && (
+      {onTap && (
         <circle
           cx={coord.x} cy={coord.y} r={20}
           fill="transparent"
           style={{ cursor: "pointer" }}
-          onClick={onToggle}
+          onClick={onTap}
         />
       )}
       {occupied && runnerLabel && (
@@ -100,7 +113,7 @@ function BaseDiamond({ base, occupied, runnerLabel, onToggle }) {
   );
 }
 
-const BaseballField = ({ state, onToggleRunner }) => {
+const BaseballField = ({ state, selectedRunner, onBaseTap, onDeselect }) => {
   // Fielding team roster (opposite of batting team)
   const fieldingRoster = state.isTop ? state.homeRoster : state.awayRoster;
 
@@ -111,8 +124,6 @@ const BaseballField = ({ state, onToggleRunner }) => {
       if (player.position && FIELDER_COORDS[player.position]) {
         fielderMap[player.position] = player;
       }
-      // FLEX fields at their position but could be any fielding pos
-      // Already handled above since FLEX isn't in FIELDER_COORDS
     }
   }
 
@@ -125,8 +136,13 @@ const BaseballField = ({ state, onToggleRunner }) => {
   };
 
   return (
-    <div className="field-container">
-      <svg viewBox="0 0 300 300" className="baseball-field-svg">
+    <div className="field-container" onClick={(e) => {
+      if (e.target === e.currentTarget && onDeselect) onDeselect();
+    }}>
+      <svg viewBox="0 0 300 300" className="baseball-field-svg" onClick={(e) => {
+        // Deselect when tapping empty field area
+        if (e.target.tagName === "rect" && onDeselect) onDeselect();
+      }}>
         {/* Grass background */}
         <rect x="0" y="0" width="300" height="300" fill="#1a3a1a" rx="8" />
 
@@ -184,24 +200,29 @@ const BaseballField = ({ state, onToggleRunner }) => {
         <BaseDiamond
           base="second"
           occupied={state.runners.second}
+          selected={selectedRunner === "second"}
           runnerLabel={getRunnerLabel("second")}
-          onToggle={() => onToggleRunner("second")}
+          onTap={() => onBaseTap("second")}
         />
         <BaseDiamond
           base="third"
           occupied={state.runners.third}
+          selected={selectedRunner === "third"}
           runnerLabel={getRunnerLabel("third")}
-          onToggle={() => onToggleRunner("third")}
+          onTap={() => onBaseTap("third")}
         />
         <BaseDiamond
           base="first"
           occupied={state.runners.first}
+          selected={selectedRunner === "first"}
           runnerLabel={getRunnerLabel("first")}
-          onToggle={() => onToggleRunner("first")}
+          onTap={() => onBaseTap("first")}
         />
         <BaseDiamond
           base="home"
           occupied={false}
+          isTarget={!!selectedRunner}
+          onTap={selectedRunner ? () => onBaseTap("home") : undefined}
         />
       </svg>
     </div>

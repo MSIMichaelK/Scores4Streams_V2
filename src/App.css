@@ -387,6 +387,33 @@ label input, label select {
   border-bottom: 1px solid var(--border-color);
 }
 
+/* ── Full field view ── */
+.field-container {
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+  background: var(--bg-primary);
+}
+
+.baseball-field-svg {
+  width: 100%;
+  max-width: 350px;
+  height: auto;
+  border-radius: 8px;
+}
+
+@media (min-width: 600px) {
+  .baseball-field-svg {
+    max-width: 400px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .baseball-field-svg {
+    max-width: 450px;
+  }
+}
+
 /* ── Scoring main grid (controls + sidebar) ── */
 .scoring-main {
   display: block; /* phone: single column */
@@ -566,7 +593,7 @@ label input, label select {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* BSO (Balls/Strikes/Outs) section — legacy wrapper, kept for compat */
+/* BSO (Balls/Strikes/Outs) section */
 .bso-section {
   display: flex;
   flex-direction: column;
@@ -611,61 +638,6 @@ label input, label select {
 
 .bso-dot.out { border-color: var(--accent-yellow); }
 .bso-dot.out.active { background: var(--accent-yellow); }
-
-/* Base diamond */
-.diamond-container {
-  display: flex;
-  justify-content: center;
-  padding: 0;
-}
-
-.diamond {
-  position: relative;
-  width: 90px;
-  height: 90px;
-}
-
-.diamond .base {
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  transform: rotate(45deg);
-  border: 2px solid var(--text-secondary);
-  background: transparent;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.diamond .base.occupied {
-  background: var(--accent-yellow);
-  border-color: var(--accent-yellow);
-}
-
-.diamond .base-second {
-  top: 0;
-  left: 50%;
-  margin-left: -12px;
-}
-
-.diamond .base-third {
-  top: 50%;
-  left: 0;
-  margin-top: -12px;
-}
-
-.diamond .base-first {
-  top: 50%;
-  right: 0;
-  margin-top: -12px;
-}
-
-.diamond .base-home {
-  bottom: 0;
-  left: 50%;
-  margin-left: -12px;
-  border-color: var(--border-color);
-  cursor: default;
-}
 
 /* Action buttons grid */
 .action-section {
@@ -1540,56 +1512,6 @@ label input, label select {
   padding-bottom: 68px;
 }
 
-/* === Runner Labels on Diamond === */
-.runner-label {
-  position: absolute;
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--accent-yellow);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 70px;
-  text-align: center;
-  pointer-events: none;
-}
-
-.runner-label-second {
-  top: 26px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.runner-label-third {
-  top: calc(50% + 14px);
-  left: -4px;
-  text-align: left;
-  transform: none;
-}
-
-.runner-label-first {
-  top: calc(50% + 14px);
-  right: -4px;
-  text-align: right;
-  transform: none;
-}
-
-/* === Baseball Field View === */
-.field-container {
-  padding: 4px 8px 8px;
-  background: var(--bg-secondary);
-  margin-bottom: 8px;
-}
-
-.baseball-field-svg {
-  width: 100%;
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
-  border-radius: 8px;
-}
-
 /* === Responsive === */
 
 /* ── Tablet (600px+) ── */
@@ -1634,26 +1556,6 @@ label input, label select {
     grid-template-columns: 1fr 1fr 1fr 1fr;
   }
 
-  /* BSO dots slightly larger */
-  .bso-dot {
-    width: 22px;
-    height: 22px;
-  }
-
-  .bso-row {
-    gap: 24px;
-    padding: 8px 24px;
-  }
-
-  /* Constrain field size on tablet */
-  .field-container {
-    padding: 8px 16px 12px;
-  }
-
-  .baseball-field-svg {
-    max-width: 400px;
-  }
-
   /* Two-column layout: scoring controls + sidebar */
   .scoring-main {
     display: grid;
@@ -1686,6 +1588,7 @@ label input, label select {
     padding: 0 16px 12px;
   }
 
+  /* Larger runner labels on tablet */
   /* Nav bar centered on tablet */
   .nav-bar {
     max-width: 768px;
@@ -1702,10 +1605,6 @@ label input, label select {
 
   .scoring-main {
     grid-template-columns: 1fr 340px;
-  }
-
-  .baseball-field-svg {
-    max-width: 450px;
   }
 
   .nav-bar {

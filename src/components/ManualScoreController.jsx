@@ -38,6 +38,7 @@ const ManualScoreController = ({ gameId }) => {
   const [outExpanded, setOutExpanded] = useState(false); // Out sub-menu
   const [morePlays, setMorePlays] = useState(false); // More Plays toggle
   const [lineupEditor, setLineupEditor] = useState(null); // "home" | "away" | null
+  const [selectedRunner, setSelectedRunner] = useState(null); // "first"|"second"|"third"|null
 
   // ─── Event persistence (Firestore) ─────────────────────────
   const { user, tenantId } = useAuth();
@@ -168,6 +169,7 @@ const ManualScoreController = ({ gameId }) => {
    * Stamps current batter/pitcher IDs on events when rosters are loaded.
    */
   const handleAction = useCallback((action) => {
+    setSelectedRunner(null);
     const gameState = getGameState();
     const batter = getCurrentBatter(state);
     const pitcher = getCurrentPitcher(state);
@@ -203,8 +205,32 @@ const ManualScoreController = ({ gameId }) => {
     handleAction(actionMap[type]);
   };
 
-  const toggleRunner = (base) => {
-    handleAction({ type: "runner_toggle", base });
+  const handleBaseTap = (base) => {
+    if (selectedRunner) {
+      if (base === selectedRunner) {
+        // Tap same base = deselect
+        setSelectedRunner(null);
+      } else if (base === "home") {
+        // Tap home = score the runner
+        handleAction({ type: "runner_move", from: selectedRunner, to: "home" });
+        setSelectedRunner(null);
+      } else if (state.runners[base]) {
+        // Target occupied = switch selection
+        setSelectedRunner(base);
+      } else {
+        // Target empty = move runner
+        handleAction({ type: "runner_move", from: selectedRunner, to: base });
+        setSelectedRunner(null);
+      }
+    } else {
+      if (state.runners[base]) {
+        // Tap occupied base = select runner
+        setSelectedRunner(base);
+      } else {
+        // Tap empty base = toggle runner on (existing behaviour)
+        handleAction({ type: "runner_toggle", base });
+      }
+    }
   };
 
   const handleScoreAdjust = (team, delta) => {
@@ -461,8 +487,13 @@ const ManualScoreController = ({ gameId }) => {
         </div>
       </div>
 
-      {/* ── Full baseball field view ── */}
-      <BaseballField state={state} onToggleRunner={toggleRunner} />
+      {/* ── Full field view with fielder positions ── */}
+      <BaseballField
+        state={state}
+        selectedRunner={selectedRunner}
+        onBaseTap={handleBaseTap}
+        onDeselect={() => setSelectedRunner(null)}
+      />
 
       {/* ── Scoring controls + sidebar wrapper ── */}
       <div className="scoring-main">
