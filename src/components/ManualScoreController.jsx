@@ -224,6 +224,10 @@ const ManualScoreController = ({ gameId }) => {
         setSelectedRunner(null);
       }
     } else {
+      if (base === "home") {
+        // Tap home with no runner selected = no-op
+        return;
+      }
       if (state.runners[base]) {
         // Tap occupied base = select runner
         setSelectedRunner(base);

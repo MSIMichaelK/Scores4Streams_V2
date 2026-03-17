@@ -43,7 +43,7 @@ function FielderMarker({ position, player }) {
     : "";
 
   return (
-    <g className="fielder-marker">
+    <g className="fielder-marker" style={{ pointerEvents: "none" }}>
       <circle cx={coord.x} cy={coord.y} r={13} fill="rgba(74, 144, 217, 0.25)" stroke="#4a90d9" strokeWidth={1.5} />
       <text x={coord.x} y={coord.y + 1} textAnchor="middle" dominantBaseline="central"
         fontSize={player ? 9 : 10} fontWeight="700" fill="#4a90d9">
@@ -239,7 +239,7 @@ const BaseballField = ({ state, selectedRunner, onBaseTap, onDeselect }) => {
             base="home"
             occupied={false}
             isTarget={!!selectedRunner}
-            onTap={selectedRunner ? () => onBaseTap("home") : undefined}
+            onTap={() => onBaseTap("home")}
           />
         </g>
       </svg>

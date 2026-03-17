@@ -67,6 +67,48 @@ async function selectRunnersMulti(page, bases) {
   await page.getByTestId("rpm-btn-confirm").click();
 }
 
+/**
+ * Verify runner presence on bases.
+ * @param {object} expected - { first: bool, second: bool, third: bool }
+ */
+async function verifyRunners(page, { first = false, second = false, third = false } = {}) {
+  const bases = { first, second, third };
+  for (const [base, shouldBeOccupied] of Object.entries(bases)) {
+    const polygon = page.locator(`[data-testid="base-${base}"] polygon`);
+    const fill = await polygon.getAttribute("fill");
+    if (shouldBeOccupied) {
+      expect(fill, `Expected runner on ${base}`).not.toBe("transparent");
+    } else {
+      expect(fill, `Expected no runner on ${base}`).toBe("transparent");
+    }
+  }
+}
+
+/**
+ * Tap a base on the diamond (for runner_move: select then move).
+ * Uses evaluate to dispatch click directly on the SVG element.
+ */
+async function tapBase(page, base) {
+  await page.evaluate((b) => {
+    const el = document.querySelector(`[data-testid="base-${b}"] polygon`);
+    if (el) el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  }, base);
+  // Allow React to process the state update
+  await page.waitForTimeout(100);
+}
+
+/**
+ * Move a runner from one base to another via tap-to-select, tap-to-move.
+ * Waits for the selected state (orange fill) before tapping destination.
+ */
+async function moveRunner(page, from, to) {
+  await tapBase(page, from);
+  // Wait for selection to render (orange = #f39c12)
+  await expect(page.locator(`[data-testid="base-${from}"] polygon`))
+    .toHaveAttribute("fill", "#f39c12", { timeout: 3000 });
+  await tapBase(page, to);
+}
+
 export {
   clickAction,
   verifyBSO,
@@ -75,4 +117,7 @@ export {
   selectFielders,
   selectRunner,
   selectRunnersMulti,
+  verifyRunners,
+  tapBase,
+  moveRunner,
 };

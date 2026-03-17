@@ -1,5 +1,5 @@
 import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getTeam } from "../hooks/useTeams";
 
@@ -11,28 +11,44 @@ export const AuthProvider = ({ children }) => {
   const [teamName, setTeamName] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Sequence counter prevents stale resolveClaims from overwriting fresh results
+  const resolveSeqRef = useRef(0);
+
   /** Shared logic: resolve claims from token or Firestore */
   const resolveClaims = useCallback(async (currentUser) => {
+    const seq = ++resolveSeqRef.current;
+
     // Try to read claims from token first
-    const tokenResult = await currentUser.getIdTokenResult(true);
-    let activeTenant = tokenResult.claims.tenantId;
-    let roles = tokenResult.claims.roles;
-    let role = tokenResult.claims.role;
+    let activeTenant, roles, role;
+    try {
+      const tokenResult = await currentUser.getIdTokenResult(true);
+      activeTenant = tokenResult.claims.tenantId;
+      roles = tokenResult.claims.roles;
+      role = tokenResult.claims.role;
+    } catch {
+      // Token refresh can fail briefly after signup — fall through to Firestore
+    }
 
     // Fall back to Firestore user doc if token claims not set
     if (!activeTenant || !roles) {
       const db = getFirestore();
       // Retry up to 5 times with delay — AuthForm may still be writing the doc
       for (let attempt = 0; attempt < 5; attempt++) {
-        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          activeTenant = data.activeTenant;
-          if (activeTenant && data.memberships?.[activeTenant]) {
-            roles = data.memberships[activeTenant].roles || [];
-            role = roles[0] || null;
-            break;
+        // Bail if a newer resolve has started
+        if (seq !== resolveSeqRef.current) return;
+        try {
+          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            activeTenant = data.activeTenant;
+            if (activeTenant && data.memberships?.[activeTenant]) {
+              roles = data.memberships[activeTenant].roles || [];
+              role = roles[0] || null;
+              break;
+            }
           }
+        } catch {
+          // Firestore read may fail transiently — retry
         }
         // Wait 600ms before retry (AuthForm may still be writing)
         if (attempt < 4) {
@@ -40,6 +56,9 @@ export const AuthProvider = ({ children }) => {
         }
       }
     }
+
+    // Only apply if this is still the latest resolve attempt
+    if (seq !== resolveSeqRef.current) return;
 
     setClaims({
       tenantId: activeTenant || null,
@@ -51,9 +70,13 @@ export const AuthProvider = ({ children }) => {
     if (activeTenant) {
       try {
         const team = await getTeam(activeTenant);
-        setTeamName(team?.name || activeTenant);
+        if (seq === resolveSeqRef.current) {
+          setTeamName(team?.name || activeTenant);
+        }
       } catch {
-        setTeamName(activeTenant);
+        if (seq === resolveSeqRef.current) {
+          setTeamName(activeTenant);
+        }
       }
     }
 

@@ -7,7 +7,9 @@ import { useAuth } from "../contexts/AuthContext";
 const LoginPage = () => {
   const { user, tenantId, claimsReady, loading, refreshClaims } = useAuth();
   const navigate = useNavigate();
+  const [retryCount, setRetryCount] = useState(0);
   const [retrying, setRetrying] = useState(false);
+  const maxRetries = 5;
 
   // Auto-redirect when claims are ready
   useEffect(() => {
@@ -18,15 +20,16 @@ const LoginPage = () => {
 
   // Auto-retry claims resolution when user is signed in but claims aren't ready
   useEffect(() => {
-    if (user && !loading && !claimsReady && !retrying) {
+    if (user && !loading && !claimsReady && !retrying && retryCount < maxRetries) {
       setRetrying(true);
       const timer = setTimeout(async () => {
         await refreshClaims();
+        setRetryCount(c => c + 1);
         setRetrying(false);
       }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [user, loading, claimsReady, retrying, refreshClaims]);
+  }, [user, loading, claimsReady, retrying, retryCount, refreshClaims]);
 
   const handleSignOut = async () => {
     const auth = getAuth();
@@ -48,17 +51,25 @@ const LoginPage = () => {
 
   // User is signed in but claims aren't ready yet — show loading with option to sign out
   if (user && !claimsReady) {
+    const exhausted = retryCount >= maxRetries;
     return (
       <div className="auth-page">
         <h2>Scores4Streams</h2>
         <div className="auth-form">
           <p style={{ marginBottom: 12, textAlign: "center" }}>
-            Setting up your account...
+            {exhausted
+              ? "Account setup is taking longer than expected. Try signing out and back in."
+              : "Setting up your account..."}
           </p>
           <div className="auth-buttons">
             <button className="btn-primary" onClick={() => navigate("/console")}>
               Go to Dashboard
             </button>
+            {exhausted && (
+              <button className="btn-secondary" onClick={async () => { setRetryCount(0); await refreshClaims(); }}>
+                Retry
+              </button>
+            )}
             <button className="btn-danger" onClick={handleSignOut}>
               Sign Out
             </button>
