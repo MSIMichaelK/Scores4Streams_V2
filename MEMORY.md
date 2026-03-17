@@ -1,6 +1,6 @@
 # MEMORY.md — Quick Reference
 
-> Last updated: 2026-03-16
+> Last updated: 2026-03-17
 
 ## Firebase
 
@@ -26,7 +26,7 @@
 - **Node.js:** v25.6.1 at `/opt/homebrew/bin/node`
 - **PATH prefix:** `export PATH="/opt/homebrew/bin:/usr/bin:$PATH"` (required before npm commands)
 - **Dev server:** Vite on port 5173 (`npm run dev`)
-- **Tests:** Jest (`npm test`) — 13 suites, 211 tests
+- **Tests:** Jest (`npm test`) — 13 suites, 211 unit tests; Playwright (`npx playwright test`) — 5 suites, 66 E2E tests
 
 ## Routes
 
@@ -184,3 +184,4 @@
 | 1.3.0 | 2026-03-15 | Bottom tab navigation, Settings page, player names on diamond |
 | 2.0.0 | 2026-03-15 | Database redesign: teams collection, persistent players, team-based auth |
 | 2.1.0 | 2026-03-16 | Interactive diamond: tap-to-select/move runners, enlarged diamond, layout redesign |
+| 2.2.0 | 2026-03-17 | Fix #35 runner-to-home, #40 auth race; 16 deep E2E tests (66 total) |

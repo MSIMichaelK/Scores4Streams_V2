@@ -59,8 +59,9 @@ Scores4Streams V2 is a mobile-first web app for real-time baseball/softball scor
 | Frontend | React 19 + Vite 6 + React Router 7 |
 | Backend | Firebase (Auth, Firestore, Cloud Functions, Storage, Hosting) |
 | Overlays | SVG templates from Figma, rendered via `react-inlinesvg` |
-| Testing | Jest + Babel |
-| Deployment | Firebase Hosting (not yet deployed to production) |
+| Unit Testing | Jest + Babel — 13 suites, 211 tests (scoring engine, stats, roster, overlay) |
+| E2E Testing | Playwright (Chromium) — 5 suites, 66 tests (auth, admin, simple/advanced scoring) |
+| Deployment | Firebase Hosting + Firestore Rules |
 
 ## Project Structure
 
@@ -132,9 +133,20 @@ Scores4Streams_V2/
 │   ├── hooks/
 │   │   └── context-recovery.sh  # Mandatory context recovery script
 │   └── worktree-prompt-template.md  # Template for starting new worktree sessions
+├── e2e/
+│   ├── helpers/
+│   │   ├── auth.js              # Login helper (email/password against real Firebase)
+│   │   ├── game.js              # Create & open game helper
+│   │   └── scoring.js           # Action clicks, BSO/score/inning/runner verification
+│   ├── auth.spec.js             # Auth flow tests (login, signup, Google)
+│   ├── admin.spec.js            # Admin/console tests (game CRUD, team management)
+│   ├── scoring-simple.spec.js   # Simple mode scoring (BSO, hits, outs, undo)
+│   ├── scoring-advanced.spec.js # Advanced mode (expanded outs, fielder chains, plays)
+│   └── scoring-advanced-deep.spec.js  # Deep scenarios (runner_move, force-chain, multi-inning)
 ├── scripts/
 │   ├── purge-test-data.js       # Firebase Admin: delete all test data
 │   └── seed-dev-data.js         # Firebase Admin: create sample teams/players/users
+├── playwright.config.js         # Playwright config (Chromium, sequential, 30s timeout)
 ├── firebase.json
 ├── firestore.rules
 ├── package.json

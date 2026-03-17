@@ -6,6 +6,30 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions follow 
 
 ---
 
+## [2.2.0] — 2026-03-17
+
+### Added
+- **16 deep E2E tests** in `scoring-advanced-deep.spec.js` (66 total):
+  runner_move via diamond tap, force-chain (walk/HBP loaded bases), undo/redo
+  of advanced actions, multi-inning game, combo scenarios (error+SB, HR w/ runners)
+- E2E helpers: `verifyRunners`, `tapBase`, `moveRunner` in `e2e/helpers/scoring.js`
+- LoginPage retry button after 5 failed claims attempts
+
+### Fixed
+- **#35 Runner won't advance to home from 3rd:** Fielder markers (catcher) could
+  intercept click events near home plate; home plate touch target only rendered
+  when a runner was already selected (race condition on fast taps)
+- **#40 Auth race condition after signup:** Concurrent `resolveClaims` calls could
+  overwrite fresh results with stale data; `callSetCustomClaims` silently ate errors;
+  no retry limit on "Setting up your account..." screen
+
+### Changed
+- BaseballField: fielder markers now have `pointerEvents: none`; home plate always tappable
+- AuthContext: sequence counter prevents stale claims overwriting; try/catch around token refresh
+- authUtils: `callSetCustomClaims` returns boolean, never throws (Firestore fallback is sufficient)
+
+---
+
 ## [2.1.0] — 2026-03-16
 
 ### Added
