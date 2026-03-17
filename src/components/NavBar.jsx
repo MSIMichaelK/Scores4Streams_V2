@@ -27,6 +27,7 @@ const NavBar = () => {
           key={tab.path}
           className={`nav-tab ${activeTab.path === tab.path ? "active" : ""}`}
           onClick={() => navigate(tab.path)}
+          data-testid={`nav-${tab.label.toLowerCase()}`}
         >
           <span className="nav-icon">{tab.icon}</span>
           <span className="nav-label">{tab.label}</span>

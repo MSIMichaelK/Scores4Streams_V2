@@ -70,9 +70,9 @@ const SettingsPage = () => {
 
       <div className="card" style={{ marginTop: 12 }}>
         <h3>Profile</h3>
-        <p className="profile-info"><strong>Email:</strong> {user?.email}</p>
-        <p className="profile-info"><strong>Role(s):</strong> {currentRoles}</p>
-        <p className="profile-info"><strong>Active Team:</strong> {displayTeamName}</p>
+        <p className="profile-info" data-testid="settings-email"><strong>Email:</strong> {user?.email}</p>
+        <p className="profile-info" data-testid="settings-roles"><strong>Role(s):</strong> {currentRoles}</p>
+        <p className="profile-info" data-testid="settings-team"><strong>Active Team:</strong> {displayTeamName}</p>
       </div>
 
       {activeTenant && (
@@ -88,6 +88,7 @@ const SettingsPage = () => {
                 <button
                   disabled={updating || team.id === activeTenant}
                   onClick={() => handleSwitchTeam(team.id)}
+                  data-testid={`settings-btn-switch-team-${team.id}`}
                 >
                   {team.name} ({team.roles?.join(", ") || "no roles"})
                   {team.id === activeTenant ? " (active)" : ""}
@@ -105,6 +106,7 @@ const SettingsPage = () => {
           className="btn-danger btn-small"
           onClick={handleSignOut}
           style={{ marginTop: 12 }}
+          data-testid="settings-btn-signout"
         >
           Sign Out
         </button>

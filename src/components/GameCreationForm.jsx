@@ -87,15 +87,16 @@ const GameCreationForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="create-game-form">
+    <form onSubmit={handleSubmit} className="create-game-form" data-testid="game-creation-form">
       <h3>New Game</h3>
-      {error && <div className="error-message">{error}</div>}
+      {error && <div className="error-message" data-testid="gcf-error">{error}</div>}
       <label>
         Home Team
         <input
           value={homeTeam}
           onChange={(e) => setHomeTeam(e.target.value)}
           placeholder="e.g. Thunder"
+          data-testid="gcf-input-home-team"
         />
       </label>
       <label>
@@ -104,6 +105,7 @@ const GameCreationForm = () => {
           value={awayTeam}
           onChange={(e) => setAwayTeam(e.target.value)}
           placeholder="e.g. Lightning"
+          data-testid="gcf-input-away-team"
         />
       </label>
       <label>
@@ -112,6 +114,7 @@ const GameCreationForm = () => {
           type="datetime-local"
           value={startTime}
           onChange={(e) => setStartTime(e.target.value)}
+          data-testid="gcf-input-start-time"
         />
       </label>
       <label>
@@ -120,6 +123,7 @@ const GameCreationForm = () => {
           value={leagueName}
           onChange={(e) => setLeagueName(e.target.value)}
           placeholder="e.g. Metro Softball"
+          data-testid="gcf-input-league"
         />
       </label>
       <div className="scoring-mode-selector">
@@ -129,6 +133,7 @@ const GameCreationForm = () => {
             type="button"
             className={`scoring-mode-btn ${scoringMode === "simple" ? "active" : ""}`}
             onClick={() => setScoringMode("simple")}
+            data-testid="gcf-mode-simple"
           >
             Simple
           </button>
@@ -136,6 +141,7 @@ const GameCreationForm = () => {
             type="button"
             className={`scoring-mode-btn ${scoringMode === "advanced" ? "active" : ""}`}
             onClick={() => setScoringMode("advanced")}
+            data-testid="gcf-mode-advanced"
           >
             Advanced
           </button>
@@ -146,7 +152,7 @@ const GameCreationForm = () => {
             : "Detailed plays — for stats and scorebook"}
         </span>
       </div>
-      <button type="submit" disabled={submitting}>
+      <button type="submit" disabled={submitting} data-testid="gcf-btn-create">
         {submitting ? "Creating..." : "Create Game"}
       </button>
     </form>

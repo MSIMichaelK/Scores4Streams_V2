@@ -47,9 +47,9 @@ const GameList = () => {
       {games.length === 0 ? (
         <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>No games yet. Create one above.</p>
       ) : (
-        <ul className="game-list">
-          {games.map(game => (
-            <li key={game.id}>
+        <ul className="game-list" data-testid="game-list">
+          {games.map((game, index) => (
+            <li key={game.id} data-testid={`game-item-${index}`}>
               <div className="game-info">
                 <div className="game-teams">
                   {game.homeTeamName} vs {game.awayTeamName}
@@ -63,6 +63,7 @@ const GameList = () => {
                 <button
                   className="btn-score"
                   onClick={() => navigate(`/manual/${game.id}`)}
+                  data-testid={`game-score-btn-${index}`}
                 >
                   Score
                 </button>

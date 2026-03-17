@@ -63,6 +63,7 @@ const RunnerPickerModal = ({
                   multiSelect && selected.includes(key) ? "selected" : ""
                 }`}
                 onClick={() => handleTap(key)}
+                data-testid={`rpm-btn-${key}`}
               >
                 {label}
               </button>
@@ -70,7 +71,7 @@ const RunnerPickerModal = ({
           </div>
         )}
         <div className="picker-actions">
-          <button className="picker-btn picker-cancel" onClick={onCancel}>
+          <button className="picker-btn picker-cancel" onClick={onCancel} data-testid="rpm-btn-cancel">
             Cancel
           </button>
           {multiSelect && (
@@ -78,6 +79,7 @@ const RunnerPickerModal = ({
               className="picker-btn picker-confirm"
               onClick={handleConfirm}
               disabled={selected.length === 0}
+              data-testid="rpm-btn-confirm"
             >
               Confirm
             </button>

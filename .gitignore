@@ -26,6 +26,12 @@ service-account.json
 .claude/worktrees/
 .claude/settings.local.json
 
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -36,3 +42,4 @@ service-account.json
 *.njsproj
 *.sln
 *.sw?
+e2e/.auth-state.json

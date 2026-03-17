@@ -17,12 +17,13 @@ const EventLog = ({ events }) => {
       <button
         className="event-log-toggle"
         onClick={() => setExpanded(!expanded)}
+        data-testid="event-log-toggle"
       >
         {expanded ? "Hide" : "Show"} Play-by-Play ({activeEvents.length})
       </button>
 
       {expanded && (
-        <div className="event-log">
+        <div className="event-log" data-testid="event-log-list">
           {displayEvents.length === 0 ? (
             <div className="event-empty">No plays recorded yet</div>
           ) : (

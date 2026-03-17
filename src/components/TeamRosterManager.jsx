@@ -120,6 +120,7 @@ const TeamRosterManager = ({ teamId, onClose }) => {
           type="checkbox"
           checked={showInactive}
           onChange={(e) => setShowInactive(e.target.checked)}
+          data-testid="trm-toggle-inactive"
         />
         Show inactive players
       </label>
@@ -131,6 +132,7 @@ const TeamRosterManager = ({ teamId, onClose }) => {
           {players.map((p) => (
             <li
               key={p.id}
+              data-testid={`trm-player-${p.id}`}
               style={{
                 display: "flex",
                 justifyContent: "space-between",
@@ -144,15 +146,15 @@ const TeamRosterManager = ({ teamId, onClose }) => {
                 {p.number && <strong>#{p.number}</strong>} {p.name}
               </span>
               <div style={{ display: "flex", gap: 4 }}>
-                <button className="btn-small" onClick={() => startEdit(p)} style={{ fontSize: 11, padding: "2px 6px" }}>
+                <button className="btn-small" onClick={() => startEdit(p)} style={{ fontSize: 11, padding: "2px 6px" }} data-testid={`trm-btn-edit-${p.id}`}>
                   Edit
                 </button>
                 {p.active !== false ? (
-                  <button className="btn-small btn-danger" onClick={() => handleDeactivate(p.id)} style={{ fontSize: 11, padding: "2px 6px" }}>
+                  <button className="btn-small btn-danger" onClick={() => handleDeactivate(p.id)} style={{ fontSize: 11, padding: "2px 6px" }} data-testid={`trm-btn-deactivate-${p.id}`}>
                     Remove
                   </button>
                 ) : (
-                  <button className="btn-small" onClick={() => handleReactivate(p.id)} style={{ fontSize: 11, padding: "2px 6px" }}>
+                  <button className="btn-small" onClick={() => handleReactivate(p.id)} style={{ fontSize: 11, padding: "2px 6px" }} data-testid={`trm-btn-reactivate-${p.id}`}>
                     Restore
                   </button>
                 )}
@@ -169,23 +171,26 @@ const TeamRosterManager = ({ teamId, onClose }) => {
             value={form.firstName}
             onChange={(e) => setForm({ ...form, firstName: e.target.value })}
             style={{ width: 80 }}
+            data-testid="trm-input-firstname"
           />
           <input
             placeholder="Last *"
             value={form.lastName}
             onChange={(e) => setForm({ ...form, lastName: e.target.value })}
             style={{ width: 100 }}
+            data-testid="trm-input-lastname"
           />
           <input
             placeholder="#"
             value={form.number}
             onChange={(e) => setForm({ ...form, number: e.target.value })}
             style={{ width: 40 }}
+            data-testid="trm-input-number"
           />
-          <button className="btn-primary btn-small" onClick={editing ? handleUpdate : handleAdd}>
+          <button className="btn-primary btn-small" onClick={editing ? handleUpdate : handleAdd} data-testid="trm-btn-save">
             {editing ? "Save" : "Add"}
           </button>
-          <button className="btn-small" onClick={() => { setAdding(false); setEditing(null); setForm({ firstName: "", lastName: "", number: "" }); }}>
+          <button className="btn-small" onClick={() => { setAdding(false); setEditing(null); setForm({ firstName: "", lastName: "", number: "" }); }} data-testid="trm-btn-cancel">
             Cancel
           </button>
         </div>
@@ -196,6 +201,7 @@ const TeamRosterManager = ({ teamId, onClose }) => {
           className="btn-secondary btn-small"
           onClick={() => { setAdding(true); setEditing(null); setForm({ firstName: "", lastName: "", number: "" }); }}
           style={{ marginTop: 8 }}
+          data-testid="trm-btn-add"
         >
           + Add Player
         </button>

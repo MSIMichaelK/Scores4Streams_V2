@@ -180,11 +180,11 @@ const LineupEditor = ({ teamName = "Team", teamId = null, roster, onSave, onCanc
   return (
     <div className="lineup-editor">
       <div className="lineup-header">
-        <button className="lineup-back-btn" onClick={onCancel}>
+        <button className="lineup-back-btn" onClick={onCancel} data-testid="le-btn-back">
           &larr;
         </button>
         <h2>{teamName} Lineup</h2>
-        <button className="lineup-save-btn" onClick={handleSave}>
+        <button className="lineup-save-btn" onClick={handleSave} data-testid="le-btn-save">
           Done
         </button>
       </div>
@@ -195,6 +195,7 @@ const LineupEditor = ({ teamName = "Team", teamId = null, roster, onSave, onCanc
             className="btn-secondary btn-small"
             onClick={handleImportFromTeamRoster}
             disabled={importLoading}
+            data-testid="le-btn-import"
           >
             {importLoading ? "Loading..." : "Import from Team Roster"}
           </button>
@@ -208,7 +209,7 @@ const LineupEditor = ({ teamName = "Team", teamId = null, roster, onSave, onCanc
           const isDupePos = player.position && usedPositions[player.position] > 1
             && player.position !== "EH" && player.position !== "DH";
           return (
-            <div key={player.id} className="lineup-row">
+            <div key={player.id} className="lineup-row" data-testid={`le-row-${player.battingOrder}`}>
               <span className="lineup-order">#{player.battingOrder}</span>
               <input
                 className="lineup-firstname-input"
@@ -216,6 +217,7 @@ const LineupEditor = ({ teamName = "Team", teamId = null, roster, onSave, onCanc
                 placeholder="First"
                 value={player.firstName || ""}
                 onChange={(e) => updatePlayer(idx, "firstName", e.target.value)}
+                data-testid={`le-input-firstname-${player.battingOrder}`}
               />
               <input
                 className="lineup-lastname-input"
@@ -223,6 +225,7 @@ const LineupEditor = ({ teamName = "Team", teamId = null, roster, onSave, onCanc
                 placeholder="Last"
                 value={player.lastName || ""}
                 onChange={(e) => updatePlayer(idx, "lastName", e.target.value)}
+                data-testid={`le-input-lastname-${player.battingOrder}`}
               />
               <input
                 className="lineup-number-input"
@@ -231,11 +234,13 @@ const LineupEditor = ({ teamName = "Team", teamId = null, roster, onSave, onCanc
                 value={player.number}
                 onChange={(e) => updatePlayer(idx, "number", e.target.value)}
                 maxLength={3}
+                data-testid={`le-input-number-${player.battingOrder}`}
               />
               <select
                 className={`lineup-pos-select${isDupePos ? " lineup-pos-dupe" : ""}`}
                 value={player.position}
                 onChange={(e) => updatePlayer(idx, "position", e.target.value)}
+                data-testid={`le-select-position-${player.battingOrder}`}
               >
                 <option value="">Pos</option>
                 {POSITION_OPTIONS.map((pos) => (
@@ -309,11 +314,11 @@ const LineupEditor = ({ teamName = "Team", teamId = null, roster, onSave, onCanc
       </div>
 
       <div className="lineup-actions">
-        <button className="lineup-add-btn" onClick={addPlayer}>
+        <button className="lineup-add-btn" onClick={addPlayer} data-testid="le-btn-add-sub">
           + Add Sub
         </button>
         {!hasDPFlex && (
-          <button className="lineup-add-btn" onClick={addDPFlex}>
+          <button className="lineup-add-btn" onClick={addDPFlex} data-testid="le-btn-add-dp">
             + Add DP/FLEX
           </button>
         )}

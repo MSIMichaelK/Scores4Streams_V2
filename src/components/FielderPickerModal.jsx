@@ -56,7 +56,7 @@ const FielderPickerModal = ({
     <div className="picker-overlay" onClick={onCancel}>
       <div className="picker-modal" onClick={(e) => e.stopPropagation()}>
         <div className="picker-title">{title}</div>
-        <div className="picker-chain">
+        <div className="picker-chain" data-testid="fpm-chain-display">
           <span className="picker-chain-text">{chainDisplay}</span>
           {chain.length > 0 && (
             <button className="picker-backspace" onClick={handleBackspace}>
@@ -70,6 +70,7 @@ const FielderPickerModal = ({
               key={num}
               className={`fielder-btn ${chain.includes(num) ? "selected" : ""}`}
               onClick={() => handleTap(num)}
+              data-testid={`fpm-btn-${num}-${label}`}
             >
               <span className="fielder-num">{num}</span>
               <span className="fielder-label">{label}</span>
@@ -78,17 +79,18 @@ const FielderPickerModal = ({
         </div>
         <div className="picker-actions">
           {minPositions === 0 && (
-            <button className="picker-btn picker-skip" onClick={handleSkip}>
+            <button className="picker-btn picker-skip" onClick={handleSkip} data-testid="fpm-btn-skip">
               Skip
             </button>
           )}
-          <button className="picker-btn picker-cancel" onClick={onCancel}>
+          <button className="picker-btn picker-cancel" onClick={onCancel} data-testid="fpm-btn-cancel">
             Cancel
           </button>
           <button
             className="picker-btn picker-confirm"
             onClick={handleConfirm}
             disabled={chain.length < minPositions}
+            data-testid="fpm-btn-confirm"
           >
             Confirm
           </button>

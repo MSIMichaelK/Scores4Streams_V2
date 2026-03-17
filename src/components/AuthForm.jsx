@@ -107,25 +107,25 @@ const AuthForm = () => {
 
   return (
     <div className="auth-form">
-      {error && <div className="error-message">{error}</div>}
+      {error && <div className="error-message" data-testid="auth-error">{error}</div>}
       {signingUp ? (
         <div style={{ textAlign: "center", padding: "1rem" }}>
           <p>Creating your team...</p>
         </div>
       ) : (
         <>
-          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <input type="text" placeholder="Team Name (for sign up)" value={teamName} onChange={(e) => setTeamName(e.target.value)} />
-          <select value={role} onChange={(e) => setRole(e.target.value)}>
+          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} data-testid="auth-input-email" />
+          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} data-testid="auth-input-password" />
+          <input type="text" placeholder="Team Name (for sign up)" value={teamName} onChange={(e) => setTeamName(e.target.value)} data-testid="auth-input-team-name" />
+          <select value={role} onChange={(e) => setRole(e.target.value)} data-testid="auth-select-role">
             <option value="scorer">Scorer</option>
             <option value="admin">Admin</option>
             <option value="viewer">Viewer</option>
           </select>
           <div className="auth-buttons">
-            <button className="btn-primary" onClick={handleSignIn}>Sign In</button>
-            <button className="btn-secondary" onClick={handleSignUp}>Sign Up</button>
-            <button className="btn-google" onClick={handleGoogleSignIn}>Sign In with Google</button>
+            <button className="btn-primary" onClick={handleSignIn} data-testid="auth-btn-signin">Sign In</button>
+            <button className="btn-secondary" onClick={handleSignUp} data-testid="auth-btn-signup">Sign Up</button>
+            <button className="btn-google" onClick={handleGoogleSignIn} data-testid="auth-btn-google">Sign In with Google</button>
           </div>
         </>
       )}

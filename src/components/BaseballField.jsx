@@ -207,33 +207,41 @@ const BaseballField = ({ state, selectedRunner, onBaseTap, onDeselect }) => {
         ))}
 
         {/* Bases (interactive) */}
-        <BaseDiamond
-          base="second"
-          occupied={state.runners.second}
-          selected={selectedRunner === "second"}
-          runnerLabel={getRunnerLabel("second")}
-          onTap={() => onBaseTap("second")}
-        />
-        <BaseDiamond
-          base="third"
-          occupied={state.runners.third}
-          selected={selectedRunner === "third"}
-          runnerLabel={getRunnerLabel("third")}
-          onTap={() => onBaseTap("third")}
-        />
-        <BaseDiamond
-          base="first"
-          occupied={state.runners.first}
-          selected={selectedRunner === "first"}
-          runnerLabel={getRunnerLabel("first")}
-          onTap={() => onBaseTap("first")}
-        />
-        <BaseDiamond
-          base="home"
-          occupied={false}
-          isTarget={!!selectedRunner}
-          onTap={selectedRunner ? () => onBaseTap("home") : undefined}
-        />
+        <g data-testid="base-second">
+          <BaseDiamond
+            base="second"
+            occupied={state.runners.second}
+            selected={selectedRunner === "second"}
+            runnerLabel={getRunnerLabel("second")}
+            onTap={() => onBaseTap("second")}
+          />
+        </g>
+        <g data-testid="base-third">
+          <BaseDiamond
+            base="third"
+            occupied={state.runners.third}
+            selected={selectedRunner === "third"}
+            runnerLabel={getRunnerLabel("third")}
+            onTap={() => onBaseTap("third")}
+          />
+        </g>
+        <g data-testid="base-first">
+          <BaseDiamond
+            base="first"
+            occupied={state.runners.first}
+            selected={selectedRunner === "first"}
+            runnerLabel={getRunnerLabel("first")}
+            onTap={() => onBaseTap("first")}
+          />
+        </g>
+        <g data-testid="base-home">
+          <BaseDiamond
+            base="home"
+            occupied={false}
+            isTarget={!!selectedRunner}
+            onTap={selectedRunner ? () => onBaseTap("home") : undefined}
+          />
+        </g>
       </svg>
     </div>
   );
