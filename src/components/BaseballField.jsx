@@ -149,12 +149,12 @@ const BaseballField = ({ state, selectedRunner, onBaseTap, onDeselect }) => {
     <div className="field-container" onClick={(e) => {
       if (e.target === e.currentTarget && onDeselect) onDeselect();
     }}>
-      <svg viewBox="0 10 300 285" className="baseball-field-svg" onClick={(e) => {
+      <svg viewBox="-20 -30 340 340" preserveAspectRatio="xMidYMax slice" className="baseball-field-svg" onClick={(e) => {
         // Deselect when tapping empty field area
         if (e.target.tagName === "rect" && onDeselect) onDeselect();
       }}>
-        {/* Grass background */}
-        <rect x="0" y="10" width="300" height="285" fill="#1a3a1a" rx="8" />
+        {/* Grass background — covers expanded viewBox */}
+        <rect x="-20" y="-30" width="340" height="340" fill="#1a3a1a" rx="8" />
 
         {/* Outfield arc */}
         <path

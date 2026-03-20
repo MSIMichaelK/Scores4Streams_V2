@@ -4,11 +4,49 @@
  */
 import { expect } from "@playwright/test";
 
+// Buttons that live inside the OutcomePanel (require "In Play" to be open first)
+const OUTCOME_PANEL_BUTTONS = new Set([
+  "btn-1b", "btn-2b", "btn-3b", "btn-hr",
+  "btn-go", "btn-fo", "btn-lo", "btn-po",
+  "btn-k", "btn-kc", "btn-dp", "btn-tp",
+  "btn-error", "btn-fc", "btn-sac", "btn-d3k",
+  "btn-more-plays",
+]);
+
+// Buttons behind the "More" toggle inside the OutcomePanel
+const MORE_PLAYS_BUTTONS = new Set([
+  "btn-ff", "btn-if", "btn-int", "btn-out-generic",
+  "btn-sac-b", "btn-bh", "btn-sl", "btn-ibb", "btn-obs", "btn-ip",
+  "btn-sb", "btn-cs", "btn-pk", "btn-wp", "btn-pb",
+]);
+
+/**
+ * Open the In Play outcome panel if not already visible.
+ */
+async function openInPlay(page) {
+  const panel = page.locator(".outcome-panel");
+  if (await panel.isVisible().catch(() => false)) return;
+  await page.getByTestId("btn-in-play").click();
+  await panel.waitFor({ state: "visible", timeout: 3000 });
+}
+
 /**
  * Click an action button by test ID.
+ * Automatically opens the In Play panel and/or More toggle as needed.
  */
 async function clickAction(page, testId) {
-  // Wait for element to be stable (handles React re-render detach)
+  // If this button is behind "More" in the OutcomePanel, open both
+  if (MORE_PLAYS_BUTTONS.has(testId)) {
+    await openInPlay(page);
+    // Click "More" toggle if the button isn't visible yet
+    const btn = page.getByTestId(testId);
+    if (!(await btn.isVisible().catch(() => false))) {
+      await page.getByTestId("btn-more-plays").click();
+      await btn.waitFor({ state: "visible", timeout: 3000 });
+    }
+  } else if (OUTCOME_PANEL_BUTTONS.has(testId)) {
+    await openInPlay(page);
+  }
   const locator = page.getByTestId(testId);
   await locator.waitFor({ state: "visible", timeout: 5000 });
   await locator.click({ timeout: 10000 });
@@ -111,6 +149,7 @@ async function moveRunner(page, from, to) {
 
 export {
   clickAction,
+  openInPlay,
   verifyBSO,
   verifyScore,
   verifyInning,

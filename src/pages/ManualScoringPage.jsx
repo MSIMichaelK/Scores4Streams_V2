@@ -6,15 +6,7 @@ const ManualScoringPage = () => {
   const navigate = useNavigate();
 
   return (
-    <div>
-      <div className="page-header">
-        <button className="back-btn" onClick={() => navigate("/console")}>
-          &larr; Back
-        </button>
-        <h2>Live Scoring</h2>
-      </div>
-      <ManualScoreController gameId={gameId} />
-    </div>
+    <ManualScoreController gameId={gameId} onBack={() => navigate("/console")} />
   );
 };
 

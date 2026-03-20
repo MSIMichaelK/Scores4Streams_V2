@@ -21,7 +21,6 @@ test.describe("Advanced Mode Scoring", () => {
 
   test("ground out with fielder chain: 6-3", async ({ page }) => {
     // Expand outs menu
-    await clickAction(page, "btn-expand-outs");
     // Click GO
     await clickAction(page, "btn-go");
     // Fielder picker opens — select 6 (SS) then 3 (1B)
@@ -31,21 +30,18 @@ test.describe("Advanced Mode Scoring", () => {
   });
 
   test("fly out with single fielder: 8 (CF)", async ({ page }) => {
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-fo");
     await selectFielders(page, [8]);
     await verifyBSO(page, 0, 0, 1);
   });
 
   test("strikeout swinging (K)", async ({ page }) => {
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-k");
     // K doesn't open fielder picker — direct out
     await verifyBSO(page, 0, 0, 1);
   });
 
   test("strikeout looking (KC)", async ({ page }) => {
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-kc");
     await verifyBSO(page, 0, 0, 1);
   });
@@ -54,7 +50,6 @@ test.describe("Advanced Mode Scoring", () => {
     // First, put a runner on 1st
     await clickAction(page, "btn-1b");
     // Now double play
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-dp");
     await selectFielders(page, [6, 4, 3]);
     // DP = 2 outs
@@ -149,28 +144,24 @@ test.describe("Advanced Mode Scoring", () => {
   });
 
   test("line drive out (LO)", async ({ page }) => {
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-lo");
     await selectFielders(page, [4]);
     await verifyBSO(page, 0, 0, 1);
   });
 
   test("popup out (PO)", async ({ page }) => {
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-po");
     await selectFielders(page, [2]);
     await verifyBSO(page, 0, 0, 1);
   });
 
   test("foul fly out (FF)", async ({ page }) => {
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-ff");
     await selectFielders(page, [5]);
     await verifyBSO(page, 0, 0, 1);
   });
 
   test("fielder picker: skip button sends null positions", async ({ page }) => {
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-go");
     // Skip instead of selecting fielders
     await page.getByTestId("fpm-btn-skip").click();
@@ -178,7 +169,6 @@ test.describe("Advanced Mode Scoring", () => {
   });
 
   test("fielder picker: chain display shows selected positions", async ({ page }) => {
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-go");
     // Select 6 (SS)
     await page.locator("[data-testid^='fpm-btn-6-']").click();
@@ -194,7 +184,6 @@ test.describe("Advanced Mode Scoring", () => {
   });
 
   test("fielder picker: cancel returns to scoring without action", async ({ page }) => {
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-go");
     // Cancel
     await page.getByTestId("fpm-btn-cancel").click();
@@ -204,7 +193,6 @@ test.describe("Advanced Mode Scoring", () => {
 
   test("full half-inning: 3 outs via various plays", async ({ page }) => {
     // Out 1: Ground out 6-3
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-go");
     await selectFielders(page, [6, 3]);
     await verifyBSO(page, 0, 0, 1);
@@ -213,13 +201,11 @@ test.describe("Advanced Mode Scoring", () => {
     await clickAction(page, "btn-1b");
 
     // Out 2: Fly out to CF
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-fo");
     await selectFielders(page, [8]);
     await verifyBSO(page, 0, 0, 2);
 
     // Out 3: Strikeout
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-k");
     // Should flip to bottom of inning
     await verifyBSO(page, 0, 0, 0);

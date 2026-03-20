@@ -97,7 +97,6 @@ test.describe("Advanced Scoring — Deep Scenarios", () => {
   // ─── Undo/Redo of Advanced Actions ─────────────────────────
 
   test("undo ground out reverts out count", async ({ page }) => {
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-go");
     await selectFielders(page, [6, 3]);
     await verifyBSO(page, 0, 0, 1);
@@ -118,7 +117,6 @@ test.describe("Advanced Scoring — Deep Scenarios", () => {
 
   test("undo double play reverts 2 outs", async ({ page }) => {
     await clickAction(page, "btn-1b"); // runner on 1st
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-dp");
     await selectFielders(page, [6, 4, 3]);
     await verifyBSO(page, 0, 0, 2);
@@ -128,7 +126,6 @@ test.describe("Advanced Scoring — Deep Scenarios", () => {
   });
 
   test("redo after undo restores advanced action", async ({ page }) => {
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-go");
     await selectFielders(page, [4, 3]);
     await verifyBSO(page, 0, 0, 1);
@@ -145,17 +142,14 @@ test.describe("Advanced Scoring — Deep Scenarios", () => {
     await clickAction(page, "btn-1b"); // single
     await verifyRunners(page, { first: true });
 
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-go");
     await selectFielders(page, [6, 3]);
     await verifyBSO(page, 0, 0, 1);
 
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-fo");
     await selectFielders(page, [8]);
     await verifyBSO(page, 0, 0, 2);
 
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-k");
     // 3 outs → flip to bottom of 1st
     await verifyBSO(page, 0, 0, 0);
@@ -168,12 +162,10 @@ test.describe("Advanced Scoring — Deep Scenarios", () => {
     await verifyBSO(page, 0, 0, 1);
     await verifyScore(page, 1, 0);
 
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-go");
     await selectFielders(page, [5, 3]);
     await verifyBSO(page, 0, 0, 2);
 
-    await clickAction(page, "btn-expand-outs");
     await clickAction(page, "btn-k");
     // 3 outs → top of 2nd
     await verifyBSO(page, 0, 0, 0);
