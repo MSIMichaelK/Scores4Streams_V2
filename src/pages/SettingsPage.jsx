@@ -6,6 +6,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { callSetCustomClaims } from "../utils/authUtils";
 import { listUserTeams } from "../hooks/useTeams";
 import TeamRosterManager from "../components/TeamRosterManager";
+import { version as appVersion } from "../../package.json";
 
 const SettingsPage = () => {
   const { user, tenantId, teamName, loading } = useAuth();
@@ -101,7 +102,7 @@ const SettingsPage = () => {
 
       <div className="card">
         <h3>App</h3>
-        <p className="profile-info"><strong>Version:</strong> 2.0.0</p>
+        <p className="profile-info"><strong>Version:</strong> {appVersion}</p>
         <button
           className="btn-danger btn-small"
           onClick={handleSignOut}
