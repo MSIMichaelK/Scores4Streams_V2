@@ -1,6 +1,6 @@
 # MEMORY.md — Quick Reference
 
-> Last updated: 2026-03-17
+> Last updated: 2026-03-21
 
 ## Firebase
 
@@ -185,3 +185,4 @@
 | 2.0.0 | 2026-03-15 | Database redesign: teams collection, persistent players, team-based auth |
 | 2.1.0 | 2026-03-16 | Interactive diamond: tap-to-select/move runners, enlarged diamond, layout redesign |
 | 2.2.0 | 2026-03-17 | Fix #35 runner-to-home, #40 auth race; 16 deep E2E tests (66 total) |
+| 2.3.0 | 2026-03-21 | v2.3 sprint: fix #47/#48/#51/#39/#43/#44/#34; enlarged diamond, scoreboard polish, recent plays ticker |

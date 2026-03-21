@@ -6,6 +6,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions follow 
 
 ---
 
+## [2.3.0] — 2026-03-21
+
+### Fixed
+- **#47 Stale worktrees:** Deleted phantom worktree dirs that doubled Jest test count (422 → 211)
+- **#48 Jest picks up Playwright:** Added `testPathIgnorePatterns` to exclude `.claude/worktrees/` and `e2e/` from Jest
+- **#51 Hardcoded version:** SettingsPage now reads version from `package.json` dynamically
+- **#39 Settings page bugs:** Roles fall back to AuthContext when team-level roles unavailable; "Unknown Team" instead of raw Firestore doc ID; per-team error handling in `listUserTeams`; roster error message improved
+- **#43 Fielder overlap:** Diamond enlarged to ~55% of SVG height (was ~26%); base size 14→18px; touch targets r=20→r=28; infield fielders repositioned clear of bases
+- **#44 datetime-local:** Game start time defaults to "now"; added "Now" quick-fill button
+
+### Improved
+- **#34 Scoring screen polish:** Scoreboard strip enlarged (scores 26px, BSO dots 12px, team names 13px); added recent plays ticker (last 3 plays) between diamond and action bar; fielder labels show position name when player has no number; runner labels larger (11px) and better offset
+
+### Added
+- `RecentPlays` component — compact last-3-plays ticker, tap to open full event log
+- Strategy docs: `docs/roadmap.md`, `docs/monetization-hypotheses.md`, `docs/competitive-positioning.md`
+- 8 domain skill files in `.claude/skills/` for session context recovery
+
+---
+
 ## [2.2.0] — 2026-03-17
 
 ### Added

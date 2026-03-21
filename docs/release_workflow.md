@@ -6,7 +6,7 @@
 
 ## Current Version
 
-**v2.1.0** (13 March 2026)
+**v2.3.0** (21 March 2026)
 
 ---
 
@@ -20,7 +20,7 @@ These files contain version numbers and must all match at release:
 | `MEMORY.md` | Version History table | `2.1.0` |
 | `ARCHITECTURE.md` | Header line | `Version: 1.0.0` (doc version, not app version) |
 
-Note: `src/pages/SettingsPage.jsx` line 104 also displays a version — update if the page is user-visible (see A-002).
+Note: `src/pages/SettingsPage.jsx` now reads version from `package.json` automatically (#51).
 
 ---
 
