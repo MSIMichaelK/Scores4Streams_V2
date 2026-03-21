@@ -1,5 +1,10 @@
 module.exports = {
   testEnvironment: "jsdom",
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "<rootDir>/.claude/worktrees/",
+    "<rootDir>/e2e/"
+  ],
   transform: {
     "^.+\\.jsx?$": "babel-jest"
   },
