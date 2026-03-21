@@ -3,10 +3,20 @@ import { collection, addDoc, Timestamp, getFirestore } from "firebase/firestore"
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
+/** Format a Date as a datetime-local value string (YYYY-MM-DDTHH:MM) */
+const toLocalDatetime = (date) => {
+  const y = date.getFullYear();
+  const mo = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  const h = String(date.getHours()).padStart(2, "0");
+  const mi = String(date.getMinutes()).padStart(2, "0");
+  return `${y}-${mo}-${d}T${h}:${mi}`;
+};
+
 const GameCreationForm = () => {
   const [homeTeam, setHomeTeam] = useState("");
   const [awayTeam, setAwayTeam] = useState("");
-  const [startTime, setStartTime] = useState("");
+  const [startTime, setStartTime] = useState(() => toLocalDatetime(new Date()));
   const [leagueName, setLeagueName] = useState("");
   const [scoringMode, setScoringMode] = useState("simple");
   const [error, setError] = useState(null);
@@ -110,12 +120,24 @@ const GameCreationForm = () => {
       </label>
       <label>
         Start Time
-        <input
-          type="datetime-local"
-          value={startTime}
-          onChange={(e) => setStartTime(e.target.value)}
-          data-testid="gcf-input-start-time"
-        />
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <input
+            type="datetime-local"
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+            data-testid="gcf-input-start-time"
+            style={{ flex: 1 }}
+          />
+          <button
+            type="button"
+            className="btn-small btn-secondary"
+            onClick={() => setStartTime(toLocalDatetime(new Date()))}
+            data-testid="gcf-btn-now"
+            style={{ whiteSpace: "nowrap" }}
+          >
+            Now
+          </button>
+        </div>
       </label>
       <label>
         League
