@@ -1,0 +1,5 @@
+# Release artifact enforcement
+changelog: true
+architecture: true
+memory: true
+user-docs: false

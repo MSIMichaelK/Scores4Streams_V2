@@ -78,6 +78,22 @@ npm test             # Run Jest tests (13 suites, 211 tests)
 9. **Work on main** — don't create worktrees unless explicitly asked. Worktrees caused branch divergence (#41, #46).
 10. **Keep responses short** — this project hits the 32K output token limit. Break up large changes across multiple responses.
 
+## Hard Rules
+
+### Never Cycle
+If something fails twice with the same approach, **STOP**. Do not retry. Instead:
+1. State what failed and why
+2. Propose a genuinely different approach
+3. Ask if unsure
+
+### Never Guess
+- Don't guess file paths — check docs or `ls` first
+- Don't guess API endpoints — read the code or docs
+- Don't guess if a change worked — verify with a concrete check
+
+### Always Verify
+After any deployment or production action, run a verification command before moving on. Don't assume it worked.
+
 ## Workflow
 
 **Work directly on `main`.** Do NOT create worktrees unless explicitly asked for parallel work.
@@ -86,6 +102,8 @@ npm test             # Run Jest tests (13 suites, 211 tests)
 - Use feature branches (`git checkout -b feature/name`) only for large multi-session changes
 - Worktrees caused branch divergence, stale deploys, and lost changes (see #41, #46)
 - If a worktree exists from a previous session, **do not use it** — merge or delete it first
+- Write a changelog fragment to `.changelog/<issue>-<slug>.md` before committing
+- See `docs/release_workflow.md` for the full release process
 
 ## Documentation Map
 
@@ -95,6 +113,9 @@ npm test             # Run Jest tests (13 suites, 211 tests)
 | `ARCHITECTURE.md` | System map, data flow, file structure | Understanding what exists |
 | `MEMORY.md` | Quick lookup: schema, files, bugs, versions | Need a specific name or value |
 | `docs/as-built.md` | Design decisions, what was tried/rejected | Before changing scoring logic or data model |
+| `docs/findings.md` | Operational gotchas — things that fail | Before touching scoring engine or tests |
+| `docs/assumptions.md` | Unverified assumptions | When planning new work |
+| `docs/release_workflow.md` | Release process, version locations | Before releasing |
 | `CHANGELOG.md` | Release history | Before version bumping |
 | `src/Doco/Requirements.md` | Original requirements spec | Planned features and roadmap |
 | `src/Doco/Data Model.md` | Planned statistics models | Building stats computation layer |

@@ -1,0 +1,7 @@
+# Scores4Streams Tier 2 — matches current 5-file recovery
+# Add files here when skipping them has caused regressions.
+ARCHITECTURE.md
+MEMORY.md
+docs/as-built.md       # AB-003 isPitch regression when skipped
+CHANGELOG.md
+gh-issues

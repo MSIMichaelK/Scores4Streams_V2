@@ -1,0 +1,5 @@
+# Files containing version numbers that must match git tag at release
+# One file per line. Lines starting with # are ignored.
+package.json
+MEMORY.md
+ARCHITECTURE.md
