@@ -14,6 +14,7 @@ import BaseballField from "./BaseballField";
 import ScoreStrip from "./ScoreStrip";
 import ActionBar from "./ActionBar";
 import OutcomePanel from "./OutcomePanel";
+import RecentPlays from "./RecentPlays";
 
 const ManualScoreController = ({ gameId, onBack }) => {
   // ─── Game state (scoring engine is single source of truth) ───
@@ -467,6 +468,9 @@ const ManualScoreController = ({ gameId, onBack }) => {
           />
         )}
       </div>
+
+      {/* ── Recent plays ticker ── */}
+      <RecentPlays events={events} onOpenLog={() => setEventLogOpen(true)} />
 
       {/* ── Action Bar — fixed bottom (6 pitch buttons) ── */}
       <ActionBar

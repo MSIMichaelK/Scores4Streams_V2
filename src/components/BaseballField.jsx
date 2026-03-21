@@ -6,29 +6,30 @@
  */
 import { getPlayerById } from "../utils/rosterHelpers";
 
-// Standard fielder positions in SVG coordinates (viewBox 0 0 300 300)
+// Standard fielder positions in SVG coordinates (viewBox -20 -30 340 340)
 // Field is oriented with home plate at bottom-center
+// Fielders are positioned well clear of base touch targets
 const FIELDER_COORDS = {
-  P:  { x: 150, y: 185 },
-  C:  { x: 150, y: 265 },
-  "1B": { x: 215, y: 185 },
-  "2B": { x: 175, y: 150 },
-  SS: { x: 125, y: 150 },
-  "3B": { x: 85, y: 185 },
-  LF: { x: 55, y: 95 },
-  CF: { x: 150, y: 55 },
-  RF: { x: 245, y: 95 },
+  P:  { x: 150, y: 200 },
+  C:  { x: 150, y: 295 },
+  "1B": { x: 268, y: 158 },
+  "2B": { x: 195, y: 78 },
+  SS: { x: 105, y: 78 },
+  "3B": { x: 32, y: 158 },
+  LF: { x: 25, y: 30 },
+  CF: { x: 150, y: -5 },
+  RF: { x: 275, y: 30 },
 };
 
-// Base positions in SVG coordinates
+// Base positions in SVG coordinates — diamond sized at ~55% of viewBox height
 const BASE_COORDS = {
-  first:  { x: 200, y: 200 },
-  second: { x: 150, y: 155 },
-  third:  { x: 100, y: 200 },
-  home:   { x: 150, y: 245 },
+  first:  { x: 235, y: 185 },
+  second: { x: 150, y: 100 },
+  third:  { x: 65, y: 185 },
+  home:   { x: 150, y: 270 },
 };
 
-const BASE_SIZE = 14;
+const BASE_SIZE = 18;
 
 function FielderMarker({ position, player }) {
   const coord = FIELDER_COORDS[position];
@@ -37,7 +38,7 @@ function FielderMarker({ position, player }) {
   const isPlaceholder = player?.id?.startsWith("placeholder-");
   const label = !player || isPlaceholder
     ? position
-    : `#${player.number || ""}`;
+    : (player.number ? `#${player.number}` : position);
   const nameLine = player && !isPlaceholder
     ? (player.lastName || player.name || "").slice(0, 8)
     : "";
@@ -90,10 +91,10 @@ function BaseDiamond({ base, occupied, selected, isTarget, runnerLabel, onTap })
         style={{ cursor: onTap ? "pointer" : "default" }}
         onClick={onTap}
       />
-      {/* Touch target — larger invisible hit area for mobile */}
+      {/* Touch target — larger invisible hit area for mobile (WCAG 44px minimum) */}
       {onTap && (
         <circle
-          cx={coord.x} cy={coord.y} r={20}
+          cx={coord.x} cy={coord.y} r={28}
           fill="transparent"
           style={{ cursor: "pointer" }}
           onClick={onTap}
@@ -101,10 +102,10 @@ function BaseDiamond({ base, occupied, selected, isTarget, runnerLabel, onTap })
       )}
       {occupied && runnerLabel && (
         <text
-          x={base === "third" ? coord.x - 18 : base === "first" ? coord.x + 18 : coord.x}
-          y={base === "second" ? coord.y - 16 : coord.y + 20}
+          x={base === "third" ? coord.x - 22 : base === "first" ? coord.x + 22 : coord.x}
+          y={base === "second" ? coord.y - 20 : coord.y + 24}
           textAnchor={base === "third" ? "end" : base === "first" ? "start" : "middle"}
-          fontSize={9.5} fontWeight="600" fill="#f1c40f"
+          fontSize={11} fontWeight="600" fill="#f1c40f"
           style={{ pointerEvents: "none" }}
         >
           {runnerLabel}
@@ -158,7 +159,7 @@ const BaseballField = ({ state, selectedRunner, onBaseTap, onDeselect }) => {
 
         {/* Outfield arc */}
         <path
-          d="M 10,245 Q 10,20 150,20 Q 290,20 290,245"
+          d="M 10,255 Q 10,-5 150,-15 Q 290,-5 290,255"
           fill="#1e4a1e"
           stroke="#2a5a2a"
           strokeWidth={2}
@@ -166,7 +167,7 @@ const BaseballField = ({ state, selectedRunner, onBaseTap, onDeselect }) => {
 
         {/* Infield dirt */}
         <path
-          d="M 100,200 L 150,155 L 200,200 L 150,245 Z"
+          d={`M ${BASE_COORDS.third.x},${BASE_COORDS.third.y} L ${BASE_COORDS.second.x},${BASE_COORDS.second.y} L ${BASE_COORDS.first.x},${BASE_COORDS.first.y} L ${BASE_COORDS.home.x},${BASE_COORDS.home.y} Z`}
           fill="#3a2a1a"
           stroke="#5a4a3a"
           strokeWidth={1}
@@ -174,18 +175,18 @@ const BaseballField = ({ state, selectedRunner, onBaseTap, onDeselect }) => {
 
         {/* Infield diamond outline */}
         <path
-          d="M 100,200 L 150,155 L 200,200 L 150,245 Z"
+          d={`M ${BASE_COORDS.third.x},${BASE_COORDS.third.y} L ${BASE_COORDS.second.x},${BASE_COORDS.second.y} L ${BASE_COORDS.first.x},${BASE_COORDS.first.y} L ${BASE_COORDS.home.x},${BASE_COORDS.home.y} Z`}
           fill="none"
           stroke="#6a5a4a"
           strokeWidth={1.5}
         />
 
         {/* Pitcher's mound */}
-        <circle cx={150} cy={195} r={5} fill="#4a3a2a" stroke="#6a5a4a" strokeWidth={1} />
+        <circle cx={150} cy={200} r={6} fill="#4a3a2a" stroke="#6a5a4a" strokeWidth={1} />
 
         {/* Foul lines */}
-        <line x1="150" y1="245" x2="10" y2="95" stroke="#6a5a4a" strokeWidth={1} strokeDasharray="4,4" />
-        <line x1="150" y1="245" x2="290" y2="95" stroke="#6a5a4a" strokeWidth={1} strokeDasharray="4,4" />
+        <line x1="150" y1="270" x2="10" y2="50" stroke="#6a5a4a" strokeWidth={1} strokeDasharray="4,4" />
+        <line x1="150" y1="270" x2="290" y2="50" stroke="#6a5a4a" strokeWidth={1} strokeDasharray="4,4" />
 
         {/* Base paths (connecting lines) */}
         <line x1={BASE_COORDS.home.x} y1={BASE_COORDS.home.y} x2={BASE_COORDS.first.x} y2={BASE_COORDS.first.y}
