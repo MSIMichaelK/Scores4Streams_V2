@@ -9,11 +9,12 @@ import TeamRosterManager from "../components/TeamRosterManager";
 import { version as appVersion } from "../../package.json";
 
 const SettingsPage = () => {
-  const { user, tenantId, teamName, loading } = useAuth();
+  const { user, tenantId, roles: authRoles, teamName, loading } = useAuth();
   const navigate = useNavigate();
   const [teams, setTeams] = useState([]);
   const [activeTenant, setActiveTenant] = useState(tenantId);
   const [updating, setUpdating] = useState(false);
+  const [teamsLoaded, setTeamsLoaded] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -31,6 +32,8 @@ const SettingsPage = () => {
         }
       } catch (err) {
         console.error("Error fetching user data:", err);
+      } finally {
+        setTeamsLoaded(true);
       }
     };
     fetchUserData();
@@ -60,8 +63,11 @@ const SettingsPage = () => {
   }
 
   const activeTeam = teams.find(t => t.id === activeTenant);
-  const currentRoles = activeTeam?.roles?.join(", ") || "none";
-  const displayTeamName = activeTeam?.name || teamName || activeTenant;
+  // Fall back to AuthContext roles if team-level roles aren't resolved
+  const teamRoles = activeTeam?.roles?.length ? activeTeam.roles : authRoles;
+  const currentRoles = teamRoles?.length ? teamRoles.join(", ") : "none";
+  // Fall back through: resolved team name → AuthContext team name → "Unknown Team"
+  const displayTeamName = activeTeam?.name || teamName || (activeTenant ? "Unknown Team" : "None");
 
   return (
     <div className="settings-page">

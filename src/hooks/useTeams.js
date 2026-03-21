@@ -38,19 +38,32 @@ export async function listUserTeams(memberships) {
   const teams = [];
 
   for (const teamId of teamIds) {
-    const team = await getTeam(teamId);
-    if (team) {
-      teams.push({
-        ...team,
-        roles: memberships[teamId].roles || [],
-      });
-    } else {
-      // Team doc doesn't exist (legacy data) — use denormalized name if available
+    const membership = memberships[teamId] || {};
+    const roles = membership.roles || [];
+    try {
+      const team = await getTeam(teamId);
+      if (team) {
+        teams.push({
+          ...team,
+          roles,
+        });
+      } else {
+        // Team doc doesn't exist (legacy data) — use denormalized name if available
+        teams.push({
+          id: teamId,
+          name: membership.teamName || "Unknown Team",
+          shortName: "",
+          roles,
+        });
+      }
+    } catch (err) {
+      // Network/permission error for this team — still include with fallback data
+      console.error(`Failed to resolve team ${teamId}:`, err);
       teams.push({
         id: teamId,
-        name: memberships[teamId].teamName || teamId,
+        name: membership.teamName || "Unknown Team",
         shortName: "",
-        roles: memberships[teamId].roles || [],
+        roles,
       });
     }
   }

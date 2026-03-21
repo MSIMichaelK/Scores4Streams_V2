@@ -15,6 +15,12 @@ const TeamRosterManager = ({ teamId, onClose }) => {
   const [loading, setLoading] = useState(true);
 
   const loadPlayers = async () => {
+    if (!effectiveTeamId) {
+      setError(null);
+      setPlayers([]);
+      setLoading(false);
+      return;
+    }
     try {
       const list = showInactive
         ? await getAllPlayers(effectiveTeamId)
@@ -27,8 +33,10 @@ const TeamRosterManager = ({ teamId, onClose }) => {
         return (a.name || "").localeCompare(b.name || "");
       });
       setPlayers(list);
+      setError(null);
     } catch (err) {
-      setError("Failed to load roster");
+      console.error("Failed to load roster:", err);
+      setError("Could not load roster. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
