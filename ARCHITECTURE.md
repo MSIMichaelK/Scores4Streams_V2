@@ -219,4 +219,7 @@ OBS Browser Source → /overlay/{gameId}
 | `CHANGELOG.md` | Release history | Before version bumping |
 | `src/Doco/Requirements.md` | Original requirements spec | For planned features and roadmap context |
 | `src/Doco/Data Model.md` | Planned statistics models | When building stats computation layer |
+| `docs/roadmap.md` | Release plan: v2.3 (fix), v3.0 (MVP), validation questions | When planning what to build next |
+| `docs/monetization-hypotheses.md` | Pricing/revenue hypotheses (unvalidated) | When planning features that might be gated/premium |
+| `docs/competitive-positioning.md` | Competitive landscape and positioning hypotheses | When making product decisions or messaging |
 | `gh issue list --state open` | Current priorities | Every session start |
